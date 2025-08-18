@@ -1,0 +1,174 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.readingsRouter = void 0;
+const express_1 = require("express");
+const readings_controller_1 = require("../controllers/readings.controller");
+const error_handler_1 = require("../middleware/error-handler");
+const router = (0, express_1.Router)();
+exports.readingsRouter = router;
+const readingsController = new readings_controller_1.ReadingsController();
+/**
+ * @swagger
+ * /api/v1/readings:
+ *   get:
+ *     summary: Get readings for a specific date
+ *     tags: [Readings]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         description: Date in YYYY-MM-DD format
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: tradition
+ *         description: Lectionary tradition ID
+ *         schema:
+ *           type: string
+ *           default: rcl
+ *     responses:
+ *       200:
+ *         description: Daily readings for the specified date
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/DailyReading'
+ *       400:
+ *         description: Invalid date format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: No readings found for the specified date
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/', (0, error_handler_1.asyncHandler)(readingsController.getByDate.bind(readingsController)));
+/**
+ * @swagger
+ * /api/v1/readings/today:
+ *   get:
+ *     summary: Get today's readings
+ *     tags: [Readings]
+ *     parameters:
+ *       - in: query
+ *         name: tradition
+ *         description: Lectionary tradition ID
+ *         schema:
+ *           type: string
+ *           default: rcl
+ *     responses:
+ *       200:
+ *         description: Today's readings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/DailyReading'
+ *       404:
+ *         description: No readings found for today
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/today', (0, error_handler_1.asyncHandler)(readingsController.getToday.bind(readingsController)));
+/**
+ * @swagger
+ * /api/v1/readings/range:
+ *   get:
+ *     summary: Get readings for a date range
+ *     tags: [Readings]
+ *     parameters:
+ *       - in: query
+ *         name: start
+ *         required: true
+ *         description: Start date in YYYY-MM-DD format
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: end
+ *         required: true
+ *         description: End date in YYYY-MM-DD format
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: tradition
+ *         description: Lectionary tradition ID
+ *         schema:
+ *           type: string
+ *           default: rcl
+ *       - in: query
+ *         name: page
+ *         description: Page number for pagination
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         description: Number of results per page
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           maximum: 100
+ *     responses:
+ *       200:
+ *         description: List of readings for the date range
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/DailyReading'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *       400:
+ *         description: Invalid date range
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/range', (0, error_handler_1.asyncHandler)(readingsController.getByDateRange.bind(readingsController)));
+//# sourceMappingURL=readings.routes.js.map

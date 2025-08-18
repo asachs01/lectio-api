@@ -1,0 +1,121 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ReadingsController = void 0;
+const readings_service_1 = require("../services/readings.service");
+const error_handler_1 = require("../middleware/error-handler");
+class ReadingsController {
+    constructor() {
+        this.readingsService = new readings_service_1.ReadingsService();
+    }
+    async getByDate(req, res) {
+        try {
+            const { date } = req.query;
+            const tradition = req.query['tradition'] || 'rcl';
+            if (!date) {
+                throw new error_handler_1.HttpError('Date parameter is required', 400);
+            }
+            const dateStr = date;
+            const traditionId = String(tradition);
+            // Validate date format
+            if (!this.isValidDate(dateStr)) {
+                throw new error_handler_1.HttpError('Invalid date format. Use YYYY-MM-DD', 400);
+            }
+            const readings = await this.readingsService.getByDate(dateStr, traditionId);
+            if (!readings) {
+                throw new error_handler_1.HttpError(`No readings found for date '${dateStr}' in tradition '${traditionId}'`, 404);
+            }
+            res.json({
+                data: readings,
+                timestamp: new Date().toISOString(),
+            });
+        }
+        catch (error) {
+            if (error instanceof error_handler_1.HttpError) {
+                throw error;
+            }
+            throw new error_handler_1.HttpError('Failed to fetch readings', 500, { originalError: error });
+        }
+    }
+    async getToday(req, res) {
+        try {
+            const tradition = req.query['tradition'] || 'rcl';
+            const today = new Date().toISOString().split('T')[0];
+            const traditionId = String(tradition);
+            const readings = await this.readingsService.getByDate(today, traditionId);
+            if (!readings) {
+                throw new error_handler_1.HttpError(`No readings found for today in tradition '${traditionId}'`, 404);
+            }
+            res.json({
+                data: readings,
+                date: today,
+                timestamp: new Date().toISOString(),
+            });
+        }
+        catch (error) {
+            if (error instanceof error_handler_1.HttpError) {
+                throw error;
+            }
+            throw new error_handler_1.HttpError('Failed to fetch today\'s readings', 500, { originalError: error });
+        }
+    }
+    async getByDateRange(req, res) {
+        try {
+            const { start, end, page = '1', limit = '10' } = req.query;
+            const tradition = req.query['tradition'] || 'rcl';
+            if (!start || !end) {
+                throw new error_handler_1.HttpError('Start and end date parameters are required', 400);
+            }
+            const startDate = start;
+            const endDate = end;
+            const traditionId = String(tradition);
+            const pageNum = parseInt(page, 10);
+            const limitNum = parseInt(limit, 10);
+            // Validate dates
+            if (!this.isValidDate(startDate) || !this.isValidDate(endDate)) {
+                throw new error_handler_1.HttpError('Invalid date format. Use YYYY-MM-DD', 400);
+            }
+            if (new Date(startDate) > new Date(endDate)) {
+                throw new error_handler_1.HttpError('Start date must be before end date', 400);
+            }
+            // Validate pagination
+            if (isNaN(pageNum) || pageNum < 1) {
+                throw new error_handler_1.HttpError('Page must be a positive integer', 400);
+            }
+            if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+                throw new error_handler_1.HttpError('Limit must be a positive integer between 1 and 100', 400);
+            }
+            const result = await this.readingsService.getByDateRange(startDate, endDate, traditionId, pageNum, limitNum);
+            res.json({
+                data: result.readings,
+                pagination: {
+                    page: pageNum,
+                    limit: limitNum,
+                    total: result.total,
+                    totalPages: Math.ceil(result.total / limitNum),
+                },
+                dateRange: {
+                    start: startDate,
+                    end: endDate,
+                },
+                tradition: traditionId,
+                timestamp: new Date().toISOString(),
+            });
+        }
+        catch (error) {
+            if (error instanceof error_handler_1.HttpError) {
+                throw error;
+            }
+            throw new error_handler_1.HttpError('Failed to fetch readings for date range', 500, { originalError: error });
+        }
+    }
+    isValidDate(dateString) {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateString)) {
+            return false;
+        }
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0] === dateString;
+    }
+}
+exports.ReadingsController = ReadingsController;
+//# sourceMappingURL=readings.controller.js.map

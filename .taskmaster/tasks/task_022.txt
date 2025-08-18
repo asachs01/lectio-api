@@ -1,0 +1,73 @@
+# Task ID: 22
+# Title: Design and Implement Database Schema
+# Status: in-progress
+# Dependencies: 21
+# Priority: high
+# Description: Design and implement a PostgreSQL database schema that supports multiple lectionary traditions, liturgical years, seasons, and readings.
+# Details:
+1. Install PostgreSQL client: `npm install pg@8.10.0 @types/pg@8.6.6`
+2. Install TypeORM for ORM capabilities: `npm install typeorm@0.3.15 reflect-metadata@0.1.13`
+3. Design database schema with the following entities:
+   - Tradition (id, name, description)
+   - LiturgicalYear (id, name, start_date, end_date, cycle, tradition_id)
+   - Season (id, name, start_date, end_date, color, liturgical_year_id)
+   - SpecialDay (id, name, date, description, tradition_id, is_feast_day)
+   - Reading (id, date, tradition_id, liturgical_year_id, season_id, special_day_id, scripture_reference, text, translation)
+   - Scripture (id, book, chapter, verse_start, verse_end, text, translation)
+4. Implement proper indexing on frequently queried fields:
+   - date, tradition_id on Reading table
+   - scripture_reference on Reading table
+   - book, chapter on Scripture table
+5. Create TypeORM entity classes for each table
+6. Implement database migrations using TypeORM migration system
+7. Create seed data for at least one tradition (RCL)
+8. Implement database connection pooling for performance
+9. Add foreign key constraints and cascading rules
+10. Document schema with entity-relationship diagram
+
+# Test Strategy:
+1. Write unit tests for entity models
+2. Test database migrations (up and down)
+3. Verify foreign key constraints work correctly
+4. Test data insertion and retrieval operations
+5. Validate indexing improves query performance
+6. Test database connection pooling under load
+7. Verify seed data is correctly inserted
+
+# Subtasks:
+## 1. Define and Normalize Database Entities [pending]
+### Dependencies: None
+### Description: Identify all required entities (Tradition, LiturgicalYear, Season, SpecialDay, Reading, Scripture) and normalize their attributes to at least third normal form to minimize redundancy and ensure data integrity.
+### Details:
+Analyze the relationships and attributes for each entity, ensuring proper normalization and clear separation of concerns. Document entity fields and relationships, considering extensibility for multi-tradition support.
+
+## 2. Design Foreign Key Relationships and Constraints [pending]
+### Dependencies: 22.1
+### Description: Establish foreign key relationships between entities to enforce referential integrity and define cascading rules for updates and deletions.
+### Details:
+Map out all foreign key dependencies (e.g., tradition_id, liturgical_year_id) and implement appropriate ON DELETE/UPDATE CASCADE or RESTRICT rules. Add constraints to prevent orphaned records and ensure data consistency.
+
+## 3. Implement Indexing and PostgreSQL Optimization Strategies [pending]
+### Dependencies: 22.2
+### Description: Identify frequently queried fields and implement appropriate indexes to optimize query performance, considering PostgreSQL-specific features and multi-tradition support.
+### Details:
+Add indexes on fields such as date, tradition_id, scripture_reference, book, and chapter. Evaluate the need for composite indexes and partial indexes based on expected query patterns. Consider schema design best practices for PostgreSQL performance.
+
+## 4. Create TypeORM Entity Classes and Migrations [pending]
+### Dependencies: 22.3
+### Description: Translate the database schema into TypeORM entity classes and implement migration scripts to manage schema changes.
+### Details:
+Define TypeORM models for each entity, including field types, relationships, and constraints. Write migration scripts to create and update tables, indexes, and constraints in PostgreSQL.
+
+## 5. Seed Initial Data and Implement Connection Pooling [pending]
+### Dependencies: 22.4
+### Description: Seed the database with initial data for at least one tradition (e.g., RCL) and configure PostgreSQL connection pooling for performance and scalability.
+### Details:
+Develop scripts to insert representative seed data for all entities. Set up connection pooling using PostgreSQL best practices to handle concurrent API requests efficiently.
+
+## 6. Document Schema and Generate Entity-Relationship Diagram [pending]
+### Dependencies: 22.5
+### Description: Create comprehensive documentation of the schema, including an entity-relationship diagram and explanations of indexing and optimization strategies.
+### Details:
+Use ERD tools to visualize entities and relationships. Document indexing choices, normalization decisions, and multi-tradition support mechanisms for future maintainers.
+

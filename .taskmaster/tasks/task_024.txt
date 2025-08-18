@@ -1,0 +1,90 @@
+# Task ID: 24
+# Title: Implement Core API Endpoints
+# Status: in-progress
+# Dependencies: 21, 22, 23
+# Priority: high
+# Description: Develop the core API endpoints for retrieving lectionary readings, calendar information, and tradition data as specified in the PRD.
+# Details:
+1. Create Express router structure for API endpoints
+2. Implement controller classes following RESTful principles
+3. Develop the following endpoints:
+   - GET /api/v1/readings/today
+     - Query params: tradition (default: RCL)
+     - Returns today's readings based on liturgical calendar
+   - GET /api/v1/readings/{date}
+     - Format: YYYY-MM-DD
+     - Query params: tradition (default: RCL)
+     - Returns readings for specific date
+   - GET /api/v1/readings/range
+     - Query params: start_date, end_date, tradition
+     - Returns readings for date range
+   - GET /api/v1/calendar/liturgical-year
+     - Returns current liturgical year information
+   - GET /api/v1/calendar/season
+     - Returns current liturgical season
+   - GET /api/v1/calendar/special-days
+     - Query params: year (optional)
+     - Returns special days and feast days
+   - GET /api/v1/traditions
+     - Returns available lectionary traditions
+   - GET /api/v1/traditions/{tradition}/readings
+     - Returns tradition-specific readings
+4. Implement proper HTTP status codes and error responses
+5. Add request validation using express-validator: `npm install express-validator@7.0.1`
+6. Implement response formatting middleware for consistent API responses
+7. Add support for different response formats (JSON, XML)
+8. Implement pagination for endpoints returning multiple items
+
+# Test Strategy:
+1. Unit tests for controller logic
+2. Integration tests for each endpoint
+3. Test different query parameters and edge cases
+4. Verify correct HTTP status codes are returned
+5. Test pagination functionality
+6. Validate response format against expected schema
+7. Test with different response formats
+8. Performance testing for each endpoint
+
+# Subtasks:
+## 1. Design Express Router Structure [pending]
+### Dependencies: None
+### Description: Establish a modular Express router structure to organize API endpoints for lectionary readings, calendar, and tradition data.
+### Details:
+Use express.Router to create modular, mountable route handlers and mount them under '/api/v1' in the main app for clean separation of concerns and scalability.[1][2]
+
+## 2. Implement RESTful Controller Classes [pending]
+### Dependencies: 24.1
+### Description: Develop controller classes for each resource (readings, calendar, traditions) following RESTful principles.
+### Details:
+Controllers should encapsulate business logic for each endpoint, handle request/response cycles, and delegate to service layers as needed.[3]
+
+## 3. Develop Core API Endpoints [pending]
+### Dependencies: 24.2
+### Description: Implement the specified API endpoints for readings, calendar, and traditions, including support for query parameters and path variables.
+### Details:
+Endpoints include: GET /readings/today, /readings/{date}, /readings/range, /calendar/liturgical-year, /calendar/season, /calendar/special-days, /traditions, and /traditions/{tradition}/readings.
+
+## 4. Implement HTTP Status Codes and Error Handling [pending]
+### Dependencies: 24.3
+### Description: Add comprehensive error handling and ensure all endpoints return appropriate HTTP status codes and error responses.
+### Details:
+Use Express error-handling middleware to catch and format errors, returning standardized error objects and status codes for client and server errors.
+
+## 5. Add Request Validation Middleware [pending]
+### Dependencies: 24.3
+### Description: Integrate express-validator to validate and sanitize incoming requests for all endpoints.
+### Details:
+Install express-validator and define validation chains for query parameters, path variables, and request bodies as needed.
+
+## 6. Implement Response Formatting Middleware [pending]
+### Dependencies: 24.4, 24.5
+### Description: Create middleware to ensure consistent API response formatting across all endpoints.
+### Details:
+Standardize success and error response structures, and add support for multiple response formats (e.g., JSON, XML) based on client request.
+
+## 7. Add Pagination Support for List Endpoints [pending]
+### Dependencies: None
+### Description: Implement pagination for endpoints that return multiple items, such as readings over a date range or lists of traditions.
+### Details:
+Add query parameters for pagination (e.g., page, limit), update controllers to handle pagination logic, and include pagination metadata in responses.
+

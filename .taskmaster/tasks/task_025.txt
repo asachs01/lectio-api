@@ -1,0 +1,34 @@
+# Task ID: 25
+# Title: Implement Multi-Tradition Lectionary Support
+# Status: pending
+# Dependencies: 22, 24
+# Priority: medium
+# Description: Develop the system to support multiple lectionary traditions (RCL, Catholic, Episcopal/Anglican, Lutheran) with tradition-specific calendar calculations and cycles.
+# Details:
+1. Research and document the calendar calculation rules for each tradition:
+   - Revised Common Lectionary (RCL): 3-year cycle (A, B, C)
+   - Catholic lectionary: 3-year Sunday cycle, 2-year weekday cycle
+   - Episcopal/Anglican: Based on RCL with modifications
+   - Lutheran: Based on RCL with modifications
+2. Implement calendar calculation service:
+   - Calculate liturgical dates (Advent, Christmas, Epiphany, Lent, Easter, Pentecost, etc.)
+   - Determine current liturgical year and cycle
+   - Handle special days and feast days
+3. Create tradition-specific adapters implementing a common interface
+4. Implement factory pattern for tradition selection
+5. Develop data models for tradition-specific variations
+6. Create mapping between traditions for equivalent dates/readings
+7. Implement cycle determination logic (A, B, C)
+8. Add configuration for tradition-specific settings
+9. Create utility functions for date calculations across traditions
+10. Implement extensible framework for adding new traditions
+
+# Test Strategy:
+1. Unit tests for calendar calculations in each tradition
+2. Test cycle determination logic
+3. Verify special days are correctly identified
+4. Test tradition-specific adaptations
+5. Integration tests across multiple traditions
+6. Validate liturgical year transitions
+7. Test with historical dates to verify calculations
+8. Verify extensibility by adding a test tradition

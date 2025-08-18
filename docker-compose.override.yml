@@ -1,0 +1,13 @@
+# Override file for local development
+# This file is automatically loaded by docker-compose
+version: '3.8'
+
+services:
+  lectionary-api:
+    volumes:
+      - ./src:/app/src:ro
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - DEBUG_MODE=true
