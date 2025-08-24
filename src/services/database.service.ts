@@ -1,34 +1,26 @@
 import { DataSource } from 'typeorm';
 import { logger } from '../utils/logger';
+import { getDatabaseConfig } from '../config/database.config';
 
 export class DatabaseService {
   private static dataSource: DataSource;
 
   public static async initialize(): Promise<void> {
     try {
-      this.dataSource = new DataSource({
-        type: 'postgres',
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT || '5432'),
-        username: process.env.DB_USERNAME || 'postgres',
-        password: process.env.DB_PASSWORD || 'password',
-        database: process.env.DB_NAME || 'lectionary_api',
-        ssl: process.env.DB_SSL === 'true',
-        synchronize: process.env.NODE_ENV === 'development',
-        logging: process.env.NODE_ENV === 'development',
-        entities: [__dirname + '/../models/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-        subscribers: [__dirname + '/../subscribers/*{.ts,.js}'],
-        maxQueryExecutionTime: 5000,
-        extra: {
-          connectionLimit: 10,
-          idleTimeout: 60000,
-          acquireTimeout: 60000,
-        },
-      });
+      this.dataSource = new DataSource(getDatabaseConfig());
 
       await this.dataSource.initialize();
       logger.info('Database connection initialized successfully');
+      logger.info(`Connected to database: ${this.dataSource.options.database}`);
+      
+      // Log entity information in development
+      if (process.env.NODE_ENV === 'development') {
+        const entityCount = this.dataSource.entityMetadatas.length;
+        logger.info(`Loaded ${entityCount} entities:`);
+        this.dataSource.entityMetadatas.forEach(metadata => {
+          logger.info(`  - ${metadata.name} (table: ${metadata.tableName})`);
+        });
+      }
     } catch (error) {
       logger.error('Failed to initialize database connection:', error);
       throw error;

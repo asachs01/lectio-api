@@ -49,6 +49,16 @@ The API will be available at `http://localhost:3000`
 
 ## 📚 API Documentation
 
+### Documentation Location
+
+All detailed documentation is located in the `/docs` directory:
+- **Database Documentation**: `/docs/DATABASE_*.md` - Schema, setup, and optimization guides
+- **Observability**: `/docs/OBSERVABILITY.md` - Monitoring and telemetry setup
+- **Migration Guide**: `/docs/MIGRATION_GUIDE.md` - Database migration procedures
+- **Entity Diagram**: `/docs/ENTITY_DIAGRAM.md` - Database relationship diagrams
+
+## 📖 Interactive API Documentation
+
 Once the server is running, access the interactive API documentation at:
 - **Swagger UI**: `http://localhost:3000/api/docs`
 - **OpenAPI JSON**: `http://localhost:3000/api/docs.json`
@@ -151,7 +161,131 @@ docker-compose up
 ```
 
 ### DigitalOcean App Platform
-The project includes configuration for DigitalOcean App Platform deployment. See the `.do/app.yaml` configuration file.
+
+This project is configured for automated deployment to DigitalOcean App Platform.
+
+#### Prerequisites
+
+1. **DigitalOcean Account**: Create an account at [DigitalOcean](https://www.digitalocean.com/)
+2. **doctl CLI**: Install the DigitalOcean command-line tool:
+   ```bash
+   # macOS
+   brew install doctl
+   
+   # Linux
+   snap install doctl
+   
+   # Or download from: https://docs.digitalocean.com/reference/doctl/how-to/install/
+   ```
+
+3. **Authentication**: Configure doctl with your API token:
+   ```bash
+   doctl auth init
+   ```
+
+#### Automated Deployment Methods
+
+##### Method 1: GitHub Actions (Recommended)
+The project includes a GitHub Actions workflow that automatically deploys on push to the `main` branch.
+
+1. Fork or push this repository to GitHub
+2. Add your DigitalOcean API token as a GitHub secret:
+   - Go to Settings → Secrets and variables → Actions
+   - Add a new secret named `DIGITALOCEAN_ACCESS_TOKEN`
+3. Push to the `main` branch to trigger deployment
+
+##### Method 2: Command-Line Deployment
+Use the included deployment script for one-command deployment:
+
+```bash
+# Deploy to DigitalOcean
+./scripts/deploy.sh
+
+# View deployment logs
+./scripts/deploy.sh logs
+
+# Get app URL
+./scripts/deploy.sh url
+
+# Destroy deployment
+./scripts/deploy.sh destroy
+```
+
+##### Method 3: Manual doctl Commands
+```bash
+# Validate app configuration
+doctl apps spec validate app.yaml
+
+# Create new app
+doctl apps create --spec app.yaml
+
+# Update existing app
+APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api" | awk '{print $1}')
+doctl apps update $APP_ID --spec app.yaml
+```
+
+#### Configuration
+
+The deployment is configured in `app.yaml`:
+- **Region**: NYC by default
+- **Instance**: Basic (512MB RAM, 1 vCPU)
+- **Database**: Managed PostgreSQL 15
+- **Cache**: Managed Redis 7
+- **Auto-deploy**: Enabled for main branch
+
+#### Environment Variables
+
+Production secrets should be set in the DigitalOcean dashboard:
+1. Navigate to your app in the DigitalOcean console
+2. Go to Settings → App-Level Environment Variables
+3. Add the following secrets:
+   - `JWT_SECRET`: Strong random string (32+ characters)
+   - `DB_PASSWORD`: Will be auto-generated if using managed database
+   - `REDIS_URL`: Will be auto-configured if using managed Redis
+
+#### Post-Deployment Validation
+
+After deployment, validate the API is working:
+
+```bash
+# Get the app URL
+APP_URL=$(doctl apps get <app-id> --format DefaultIngress --no-header)
+
+# Test health endpoint
+curl https://$APP_URL/health
+
+# Test API documentation
+open https://$APP_URL/api/docs
+
+# Test sample endpoint
+curl https://$APP_URL/api/v1/traditions
+```
+
+#### Monitoring and Logs
+
+```bash
+# View real-time logs
+doctl apps logs <app-id> --follow
+
+# View deployment history
+doctl apps list-deployments <app-id>
+
+# Get app metrics
+doctl apps get <app-id>
+```
+
+#### Cost Optimization
+
+The default configuration uses:
+- **App**: Basic instance (~$5/month)
+- **Database**: Dev database (~$15/month)
+- **Redis**: Dev instance (~$15/month)
+- **Total**: ~$35/month
+
+For production workloads, consider:
+- Upgrading to Professional instances for auto-scaling
+- Using dedicated database nodes for better performance
+- Implementing CDN for static assets
 
 ## 🤝 Contributing
 

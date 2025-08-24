@@ -30,7 +30,7 @@
             "description": "Identify all required entities (Tradition, LiturgicalYear, Season, SpecialDay, Reading, Scripture) and normalize their attributes to at least third normal form to minimize redundancy and ensure data integrity.",
             "dependencies": [],
             "details": "Analyze the relationships and attributes for each entity, ensuring proper normalization and clear separation of concerns. Document entity fields and relationships, considering extensibility for multi-tradition support.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review entity definitions for normalization, run data integrity tests, and verify that no redundant or inconsistent data can be inserted."
           },
           {
@@ -428,7 +428,97 @@
           31
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Docker Configuration Files",
+            "description": "Set up Docker containerization for the application by creating necessary configuration files including Dockerfile and docker-compose.yml.",
+            "dependencies": [],
+            "details": "1. Create a Dockerfile in the project root with appropriate base image (Node.js)\n2. Configure multi-stage build to optimize image size\n3. Set up proper security practices (non-root user, minimal permissions)\n4. Create docker-compose.yml for local development environment\n5. Configure volume mappings for code and data persistence\n6. Set up environment variable handling\n7. Add .dockerignore file to exclude unnecessary files",
+            "status": "done",
+            "testStrategy": "1. Verify Docker image builds successfully\n2. Test container startup and application accessibility\n3. Validate environment variable configuration\n4. Ensure proper volume mounting\n5. Verify local development workflow with docker-compose up"
+          },
+          {
+            "id": 2,
+            "title": "Configure Kubernetes Deployment Manifests",
+            "description": "Create Kubernetes configuration files for deploying the application to a Kubernetes cluster with proper resource management and scaling.",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Create deployment.yaml with container specifications and resource limits\n2. Configure service.yaml for internal service discovery\n3. Set up ingress.yaml for external access with routing rules\n4. Create configmap.yaml and secret.yaml for configuration management\n5. Configure persistent volume claims for data storage\n6. Set up horizontal pod autoscaling configuration\n7. Implement health checks (liveness and readiness probes)",
+            "status": "pending",
+            "testStrategy": "1. Validate YAML syntax with kubectl\n2. Test deployment in a local Kubernetes environment (minikube/kind)\n3. Verify service discovery and networking\n4. Test autoscaling with simulated load\n5. Validate persistent storage configuration"
+          },
+          {
+            "id": 3,
+            "title": "Implement CI/CD Pipeline with GitHub Actions",
+            "description": "Set up automated continuous integration and deployment workflow using GitHub Actions to build, test, and deploy the application.",
+            "dependencies": [
+              "32.1",
+              "32.2"
+            ],
+            "details": "1. Create .github/workflows/ci-cd.yml workflow file\n2. Configure build job to compile and test the application\n3. Set up Docker image building and pushing to container registry\n4. Implement deployment job for Kubernetes using doctl CLI\n5. Configure environment-specific deployments (dev, staging, prod)\n6. Set up secrets management for sensitive information\n7. Implement rollback capability for failed deployments\n8. Add workflow status notifications",
+            "status": "done",
+            "testStrategy": "1. Test workflow with a pull request\n2. Verify build, test, and deployment stages execute correctly\n3. Validate environment-specific deployments\n4. Test rollback functionality with intentionally broken deployment\n5. Verify secrets are properly utilized and not exposed"
+          },
+          {
+            "id": 4,
+            "title": "Set Up DigitalOcean App Platform Configuration",
+            "description": "Configure the application for deployment on DigitalOcean App Platform with proper resource allocation and service integration.",
+            "dependencies": [
+              "32.1"
+            ],
+            "details": "1. Create app.yaml specification file for DigitalOcean App Platform\n2. Configure resource allocation (CPU, memory)\n3. Set up database service connection (managed PostgreSQL)\n4. Configure Redis cache service integration\n5. Set up environment variables for different environments\n6. Configure domain and SSL settings\n7. Set up health checks and monitoring\n8. Configure auto-deployment from GitHub repository",
+            "status": "done",
+            "testStrategy": "1. Validate app.yaml configuration\n2. Test deployment to development environment\n3. Verify service connections (database, Redis)\n4. Test domain configuration and SSL certificate\n5. Validate auto-deployment from GitHub"
+          },
+          {
+            "id": 5,
+            "title": "Implement Database Backup and Recovery System",
+            "description": "Set up automated database backup procedures and recovery mechanisms to ensure data durability and disaster recovery capabilities.",
+            "dependencies": [
+              "32.4"
+            ],
+            "details": "1. Configure scheduled database backups using DigitalOcean managed database features\n2. Set up backup retention policies (daily, weekly, monthly)\n3. Implement backup verification process\n4. Create scripts for point-in-time recovery\n5. Document recovery procedures for different failure scenarios\n6. Set up backup notifications and monitoring\n7. Configure backup encryption for sensitive data\n8. Implement backup testing schedule",
+            "status": "pending",
+            "testStrategy": "1. Verify scheduled backups are created successfully\n2. Test point-in-time recovery procedure\n3. Validate backup verification process\n4. Simulate disaster recovery scenario\n5. Test backup encryption and security"
+          },
+          {
+            "id": 6,
+            "title": "Configure SSL/TLS and Security Settings",
+            "description": "Set up secure communication with SSL/TLS certificates, implement HTTPS redirection, and configure security headers for the application.",
+            "dependencies": [
+              "32.4"
+            ],
+            "details": "1. Configure Let's Encrypt certificate integration with DigitalOcean\n2. Set up automatic certificate renewal process\n3. Implement HTTPS redirection at the ingress level\n4. Configure HTTP Strict Transport Security (HSTS) headers\n5. Set up Content Security Policy (CSP) headers\n6. Configure X-Content-Type-Options and other security headers\n7. Implement rate limiting for API endpoints\n8. Document security configuration",
+            "status": "pending",
+            "testStrategy": "1. Verify SSL/TLS certificate installation\n2. Test HTTPS redirection\n3. Validate security headers using online tools\n4. Test certificate renewal process\n5. Verify rate limiting functionality"
+          },
+          {
+            "id": 7,
+            "title": "Implement Environment-Specific Configurations",
+            "description": "Set up configuration management for different environments (development, testing, staging, production) with appropriate variable isolation.",
+            "dependencies": [
+              "32.3",
+              "32.4"
+            ],
+            "details": "1. Create environment-specific configuration files\n2. Set up environment variable management for each environment\n3. Configure feature flags for environment-specific features\n4. Implement configuration validation on application startup\n5. Set up secrets management for sensitive configuration\n6. Document environment setup procedures\n7. Create environment promotion workflow\n8. Implement configuration change auditing",
+            "status": "pending",
+            "testStrategy": "1. Test application with different environment configurations\n2. Verify environment-specific features work correctly\n3. Validate configuration validation\n4. Test environment promotion process\n5. Verify secrets are properly managed"
+          },
+          {
+            "id": 8,
+            "title": "Set Up Monitoring and Alerting Infrastructure",
+            "description": "Implement comprehensive monitoring and alerting for the application infrastructure, including logs, metrics, and performance indicators.",
+            "dependencies": [
+              "32.2",
+              "32.4"
+            ],
+            "details": "1. Configure DigitalOcean Monitoring for infrastructure metrics\n2. Set up application performance monitoring (APM) solution\n3. Implement centralized logging with log aggregation\n4. Configure alerting thresholds for critical metrics\n5. Set up notification channels (email, Slack, PagerDuty)\n6. Create monitoring dashboards for key performance indicators\n7. Implement health check endpoints for service monitoring\n8. Document incident response procedures",
+            "status": "pending",
+            "testStrategy": "1. Verify metrics collection and visualization\n2. Test alerting by triggering threshold violations\n3. Validate log aggregation and search functionality\n4. Test notification delivery to configured channels\n5. Verify dashboard functionality and data accuracy"
+          }
+        ]
       },
       {
         "id": 33,
@@ -496,7 +586,7 @@
     ],
     "metadata": {
       "created": "2025-07-14T17:36:14.216Z",
-      "updated": "2025-07-14T18:09:43.436Z",
+      "updated": "2025-08-20T12:56:29.993Z",
       "description": "Tasks for master context"
     }
   }

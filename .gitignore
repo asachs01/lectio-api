@@ -11,6 +11,9 @@ node_modules/
 
 # Environment variables
 .env
+.env.production
+.env.staging
+.env.local
 
 # Editor directories and files
 .idea
@@ -26,4 +29,15 @@ node_modules/
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
+
+# Deployment artifacts
+.app-id
+.app-url
+dist/ 
+
+# Plans and documentation (per project requirements)
+plans/
+
+# Prompt logs (per project requirements)
+prompt_logs/ 

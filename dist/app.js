@@ -22,8 +22,19 @@ class App {
         this.setupErrorHandling();
     }
     setupMiddleware() {
-        // Security middleware
-        this.app.use((0, helmet_1.default)());
+        // Security middleware with CSP configured for Swagger UI
+        this.app.use((0, helmet_1.default)({
+            contentSecurityPolicy: {
+                directives: {
+                    defaultSrc: ["'self'"],
+                    styleSrc: ["'self'", "'unsafe-inline'"],
+                    scriptSrc: ["'self'"],
+                    imgSrc: ["'self'", "data:"],
+                    fontSrc: ["'self'"],
+                    upgradeInsecureRequests: null, // Disable HTTPS upgrade for development
+                },
+            },
+        }));
         // CORS configuration
         this.app.use((0, cors_1.default)({
             origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
