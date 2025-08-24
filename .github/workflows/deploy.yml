@@ -49,18 +49,29 @@ jobs:
 
       - name: Deploy to DigitalOcean App Platform
         run: |
-          # Check if app exists (case-insensitive)
-          APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio-api" | awk '{print $1}')
+          # Try to get app ID
+          APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio-api" | head -1 | awk '{print $1}' || true)
           
+          if [ -z "$APP_ID" ]; then
+            echo "App doesn't exist, creating new app..."
+            # Try to create, if it fails with 409, get the existing app ID
+            if ! doctl apps create --spec app.yaml --wait; then
+              echo "App creation failed, checking if it already exists..."
+              APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio-api" | head -1 | awk '{print $1}')
+              if [ -n "$APP_ID" ]; then
+                echo "Found existing app with ID: $APP_ID"
+              else
+                echo "Failed to create or find app"
+                exit 1
+              fi
+            fi
+          fi
+          
+          # Now we definitely have an app, update it
           if [ -n "$APP_ID" ]; then
-            echo "App exists with ID: $APP_ID, updating..."
+            echo "Updating app with ID: $APP_ID"
             doctl apps update $APP_ID --spec app.yaml
-            
-            # Create deployment
             doctl apps create-deployment $APP_ID --wait
-          else
-            echo "Creating new app..."
-            doctl apps create --spec app.yaml --wait
           fi
 
       - name: Get app URL
