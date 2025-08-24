@@ -40,9 +40,10 @@ services:
         type: SECRET
       - key: DB_SSL
         value: "true"
-      - key: REDIS_URL
-        value: ${lectio-redis.DATABASE_URL}
-        type: SECRET
+      # Redis temporarily disabled - will add later
+      # - key: REDIS_URL
+      #   value: ${lectio-redis.DATABASE_URL}
+      #   type: SECRET
       - key: JWT_SECRET
         type: SECRET
       - key: JWT_EXPIRES_IN
@@ -64,11 +65,5 @@ databases:
   - name: lectio-db
     engine: PG
     version: "15"
-    size: db-s-dev-database
-    num_nodes: 1
-
-  - name: lectio-redis
-    engine: REDIS
-    version: "7"
     size: db-s-dev-database
     num_nodes: 1
