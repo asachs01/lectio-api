@@ -114,7 +114,16 @@ class ReadingsController {
             return false;
         }
         const date = new Date(dateString);
-        return date.toISOString().split('T')[0] === dateString;
+        // Check if date is valid (not NaN) and matches original string
+        if (isNaN(date.getTime())) {
+            return false;
+        }
+        try {
+            return date.toISOString().split('T')[0] === dateString;
+        }
+        catch {
+            return false;
+        }
     }
 }
 exports.ReadingsController = ReadingsController;

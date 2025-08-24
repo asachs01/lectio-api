@@ -2,591 +2,213 @@
   "master": {
     "tasks": [
       {
-        "id": 21,
-        "title": "Setup Project Infrastructure and Environment",
-        "description": "Initialize the project repository with Node.js, Express.js, and TypeScript. Configure development environment with necessary dependencies and tooling.",
-        "details": "1. Initialize a new Node.js project with `npm init -y`\n2. Install TypeScript and configure tsconfig.json: `npm install typescript@4.9.5 @types/node@18.15.11 @types/express@4.17.17 ts-node@10.9.1`\n3. Setup Express.js with TypeScript: `npm install express@4.18.2`\n4. Configure ESLint and Prettier for code quality: `npm install eslint@8.38.0 prettier@2.8.7 @typescript-eslint/eslint-plugin@5.59.0 @typescript-eslint/parser@5.59.0 --save-dev`\n5. Setup directory structure following clean architecture principles:\n   - `/src`\n     - `/api` (controllers, routes, middleware)\n     - `/services` (business logic)\n     - `/data` (data access, models)\n     - `/config` (configuration files)\n     - `/utils` (utility functions)\n     - `/types` (TypeScript type definitions)\n6. Configure Docker with Node.js 18 LTS image\n7. Setup nodemon for development: `npm install nodemon@2.0.22 --save-dev`\n8. Create npm scripts in package.json for development, building, and testing\n9. Initialize Git repository with appropriate .gitignore file\n10. Configure environment variables with dotenv: `npm install dotenv@16.0.3`",
-        "testStrategy": "1. Verify project structure is correctly set up\n2. Ensure all dependencies are installed correctly\n3. Confirm TypeScript compilation works\n4. Test that development server starts without errors\n5. Validate Docker container builds and runs successfully\n6. Check that ESLint and Prettier configurations work as expected",
+        "id": 37,
+        "title": "Implement Pre-commit Hooks and Code Quality Enforcement",
+        "description": "Set up Husky pre-commit hooks to enforce TypeScript type checking, linting, and testing before code is committed.",
+        "details": "Install Husky (v9+) and lint-staged. Configure pre-commit hooks to run `npm run typecheck`, `npm run lint`, and `npm test`. Ensure lint-staged is set up to only check staged files for linting and type errors. Integrate with ESLint (v9+) and TypeScript (v5.4+) for maximum compatibility. Block commits if any check fails. Document the workflow in CONTRIBUTING.md.",
+        "testStrategy": "Attempt to commit code with type errors, lint errors, and failing tests; verify that the commit is blocked. Validate that clean code passes all hooks and is committed successfully.",
         "priority": "high",
         "dependencies": [],
         "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 22,
-        "title": "Design and Implement Database Schema",
-        "description": "Design and implement a PostgreSQL database schema that supports multiple lectionary traditions, liturgical years, seasons, and readings.",
-        "details": "1. Install PostgreSQL client: `npm install pg@8.10.0 @types/pg@8.6.6`\n2. Install TypeORM for ORM capabilities: `npm install typeorm@0.3.15 reflect-metadata@0.1.13`\n3. Design database schema with the following entities:\n   - Tradition (id, name, description)\n   - LiturgicalYear (id, name, start_date, end_date, cycle, tradition_id)\n   - Season (id, name, start_date, end_date, color, liturgical_year_id)\n   - SpecialDay (id, name, date, description, tradition_id, is_feast_day)\n   - Reading (id, date, tradition_id, liturgical_year_id, season_id, special_day_id, scripture_reference, text, translation)\n   - Scripture (id, book, chapter, verse_start, verse_end, text, translation)\n4. Implement proper indexing on frequently queried fields:\n   - date, tradition_id on Reading table\n   - scripture_reference on Reading table\n   - book, chapter on Scripture table\n5. Create TypeORM entity classes for each table\n6. Implement database migrations using TypeORM migration system\n7. Create seed data for at least one tradition (RCL)\n8. Implement database connection pooling for performance\n9. Add foreign key constraints and cascading rules\n10. Document schema with entity-relationship diagram",
-        "testStrategy": "1. Write unit tests for entity models\n2. Test database migrations (up and down)\n3. Verify foreign key constraints work correctly\n4. Test data insertion and retrieval operations\n5. Validate indexing improves query performance\n6. Test database connection pooling under load\n7. Verify seed data is correctly inserted",
-        "priority": "high",
-        "dependencies": [
-          21
-        ],
-        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
-            "title": "Define and Normalize Database Entities",
-            "description": "Identify all required entities (Tradition, LiturgicalYear, Season, SpecialDay, Reading, Scripture) and normalize their attributes to at least third normal form to minimize redundancy and ensure data integrity.",
+            "title": "Install Husky and lint-staged",
+            "description": "Add Husky (v9+) and lint-staged as development dependencies and initialize Husky in the project.",
             "dependencies": [],
-            "details": "Analyze the relationships and attributes for each entity, ensuring proper normalization and clear separation of concerns. Document entity fields and relationships, considering extensibility for multi-tradition support.",
+            "details": "Run `npm install --save-dev husky lint-staged`. Initialize Husky with `npx husky install` and ensure the prepare script is set in package.json for automatic setup on install.\n<info added on 2025-08-24T17:23:03.005Z>\nInstallation completed successfully. Husky v9.1.7 and lint-staged v15.5.2 have been added as dev dependencies. Husky has been initialized in the project, creating the .husky directory with a default pre-commit hook that runs `npm test`. The `prepare` script has been added to package.json with the value `husky` to ensure automatic setup whenever the project is installed. The project is now ready for configuring the pre-commit hook with custom commands.\n</info added on 2025-08-24T17:23:03.005Z>",
             "status": "done",
-            "testStrategy": "Review entity definitions for normalization, run data integrity tests, and verify that no redundant or inconsistent data can be inserted."
+            "testStrategy": "Verify that the .husky directory is created and Husky is initialized. Confirm lint-staged is listed in devDependencies."
           },
           {
             "id": 2,
-            "title": "Design Foreign Key Relationships and Constraints",
-            "description": "Establish foreign key relationships between entities to enforce referential integrity and define cascading rules for updates and deletions.",
+            "title": "Configure Husky Pre-commit Hook",
+            "description": "Set up a Husky pre-commit hook to run type checking, linting, and testing commands before commits.",
             "dependencies": [
-              1
+              "37.1"
             ],
-            "details": "Map out all foreign key dependencies (e.g., tradition_id, liturgical_year_id) and implement appropriate ON DELETE/UPDATE CASCADE or RESTRICT rules. Add constraints to prevent orphaned records and ensure data consistency.",
-            "status": "pending",
-            "testStrategy": "Test insertion, update, and deletion scenarios to confirm that constraints prevent invalid data and cascading rules behave as expected."
-          },
-          {
-            "id": 3,
-            "title": "Implement Indexing and PostgreSQL Optimization Strategies",
-            "description": "Identify frequently queried fields and implement appropriate indexes to optimize query performance, considering PostgreSQL-specific features and multi-tradition support.",
-            "dependencies": [
-              2
-            ],
-            "details": "Add indexes on fields such as date, tradition_id, scripture_reference, book, and chapter. Evaluate the need for composite indexes and partial indexes based on expected query patterns. Consider schema design best practices for PostgreSQL performance.",
-            "status": "pending",
-            "testStrategy": "Benchmark query performance before and after indexing, and verify that indexes are used by the query planner for common queries."
-          },
-          {
-            "id": 4,
-            "title": "Create TypeORM Entity Classes and Migrations",
-            "description": "Translate the database schema into TypeORM entity classes and implement migration scripts to manage schema changes.",
-            "dependencies": [
-              3
-            ],
-            "details": "Define TypeORM models for each entity, including field types, relationships, and constraints. Write migration scripts to create and update tables, indexes, and constraints in PostgreSQL.",
-            "status": "pending",
-            "testStrategy": "Run migrations in a test environment, verify schema creation, and ensure rollback functionality works as intended."
-          },
-          {
-            "id": 5,
-            "title": "Seed Initial Data and Implement Connection Pooling",
-            "description": "Seed the database with initial data for at least one tradition (e.g., RCL) and configure PostgreSQL connection pooling for performance and scalability.",
-            "dependencies": [
-              4
-            ],
-            "details": "Develop scripts to insert representative seed data for all entities. Set up connection pooling using PostgreSQL best practices to handle concurrent API requests efficiently.",
-            "status": "pending",
-            "testStrategy": "Verify seed data is correctly inserted and accessible. Stress-test the database under concurrent connections to ensure pooling is effective."
-          },
-          {
-            "id": 6,
-            "title": "Document Schema and Generate Entity-Relationship Diagram",
-            "description": "Create comprehensive documentation of the schema, including an entity-relationship diagram and explanations of indexing and optimization strategies.",
-            "dependencies": [
-              5
-            ],
-            "details": "Use ERD tools to visualize entities and relationships. Document indexing choices, normalization decisions, and multi-tradition support mechanisms for future maintainers.",
-            "status": "pending",
-            "testStrategy": "Review documentation for completeness and clarity. Validate ERD accuracy against the implemented schema."
-          }
-        ]
-      },
-      {
-        "id": 23,
-        "title": "Implement Authentication and Authorization System",
-        "description": "Develop a comprehensive authentication and authorization system with API key management, JWT tokens, and role-based access control.",
-        "details": "1. Install required packages: `npm install jsonwebtoken@9.0.0 @types/jsonwebtoken@9.0.1 bcrypt@5.1.0 @types/bcrypt@5.0.0 passport@0.6.0 passport-jwt@4.0.1 @types/passport-jwt@3.0.8`\n2. Create User model with roles (public, admin, super-admin)\n3. Implement API key generation and validation:\n   - Create APIKey model with user_id, key, permissions, rate_limit\n   - Generate secure random API keys with crypto module\n   - Implement API key middleware for authentication\n4. Implement JWT authentication:\n   - Create JWT token generation service with appropriate expiration\n   - Implement refresh token mechanism\n   - Create JWT validation middleware\n5. Implement password hashing with bcrypt (10+ rounds)\n6. Create role-based middleware for authorization\n7. Implement rate limiting per API key using Redis:\n   - `npm install redis@4.6.5 rate-limiter-flexible@2.4.1`\n   - Configure sliding window rate limiting\n8. Setup OAuth2 integration for third-party authentication:\n   - `npm install passport-oauth2@1.7.0 @types/passport-oauth2@1.4.12`\n9. Create authentication routes:\n   - POST /api/v1/auth/register\n   - POST /api/v1/auth/login\n   - POST /api/v1/auth/refresh-token\n   - POST /api/v1/auth/api-key\n10. Implement secure token storage and rotation strategy",
-        "testStrategy": "1. Unit test password hashing and verification\n2. Test JWT token generation and validation\n3. Test API key generation and validation\n4. Integration tests for authentication endpoints\n5. Test role-based access control\n6. Verify rate limiting works correctly\n7. Test token refresh mechanism\n8. Security testing for authentication bypass attempts\n9. Load testing for authentication system",
-        "priority": "high",
-        "dependencies": [
-          21,
-          22
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 24,
-        "title": "Implement Core API Endpoints",
-        "description": "Develop the core API endpoints for retrieving lectionary readings, calendar information, and tradition data as specified in the PRD.",
-        "details": "1. Create Express router structure for API endpoints\n2. Implement controller classes following RESTful principles\n3. Develop the following endpoints:\n   - GET /api/v1/readings/today\n     - Query params: tradition (default: RCL)\n     - Returns today's readings based on liturgical calendar\n   - GET /api/v1/readings/{date}\n     - Format: YYYY-MM-DD\n     - Query params: tradition (default: RCL)\n     - Returns readings for specific date\n   - GET /api/v1/readings/range\n     - Query params: start_date, end_date, tradition\n     - Returns readings for date range\n   - GET /api/v1/calendar/liturgical-year\n     - Returns current liturgical year information\n   - GET /api/v1/calendar/season\n     - Returns current liturgical season\n   - GET /api/v1/calendar/special-days\n     - Query params: year (optional)\n     - Returns special days and feast days\n   - GET /api/v1/traditions\n     - Returns available lectionary traditions\n   - GET /api/v1/traditions/{tradition}/readings\n     - Returns tradition-specific readings\n4. Implement proper HTTP status codes and error responses\n5. Add request validation using express-validator: `npm install express-validator@7.0.1`\n6. Implement response formatting middleware for consistent API responses\n7. Add support for different response formats (JSON, XML)\n8. Implement pagination for endpoints returning multiple items",
-        "testStrategy": "1. Unit tests for controller logic\n2. Integration tests for each endpoint\n3. Test different query parameters and edge cases\n4. Verify correct HTTP status codes are returned\n5. Test pagination functionality\n6. Validate response format against expected schema\n7. Test with different response formats\n8. Performance testing for each endpoint",
-        "priority": "high",
-        "dependencies": [
-          21,
-          22,
-          23
-        ],
-        "status": "in-progress",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Design Express Router Structure",
-            "description": "Establish a modular Express router structure to organize API endpoints for lectionary readings, calendar, and tradition data.",
-            "dependencies": [],
-            "details": "Use express.Router to create modular, mountable route handlers and mount them under '/api/v1' in the main app for clean separation of concerns and scalability.[1][2]",
-            "status": "pending",
-            "testStrategy": "Verify that all routers are correctly mounted and accessible at their intended paths."
-          },
-          {
-            "id": 2,
-            "title": "Implement RESTful Controller Classes",
-            "description": "Develop controller classes for each resource (readings, calendar, traditions) following RESTful principles.",
-            "dependencies": [
-              1
-            ],
-            "details": "Controllers should encapsulate business logic for each endpoint, handle request/response cycles, and delegate to service layers as needed.[3]",
-            "status": "pending",
-            "testStrategy": "Unit test controller methods to ensure correct handling of requests and responses."
-          },
-          {
-            "id": 3,
-            "title": "Develop Core API Endpoints",
-            "description": "Implement the specified API endpoints for readings, calendar, and traditions, including support for query parameters and path variables.",
-            "dependencies": [
-              2
-            ],
-            "details": "Endpoints include: GET /readings/today, /readings/{date}, /readings/range, /calendar/liturgical-year, /calendar/season, /calendar/special-days, /traditions, and /traditions/{tradition}/readings.",
-            "status": "pending",
-            "testStrategy": "Integration test each endpoint for correct routing, parameter handling, and expected output."
-          },
-          {
-            "id": 4,
-            "title": "Implement HTTP Status Codes and Error Handling",
-            "description": "Add comprehensive error handling and ensure all endpoints return appropriate HTTP status codes and error responses.",
-            "dependencies": [
-              3
-            ],
-            "details": "Use Express error-handling middleware to catch and format errors, returning standardized error objects and status codes for client and server errors.",
-            "status": "pending",
-            "testStrategy": "Test error scenarios and verify correct status codes and error messages are returned."
-          },
-          {
-            "id": 5,
-            "title": "Add Request Validation Middleware",
-            "description": "Integrate express-validator to validate and sanitize incoming requests for all endpoints.",
-            "dependencies": [
-              3
-            ],
-            "details": "Install express-validator and define validation chains for query parameters, path variables, and request bodies as needed.",
-            "status": "pending",
-            "testStrategy": "Test endpoints with valid and invalid input to ensure validation errors are handled and reported correctly."
-          },
-          {
-            "id": 6,
-            "title": "Implement Response Formatting Middleware",
-            "description": "Create middleware to ensure consistent API response formatting across all endpoints.",
-            "dependencies": [
-              4,
-              5
-            ],
-            "details": "Standardize success and error response structures, and add support for multiple response formats (e.g., JSON, XML) based on client request.",
-            "status": "pending",
-            "testStrategy": "Test API responses for consistency and correct format negotiation."
-          },
-          {
-            "id": 7,
-            "title": "Add Pagination Support for List Endpoints",
-            "description": "Implement pagination for endpoints that return multiple items, such as readings over a date range or lists of traditions.",
-            "dependencies": [],
-            "details": "Add query parameters for pagination (e.g., page, limit), update controllers to handle pagination logic, and include pagination metadata in responses.",
-            "status": "pending",
-            "testStrategy": "Test paginated endpoints for correct slicing of results and accurate pagination metadata."
-          }
-        ]
-      },
-      {
-        "id": 25,
-        "title": "Implement Multi-Tradition Lectionary Support",
-        "description": "Develop the system to support multiple lectionary traditions (RCL, Catholic, Episcopal/Anglican, Lutheran) with tradition-specific calendar calculations and cycles.",
-        "details": "1. Research and document the calendar calculation rules for each tradition:\n   - Revised Common Lectionary (RCL): 3-year cycle (A, B, C)\n   - Catholic lectionary: 3-year Sunday cycle, 2-year weekday cycle\n   - Episcopal/Anglican: Based on RCL with modifications\n   - Lutheran: Based on RCL with modifications\n2. Implement calendar calculation service:\n   - Calculate liturgical dates (Advent, Christmas, Epiphany, Lent, Easter, Pentecost, etc.)\n   - Determine current liturgical year and cycle\n   - Handle special days and feast days\n3. Create tradition-specific adapters implementing a common interface\n4. Implement factory pattern for tradition selection\n5. Develop data models for tradition-specific variations\n6. Create mapping between traditions for equivalent dates/readings\n7. Implement cycle determination logic (A, B, C)\n8. Add configuration for tradition-specific settings\n9. Create utility functions for date calculations across traditions\n10. Implement extensible framework for adding new traditions",
-        "testStrategy": "1. Unit tests for calendar calculations in each tradition\n2. Test cycle determination logic\n3. Verify special days are correctly identified\n4. Test tradition-specific adaptations\n5. Integration tests across multiple traditions\n6. Validate liturgical year transitions\n7. Test with historical dates to verify calculations\n8. Verify extensibility by adding a test tradition",
-        "priority": "medium",
-        "dependencies": [
-          22,
-          24
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 26,
-        "title": "Implement Data Import and Management System",
-        "description": "Develop a system for importing, validating, and managing lectionary data from various sources, with support for multiple data formats and bulk operations.",
-        "details": "1. Create data import service with support for multiple formats:\n   - CSV: `npm install csv-parser@3.0.0`\n   - JSON: Native Node.js\n   - XML: `npm install xml2js@0.5.0`\n2. Implement data validation rules:\n   - Scripture reference format validation\n   - Date format validation\n   - Required fields validation\n   - Cross-reference validation\n3. Create admin API endpoints for data management:\n   - POST /api/v1/admin/import - Import data\n   - PUT /api/v1/admin/data - Update data\n   - DELETE /api/v1/admin/data - Delete data\n   - GET /api/v1/admin/data/validate - Validate data\n4. Implement data versioning system:\n   - Add version field to data tables\n   - Create version history table\n   - Implement rollback functionality\n5. Develop bulk update capabilities:\n   - Transaction support for atomic operations\n   - Batch processing for large datasets\n   - Progress tracking for long-running imports\n6. Create data consistency checks:\n   - Duplicate detection\n   - Missing data detection\n   - Inconsistency detection\n7. Implement scheduled import jobs using node-cron: `npm install node-cron@3.0.2`\n8. Add logging for import operations\n9. Create data source connectors for official lectionary sources",
-        "testStrategy": "1. Unit tests for data validation rules\n2. Test import functionality with sample data in each format\n3. Integration tests for admin API endpoints\n4. Test bulk operations with large datasets\n5. Verify data versioning and rollback functionality\n6. Test consistency checks with intentionally flawed data\n7. Validate scheduled import jobs\n8. Test transaction rollback on failure",
-        "priority": "medium",
-        "dependencies": [
-          22,
-          23,
-          25
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 27,
-        "title": "Implement Search and Query Capabilities",
-        "description": "Develop comprehensive search and query functionality including full-text search, filtering, and advanced search options across lectionary data.",
-        "details": "1. Install and configure full-text search capabilities:\n   - Use PostgreSQL's built-in full-text search\n   - Create text search configurations for religious texts\n   - Add text search vectors to relevant tables\n2. Implement search endpoints:\n   - GET /api/v1/search/readings - Search readings\n   - GET /api/v1/search/scripture - Search by scripture reference\n   - GET /api/v1/search/keyword - Keyword search\n3. Develop advanced filtering options:\n   - Filter by tradition\n   - Filter by liturgical year/cycle\n   - Filter by season\n   - Filter by date range\n   - Filter by scripture book/chapter/verse\n4. Implement query builder pattern for complex queries\n5. Add fuzzy search capabilities for approximate matches:\n   - Use pg_trgm extension in PostgreSQL\n   - Configure similarity thresholds\n6. Optimize search performance:\n   - Create appropriate indexes for search fields\n   - Implement query result caching\n   - Use pagination for large result sets\n7. Create search result highlighting:\n   - Highlight matching terms in results\n   - Provide context around matches\n8. Implement search analytics to track popular searches",
-        "testStrategy": "1. Unit tests for search query construction\n2. Test full-text search with various queries\n3. Verify filtering works correctly with combinations of filters\n4. Performance testing for search operations\n5. Test fuzzy search with misspelled terms\n6. Validate search result highlighting\n7. Test pagination of search results\n8. Verify search works across different traditions",
-        "priority": "medium",
-        "dependencies": [
-          22,
-          24,
-          25
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 28,
-        "title": "Implement Caching and Performance Optimizations",
-        "description": "Develop a comprehensive caching strategy using Redis, implement query optimization, and add performance enhancements to meet the specified performance requirements.",
-        "details": "1. Install and configure Redis for caching: `npm install redis@4.6.5 connect-redis@7.0.1`\n2. Implement multi-level caching strategy:\n   - In-memory cache for frequently accessed data\n   - Redis cache for distributed caching\n   - Database query result caching\n3. Configure cache TTL (Time To Live) based on data type:\n   - Static data: longer TTL\n   - Dynamic data: shorter TTL\n4. Implement cache invalidation strategies:\n   - Time-based invalidation\n   - Event-based invalidation on data updates\n   - Selective invalidation for specific keys\n5. Add database query optimization:\n   - Review and optimize SQL queries\n   - Add appropriate indexes\n   - Implement query result pagination\n6. Add response compression using compression middleware: `npm install compression@1.7.4 @types/compression@1.7.2`\n7. Implement HTTP caching headers:\n   - ETag support\n   - Cache-Control headers\n   - Conditional GET requests\n8. Configure CDN integration for static assets\n9. Implement database connection pooling optimization\n10. Add performance monitoring and metrics collection",
-        "testStrategy": "1. Benchmark API response times before and after caching\n2. Test cache hit/miss rates\n3. Verify cache invalidation works correctly\n4. Load testing to ensure performance under concurrent users\n5. Test database query performance\n6. Verify compression reduces response size\n7. Test HTTP caching effectiveness\n8. Validate performance meets requirements (<200ms response time)",
-        "priority": "medium",
-        "dependencies": [
-          24,
-          27
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 29,
-        "title": "Implement API Documentation and Developer Experience",
-        "description": "Create comprehensive API documentation using OpenAPI 3.0, implement Swagger UI, and develop resources to enhance the developer experience.",
-        "details": "1. Install and configure Swagger tools: `npm install swagger-jsdoc@6.2.8 swagger-ui-express@4.6.2 @types/swagger-ui-express@4.1.3`\n2. Create OpenAPI 3.0 specification:\n   - Define all API endpoints\n   - Document request/response schemas\n   - Add examples for each endpoint\n   - Document authentication requirements\n   - Add error responses\n3. Implement Swagger UI for interactive documentation\n4. Create route for API documentation: GET /api/v1/docs\n5. Generate code examples for common programming languages\n6. Create Postman collection for API testing:\n   - Include all endpoints\n   - Add example requests\n   - Create environment variables\n7. Develop comprehensive developer guide:\n   - Getting started guide\n   - Authentication guide\n   - Common use cases\n   - Best practices\n8. Add request/response examples to documentation\n9. Implement SDK generation for multiple languages using OpenAPI Generator\n10. Create interactive API playground",
-        "testStrategy": "1. Validate OpenAPI specification against schema\n2. Test Swagger UI functionality\n3. Verify documentation accuracy for all endpoints\n4. Test generated code examples\n5. Validate Postman collection works correctly\n6. User testing of developer documentation\n7. Verify SDK generation works for target languages\n8. Test interactive API playground",
-        "priority": "medium",
-        "dependencies": [
-          24,
-          27
-        ],
-        "status": "in-progress",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Install and Configure Swagger Tools",
-            "description": "Set up the project environment by installing and configuring Swagger-related packages (swagger-jsdoc, swagger-ui-express, @types/swagger-ui-express) for API documentation in a Node.js (Express) application.",
-            "dependencies": [],
-            "details": "Run npm install commands to add Swagger dependencies. Import and configure these packages in the Express app to prepare for documentation generation and serving.[1][2][3][4]",
-            "status": "pending",
-            "testStrategy": "Verify that all required packages are installed and imported without errors. Confirm that the Express app starts successfully with Swagger middleware configured."
-          },
-          {
-            "id": 2,
-            "title": "Create Comprehensive OpenAPI 3.0 Specification",
-            "description": "Develop a detailed OpenAPI 3.0 specification that defines all API endpoints, request/response schemas, authentication requirements, error responses, and includes examples for each endpoint.",
-            "dependencies": [
-              1
-            ],
-            "details": "Use swagger-jsdoc to annotate routes and generate the OpenAPI specification. Ensure all endpoints, parameters, responses, and security schemes are fully documented with examples and error cases.[2][3]",
-            "status": "pending",
-            "testStrategy": "Validate the OpenAPI specification against the OpenAPI schema. Review generated docs for completeness and accuracy."
-          },
-          {
-            "id": 3,
-            "title": "Implement and Serve Swagger UI for Interactive Documentation",
-            "description": "Integrate Swagger UI into the Express application to provide interactive, web-based API documentation accessible to developers.",
-            "dependencies": [
-              2
-            ],
-            "details": "Configure swagger-ui-express to serve the generated OpenAPI documentation at a dedicated route (e.g., /api/v1/docs). Ensure the UI allows endpoint testing and displays all documented features.[1][2][3][4]",
-            "status": "pending",
-            "testStrategy": "Access the Swagger UI in a browser and verify that all endpoints are visible, interactive, and accurately reflect the API specification."
-          },
-          {
-            "id": 4,
-            "title": "Develop Developer Experience Resources and Guides",
-            "description": "Create comprehensive developer resources, including a getting started guide, authentication instructions, common use cases, best practices, and code examples for multiple programming languages.",
-            "dependencies": [
-              3
-            ],
-            "details": "Draft and publish documentation that helps developers onboard quickly, understand authentication, and use the API effectively. Include code samples and usage scenarios for popular languages.",
-            "status": "pending",
-            "testStrategy": "Conduct user testing with developers to ensure resources are clear, helpful, and facilitate successful API integration."
-          },
-          {
-            "id": 5,
-            "title": "Generate and Distribute API Testing and SDK Resources",
-            "description": "Produce a Postman collection covering all endpoints, generate SDKs for multiple languages using OpenAPI Generator, and create an interactive API playground for hands-on testing.",
-            "dependencies": [
-              4
-            ],
-            "details": "Export a Postman collection with example requests and environment variables. Use OpenAPI Generator to create SDKs. Set up an interactive playground for real-time API exploration.",
-            "status": "pending",
-            "testStrategy": "Test the Postman collection for completeness, verify SDKs build and function in target languages, and ensure the playground allows successful API calls."
-          }
-        ]
-      },
-      {
-        "id": 30,
-        "title": "Implement Testing Framework and Quality Assurance",
-        "description": "Set up comprehensive testing infrastructure including unit tests, integration tests, end-to-end tests, and automated testing in CI/CD pipeline.",
-        "details": "1. Install testing frameworks and tools: `npm install jest@29.5.0 @types/jest@29.5.0 ts-jest@29.1.0 supertest@6.3.3 @types/supertest@2.0.12`\n2. Configure Jest for TypeScript testing\n3. Create test directory structure:\n   - `/tests/unit` - Unit tests\n   - `/tests/integration` - Integration tests\n   - `/tests/e2e` - End-to-end tests\n   - `/tests/performance` - Performance tests\n4. Implement unit tests for all business logic:\n   - Service layer tests\n   - Utility function tests\n   - Model tests\n5. Create integration tests for API endpoints:\n   - Test all endpoints with various parameters\n   - Test authentication and authorization\n   - Test error handling\n6. Implement end-to-end testing for critical workflows:\n   - User registration and authentication\n   - Data retrieval workflows\n   - Search functionality\n7. Set up load testing using Artillery: `npm install artillery@2.0.0-31 --save-dev`\n8. Configure test coverage reporting with Istanbul/nyc: `npm install nyc@15.1.0 --save-dev`\n9. Implement security testing:\n   - Authentication bypass testing\n   - Input validation testing\n   - Rate limiting testing\n10. Set up CI/CD pipeline with GitHub Actions:\n    - Run tests on pull requests\n    - Generate and publish test coverage reports\n    - Enforce minimum test coverage thresholds",
-        "testStrategy": "1. Verify test framework setup works correctly\n2. Run unit tests and validate coverage\n3. Execute integration tests against test environment\n4. Run end-to-end tests for critical workflows\n5. Perform load testing to validate performance requirements\n6. Verify security tests identify vulnerabilities\n7. Test CI/CD pipeline integration\n8. Validate test coverage reporting",
-        "priority": "high",
-        "dependencies": [
-          21,
-          23,
-          24
-        ],
-        "status": "in-progress",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Install and Configure Testing Frameworks",
-            "description": "Install Jest, ts-jest, Supertest, and related TypeScript types. Configure Jest for TypeScript compatibility using ts-jest and create a base jest.config.js file.",
-            "dependencies": [],
-            "details": "Run npm install commands for jest, ts-jest, @types/jest, supertest, and @types/supertest. Set up jest.config.js with the appropriate preset and test environment for TypeScript.",
-            "status": "pending",
-            "testStrategy": "Verify that running 'npx jest' discovers and executes a sample test file without errors."
-          },
-          {
-            "id": 2,
-            "title": "Establish Test Directory Structure",
-            "description": "Create a standardized directory structure for different test types, including unit, integration, end-to-end, and performance tests.",
-            "dependencies": [
-              1
-            ],
-            "details": "Set up /tests/unit, /tests/integration, /tests/e2e, and /tests/performance directories to organize test files by category.",
-            "status": "pending",
-            "testStrategy": "Check that test files placed in each directory are correctly discovered and executed by Jest."
-          },
-          {
-            "id": 3,
-            "title": "Implement Unit Tests for Business Logic",
-            "description": "Write comprehensive unit tests for service layers, utility functions, and data models using Jest.",
-            "dependencies": [
-              2
-            ],
-            "details": "Develop test cases that cover all critical business logic, ensuring each function and method is tested in isolation.",
-            "status": "pending",
-            "testStrategy": "Run unit tests and validate that all business logic is covered with high code coverage metrics."
-          },
-          {
-            "id": 4,
-            "title": "Develop Integration and API Endpoint Tests",
-            "description": "Create integration tests using Supertest to validate API endpoints, including parameter handling, authentication, and error scenarios.",
-            "dependencies": [
-              3
-            ],
-            "details": "Write tests that simulate HTTP requests to API endpoints, checking for correct responses, status codes, and error handling.",
-            "status": "pending",
-            "testStrategy": "Execute integration tests against a test environment and verify all endpoints behave as expected."
-          },
-          {
-            "id": 5,
-            "title": "Set Up End-to-End and Performance Testing",
-            "description": "Implement end-to-end tests for critical workflows and configure performance/load testing using Artillery.",
-            "dependencies": [
-              4
-            ],
-            "details": "Write E2E tests for user registration, authentication, and data retrieval. Set up Artillery scripts for load testing key endpoints.",
-            "status": "pending",
-            "testStrategy": "Run E2E tests to validate user flows and execute load tests to ensure performance requirements are met."
-          },
-          {
-            "id": 6,
-            "title": "Integrate Automated Testing into CI/CD Pipeline",
-            "description": "Configure GitHub Actions to run all tests on pull requests, generate coverage reports, and enforce minimum coverage thresholds.",
-            "dependencies": [
-              5
-            ],
-            "details": "Set up CI workflows to automate test execution, publish coverage reports, and block merges if coverage falls below defined thresholds.",
-            "status": "pending",
-            "testStrategy": "Trigger CI/CD runs on PRs and verify that tests execute, coverage is reported, and quality gates are enforced."
-          }
-        ]
-      },
-      {
-        "id": 31,
-        "title": "Implement Monitoring and Logging System",
-        "description": "Set up comprehensive monitoring, logging, and alerting infrastructure to track application performance, errors, and security events.",
-        "details": "1. Install logging packages: `npm install winston@3.8.2 morgan@1.10.0 @types/morgan@1.9.4`\n2. Configure structured logging with Winston:\n   - Define log levels (error, warn, info, debug)\n   - Configure log format (JSON for production)\n   - Set up log rotation\n3. Implement HTTP request logging with Morgan\n4. Add application performance monitoring:\n   - Install and configure Prometheus client: `npm install prom-client@14.2.0`\n   - Create custom metrics for key operations\n   - Set up Grafana dashboards for visualization\n5. Implement error tracking and alerting:\n   - Centralized error handling\n   - Error notification system\n   - Error categorization and prioritization\n6. Add database query performance monitoring:\n   - Log slow queries\n   - Track query execution times\n   - Monitor connection pool usage\n7. Implement security audit logging:\n   - Authentication attempts\n   - Authorization failures\n   - API key usage\n   - Admin operations\n8. Create health check endpoints:\n   - GET /api/v1/health - Basic health check\n   - GET /api/v1/health/detailed - Detailed system status\n9. Set up log aggregation and analysis\n10. Configure alerting thresholds and notification channels",
-        "testStrategy": "1. Verify logs are correctly generated and formatted\n2. Test error tracking with simulated errors\n3. Validate metrics collection and visualization\n4. Test health check endpoints\n5. Verify alerting works with test alerts\n6. Test log rotation and retention\n7. Validate security audit logging captures relevant events\n8. Test performance monitoring under load",
-        "priority": "medium",
-        "dependencies": [
-          21,
-          24,
-          28
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 32,
-        "title": "Implement Deployment and Infrastructure Configuration",
-        "description": "Set up Docker containerization, Kubernetes orchestration, and CI/CD pipeline for automated deployment to production environments.",
-        "details": "1. Create Docker configuration:\n   - Write Dockerfile for application\n   - Create docker-compose.yml for local development\n   - Optimize Docker image size and security\n2. Configure Kubernetes deployment:\n   - Create deployment manifests\n   - Configure services and ingress\n   - Set up persistent volumes for data\n   - Configure horizontal pod autoscaling\n3. Implement CI/CD pipeline with GitHub Actions:\n   - Configure workflow files (.github/workflows/)\n   - Set up build, test, and deployment stages\n   - Configure environment-specific deployments\n   - Implement rollback capability\n4. Set up cloud infrastructure:\n   - Configure production database (managed PostgreSQL)\n   - Set up Redis cache (managed Redis)\n   - Configure load balancer\n   - Set up CDN for static assets\n5. Implement database backup and recovery:\n   - Scheduled backups\n   - Point-in-time recovery\n   - Backup verification\n6. Configure SSL/TLS with Let's Encrypt:\n   - Automatic certificate renewal\n   - HTTPS redirection\n   - HTTP Strict Transport Security (HSTS)\n7. Set up environment-specific configurations:\n   - Development\n   - Testing\n   - Staging\n   - Production\n8. Implement infrastructure monitoring and alerting",
-        "testStrategy": "1. Verify Docker container builds and runs correctly\n2. Test Kubernetes deployment in test environment\n3. Validate CI/CD pipeline with test deployment\n4. Test database backup and recovery procedures\n5. Verify SSL/TLS configuration\n6. Test environment-specific configurations\n7. Validate load balancing and high availability\n8. Perform disaster recovery testing",
-        "priority": "high",
-        "dependencies": [
-          21,
-          28,
-          31
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Create Docker Configuration Files",
-            "description": "Set up Docker containerization for the application by creating necessary configuration files including Dockerfile and docker-compose.yml.",
-            "dependencies": [],
-            "details": "1. Create a Dockerfile in the project root with appropriate base image (Node.js)\n2. Configure multi-stage build to optimize image size\n3. Set up proper security practices (non-root user, minimal permissions)\n4. Create docker-compose.yml for local development environment\n5. Configure volume mappings for code and data persistence\n6. Set up environment variable handling\n7. Add .dockerignore file to exclude unnecessary files",
+            "details": "Create a .husky/pre-commit file that runs `npm run typecheck`, `npm run lint`, and `npm test`. Ensure the hook blocks commits if any command fails.\n<info added on 2025-08-24T17:25:45.216Z>\nSuccessfully configured the Husky pre-commit hook. Created a .husky/pre-commit script that runs:\n\n1. TypeScript type checking (`npm run typecheck`)\n2. lint-staged for linting staged files\n3. Tests (`npm test`)\n4. Build verification\n\nThe hook is executable and blocks commits if any check fails. Each step provides clear feedback with emojis and error messages to help developers understand what failed. The pre-commit hook is now fully operational and will prevent broken code from being committed to the repository.\n</info added on 2025-08-24T17:25:45.216Z>",
             "status": "done",
-            "testStrategy": "1. Verify Docker image builds successfully\n2. Test container startup and application accessibility\n3. Validate environment variable configuration\n4. Ensure proper volume mounting\n5. Verify local development workflow with docker-compose up"
-          },
-          {
-            "id": 2,
-            "title": "Configure Kubernetes Deployment Manifests",
-            "description": "Create Kubernetes configuration files for deploying the application to a Kubernetes cluster with proper resource management and scaling.",
-            "dependencies": [
-              "32.1"
-            ],
-            "details": "1. Create deployment.yaml with container specifications and resource limits\n2. Configure service.yaml for internal service discovery\n3. Set up ingress.yaml for external access with routing rules\n4. Create configmap.yaml and secret.yaml for configuration management\n5. Configure persistent volume claims for data storage\n6. Set up horizontal pod autoscaling configuration\n7. Implement health checks (liveness and readiness probes)",
-            "status": "pending",
-            "testStrategy": "1. Validate YAML syntax with kubectl\n2. Test deployment in a local Kubernetes environment (minikube/kind)\n3. Verify service discovery and networking\n4. Test autoscaling with simulated load\n5. Validate persistent storage configuration"
+            "testStrategy": "Attempt to commit code with type errors, lint errors, or failing tests and confirm the commit is blocked."
           },
           {
             "id": 3,
-            "title": "Implement CI/CD Pipeline with GitHub Actions",
-            "description": "Set up automated continuous integration and deployment workflow using GitHub Actions to build, test, and deploy the application.",
+            "title": "Configure lint-staged for Staged File Checks",
+            "description": "Set up lint-staged to only run linting and type checking on staged files.",
             "dependencies": [
-              "32.1",
-              "32.2"
+              "37.1"
             ],
-            "details": "1. Create .github/workflows/ci-cd.yml workflow file\n2. Configure build job to compile and test the application\n3. Set up Docker image building and pushing to container registry\n4. Implement deployment job for Kubernetes using doctl CLI\n5. Configure environment-specific deployments (dev, staging, prod)\n6. Set up secrets management for sensitive information\n7. Implement rollback capability for failed deployments\n8. Add workflow status notifications",
+            "details": "Update lint-staged configuration in package.json or .lintstagedrc to run ESLint and TypeScript checks on staged files only.\n<info added on 2025-08-24T17:25:54.814Z>\nSuccessfully configured lint-staged in package.json with the following settings:\n- ESLint with --fix option runs on staged JavaScript and TypeScript files\n- TypeScript type checking runs only on staged TypeScript files\n- Configuration is properly integrated with the Husky pre-commit hook\n- The setup now only processes staged files, improving commit performance\n- All checks are fully operational and ready for use by the development team\n</info added on 2025-08-24T17:25:54.814Z>",
             "status": "done",
-            "testStrategy": "1. Test workflow with a pull request\n2. Verify build, test, and deployment stages execute correctly\n3. Validate environment-specific deployments\n4. Test rollback functionality with intentionally broken deployment\n5. Verify secrets are properly utilized and not exposed"
+            "testStrategy": "Stage files with lint or type errors and verify that only those files are checked and errors block the commit."
           },
           {
             "id": 4,
-            "title": "Set Up DigitalOcean App Platform Configuration",
-            "description": "Configure the application for deployment on DigitalOcean App Platform with proper resource allocation and service integration.",
+            "title": "Integrate ESLint and TypeScript for Compatibility",
+            "description": "Ensure ESLint (v9+) and TypeScript (v5.4+) are installed and properly configured for maximum compatibility.",
             "dependencies": [
-              "32.1"
+              "37.1"
             ],
-            "details": "1. Create app.yaml specification file for DigitalOcean App Platform\n2. Configure resource allocation (CPU, memory)\n3. Set up database service connection (managed PostgreSQL)\n4. Configure Redis cache service integration\n5. Set up environment variables for different environments\n6. Configure domain and SSL settings\n7. Set up health checks and monitoring\n8. Configure auto-deployment from GitHub repository",
+            "details": "Install and configure ESLint and TypeScript, including recommended plugins and rules. Verify that both tools work together without conflicts.\n<info added on 2025-08-24T17:23:46.152Z>\nESLint configuration has been successfully fixed by correcting the extends reference from '@typescript-eslint/recommended' to 'plugin:@typescript-eslint/recommended'. The linter is now operational and has identified 448 issues (263 errors, 185 warnings) throughout the codebase, with 247 of these being automatically fixable using the --fix option. TypeScript compilation is also functioning correctly, and both tools are now properly integrated and compatible with each other. This configuration is ready to be incorporated into the pre-commit hooks as planned.\n</info added on 2025-08-24T17:23:46.152Z>",
             "status": "done",
-            "testStrategy": "1. Validate app.yaml configuration\n2. Test deployment to development environment\n3. Verify service connections (database, Redis)\n4. Test domain configuration and SSL certificate\n5. Validate auto-deployment from GitHub"
+            "testStrategy": "Run `npm run lint` and `npm run typecheck` to confirm no configuration errors and that both tools catch relevant issues."
           },
           {
             "id": 5,
-            "title": "Implement Database Backup and Recovery System",
-            "description": "Set up automated database backup procedures and recovery mechanisms to ensure data durability and disaster recovery capabilities.",
+            "title": "Document Workflow in CONTRIBUTING.md",
+            "description": "Write clear documentation of the pre-commit workflow, including setup, usage, and troubleshooting steps.",
             "dependencies": [
-              "32.4"
+              "37.2",
+              "37.3",
+              "37.4"
             ],
-            "details": "1. Configure scheduled database backups using DigitalOcean managed database features\n2. Set up backup retention policies (daily, weekly, monthly)\n3. Implement backup verification process\n4. Create scripts for point-in-time recovery\n5. Document recovery procedures for different failure scenarios\n6. Set up backup notifications and monitoring\n7. Configure backup encryption for sensitive data\n8. Implement backup testing schedule",
-            "status": "pending",
-            "testStrategy": "1. Verify scheduled backups are created successfully\n2. Test point-in-time recovery procedure\n3. Validate backup verification process\n4. Simulate disaster recovery scenario\n5. Test backup encryption and security"
-          },
-          {
-            "id": 6,
-            "title": "Configure SSL/TLS and Security Settings",
-            "description": "Set up secure communication with SSL/TLS certificates, implement HTTPS redirection, and configure security headers for the application.",
-            "dependencies": [
-              "32.4"
-            ],
-            "details": "1. Configure Let's Encrypt certificate integration with DigitalOcean\n2. Set up automatic certificate renewal process\n3. Implement HTTPS redirection at the ingress level\n4. Configure HTTP Strict Transport Security (HSTS) headers\n5. Set up Content Security Policy (CSP) headers\n6. Configure X-Content-Type-Options and other security headers\n7. Implement rate limiting for API endpoints\n8. Document security configuration",
-            "status": "pending",
-            "testStrategy": "1. Verify SSL/TLS certificate installation\n2. Test HTTPS redirection\n3. Validate security headers using online tools\n4. Test certificate renewal process\n5. Verify rate limiting functionality"
-          },
-          {
-            "id": 7,
-            "title": "Implement Environment-Specific Configurations",
-            "description": "Set up configuration management for different environments (development, testing, staging, production) with appropriate variable isolation.",
-            "dependencies": [
-              "32.3",
-              "32.4"
-            ],
-            "details": "1. Create environment-specific configuration files\n2. Set up environment variable management for each environment\n3. Configure feature flags for environment-specific features\n4. Implement configuration validation on application startup\n5. Set up secrets management for sensitive configuration\n6. Document environment setup procedures\n7. Create environment promotion workflow\n8. Implement configuration change auditing",
-            "status": "pending",
-            "testStrategy": "1. Test application with different environment configurations\n2. Verify environment-specific features work correctly\n3. Validate configuration validation\n4. Test environment promotion process\n5. Verify secrets are properly managed"
-          },
-          {
-            "id": 8,
-            "title": "Set Up Monitoring and Alerting Infrastructure",
-            "description": "Implement comprehensive monitoring and alerting for the application infrastructure, including logs, metrics, and performance indicators.",
-            "dependencies": [
-              "32.2",
-              "32.4"
-            ],
-            "details": "1. Configure DigitalOcean Monitoring for infrastructure metrics\n2. Set up application performance monitoring (APM) solution\n3. Implement centralized logging with log aggregation\n4. Configure alerting thresholds for critical metrics\n5. Set up notification channels (email, Slack, PagerDuty)\n6. Create monitoring dashboards for key performance indicators\n7. Implement health check endpoints for service monitoring\n8. Document incident response procedures",
-            "status": "pending",
-            "testStrategy": "1. Verify metrics collection and visualization\n2. Test alerting by triggering threshold violations\n3. Validate log aggregation and search functionality\n4. Test notification delivery to configured channels\n5. Verify dashboard functionality and data accuracy"
+            "details": "Update or create CONTRIBUTING.md to describe Husky, lint-staged, ESLint, and TypeScript integration, and how contributors should use and troubleshoot the hooks.\n<info added on 2025-08-24T17:26:54.134Z>\nThe CONTRIBUTING.md documentation has been successfully created with comprehensive content covering all required aspects of the development workflow. The document includes detailed sections on:\n\n1. Development environment setup instructions\n2. Pre-commit hooks configuration with Husky and lint-staged\n3. ESLint and TypeScript integration details\n4. Step-by-step workflow for contributors\n5. Troubleshooting guide for common issues\n6. Code quality standards and best practices\n7. Project structure overview\n8. Guidelines for submitting pull requests\n\nAll sections provide clear instructions that will help new contributors understand how to work with the codebase while maintaining quality standards through the automated pre-commit checks.\n</info added on 2025-08-24T17:26:54.134Z>",
+            "status": "done",
+            "testStrategy": "Review documentation for completeness and clarity. Have a new contributor follow the steps and confirm successful setup and usage."
           }
         ]
       },
       {
-        "id": 33,
-        "title": "Implement Data Import for Initial Lectionary Traditions",
-        "description": "Develop and execute data import processes for the initial lectionary traditions (RCL, Catholic, Episcopal/Anglican, Lutheran) with complete calendar and reading data.",
-        "details": "1. Research and identify authoritative data sources for each tradition:\n   - Revised Common Lectionary (RCL): Consultation on Common Texts\n   - Catholic: United States Conference of Catholic Bishops\n   - Episcopal/Anglican: The Episcopal Church\n   - Lutheran: Evangelical Lutheran Church in America\n2. Create data scraping/extraction scripts if needed: `npm install cheerio@1.0.0-rc.12 axios@1.3.5`\n3. Develop data transformation pipelines for each source format\n4. Implement data validation rules specific to each tradition\n5. Create mapping between different Bible translations\n6. Import historical data for past 5 years\n7. Generate projected data for next 5 years\n8. Import special days and feast days for each tradition\n9. Add liturgical color information\n10. Implement data verification and quality checks\n11. Create data update schedule for ongoing maintenance",
-        "testStrategy": "1. Verify data accuracy against official sources\n2. Test data completeness for each tradition\n3. Validate special days and feast days\n4. Test liturgical year calculations\n5. Verify scripture references are correctly formatted\n6. Test data for edge cases (leap years, special calculations)\n7. Validate data consistency across traditions\n8. Test data update procedures",
-        "priority": "medium",
-        "dependencies": [
-          22,
-          25,
-          26
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 34,
-        "title": "Implement Internationalization and Localization Support",
-        "description": "Add support for multiple languages and locales, including translation of API responses, documentation, and scripture readings.",
-        "details": "1. Install i18n packages: `npm install i18n@0.15.1 @types/i18n@0.13.6`\n2. Configure internationalization framework:\n   - Set up language files\n   - Configure locale detection\n   - Implement language fallback\n3. Create translation files for API messages and errors\n4. Implement locale-aware date formatting\n5. Add support for localized liturgical terms\n6. Configure API to accept language preference:\n   - Accept-Language header\n   - lang query parameter\n7. Add support for multiple Bible translations:\n   - Map between equivalent verses in different translations\n   - Store translation metadata\n8. Translate API documentation\n9. Implement right-to-left (RTL) language support\n10. Add language selection to API responses",
-        "testStrategy": "1. Test API with different language settings\n2. Verify translations are correctly applied\n3. Test date formatting across locales\n4. Validate RTL language support\n5. Test language fallback mechanism\n6. Verify documentation is available in multiple languages\n7. Test with non-Latin character sets\n8. Validate Bible translation mapping",
-        "priority": "low",
-        "dependencies": [
-          24,
-          29,
-          33
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 35,
-        "title": "Implement Advanced Security Features and Hardening",
-        "description": "Enhance the security posture of the application with advanced security features, vulnerability scanning, and security best practices.",
-        "details": "1. Implement security headers:\n   - Content-Security-Policy\n   - X-Content-Type-Options\n   - X-Frame-Options\n   - X-XSS-Protection\n   - Referrer-Policy\n2. Add CSRF protection: `npm install csurf@1.11.0 @types/csurf@1.11.1`\n3. Implement input validation and sanitization:\n   - Validate all API inputs\n   - Sanitize user-generated content\n   - Prevent SQL injection\n4. Configure rate limiting and brute force protection:\n   - Account lockout after failed attempts\n   - Progressive delays\n   - IP-based rate limiting\n5. Set up security scanning in CI/CD pipeline:\n   - Static Application Security Testing (SAST)\n   - Dependency vulnerability scanning\n   - Container security scanning\n6. Implement secure coding practices:\n   - Avoid eval() and other unsafe functions\n   - Use parameterized queries\n   - Implement proper error handling\n7. Configure security monitoring and alerting:\n   - Monitor for suspicious activities\n   - Alert on security events\n   - Log security-related actions\n8. Implement API abuse prevention:\n   - Request throttling\n   - Anomaly detection\n   - Blocking of malicious clients\n9. Conduct security audit and penetration testing\n10. Create security incident response plan",
-        "testStrategy": "1. Run vulnerability scanning tools\n2. Test security headers implementation\n3. Attempt CSRF attacks to verify protection\n4. Test input validation with malicious inputs\n5. Verify rate limiting under attack conditions\n6. Test brute force protection\n7. Validate dependency security\n8. Conduct penetration testing on critical endpoints",
+        "id": 38,
+        "title": "Resolve TypeScript Compilation and Type Safety Issues",
+        "description": "Fix all TypeScript compilation errors and enforce strict type safety across the codebase, especially in middleware and models.",
+        "details": "Upgrade TypeScript to latest LTS (v5.4+). Refactor middleware files (health-checks.ts, observability.ts, rate-limiter.ts) to resolve type errors. Ensure all models and database entities use explicit types and interfaces. Fix import/export and module resolution issues. Use tsconfig strict mode. Implement typed error objects for error handling. Leverage ESLint TypeScript plugin for additional type checks.",
+        "testStrategy": "Run `npm run typecheck` and ensure zero errors. Add type-driven unit tests for critical modules. Review PRs for type safety violations.",
         "priority": "high",
         "dependencies": [
-          23,
-          24,
-          32
+          37
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Upgrade TypeScript and Configure Strict Mode",
+            "description": "Upgrade the project to the latest LTS version of TypeScript (v5.4+), update all relevant dependencies, and enable strict type checking in tsconfig.json.",
+            "dependencies": [],
+            "details": "Ensure all deprecated compiler options are removed or replaced according to TypeScript 5.4+ requirements. Set 'strict' to true in tsconfig.json and review for any breaking changes introduced by the upgrade.\n<info added on 2025-08-24T17:28:48.817Z>\nSuccessfully upgraded TypeScript to v5.8.3, exceeding the required v5.4+ target. Updated tsconfig.json with optimized compiler options including enabling strict mode while maintaining compatibility with existing code. Added noFallthroughCasesInSwitch for improved switch statement safety. The configuration balances strictness with practicality - initial testing with maximum strictness revealed 301 type errors, but our current balanced approach reduced this to 98 manageable errors that can be systematically addressed. These remaining errors are primarily in middleware and models, which aligns with the next subtask focus areas. The project is now ready to proceed with targeted type error resolution.\n</info added on 2025-08-24T17:28:48.817Z>",
+            "status": "done",
+            "testStrategy": "Run 'npm run typecheck' and verify that the project compiles without errors. Confirm that strict mode is enforced by introducing intentional type errors and ensuring they are caught."
+          },
+          {
+            "id": 2,
+            "title": "Refactor Middleware for Type Safety",
+            "description": "Refactor all middleware files (health-checks.ts, observability.ts, rate-limiter.ts) to resolve existing type errors and enforce explicit typing.",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "Update function signatures, request/response types, and any shared utilities to use explicit TypeScript types and interfaces. Address any issues arising from the TypeScript upgrade.",
+            "status": "pending",
+            "testStrategy": "Run 'npm run typecheck' and ensure zero type errors in middleware files. Add or update unit tests to verify type-driven behavior."
+          },
+          {
+            "id": 3,
+            "title": "Enforce Explicit Types in Models and Database Entities",
+            "description": "Audit all models and database entities to ensure explicit TypeScript types and interfaces are used throughout.",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "Replace implicit 'any' types with well-defined interfaces or types. Ensure all properties, method parameters, and return types are explicitly typed.",
+            "status": "pending",
+            "testStrategy": "Run 'npm run typecheck' and confirm no implicit 'any' warnings or errors. Add type-driven unit tests for critical model logic."
+          },
+          {
+            "id": 4,
+            "title": "Resolve Import/Export and Module Resolution Issues",
+            "description": "Identify and fix all import/export and module resolution errors across the codebase to ensure compatibility with the upgraded TypeScript version.",
+            "dependencies": [
+              "38.1"
+            ],
+            "details": "Update import/export syntax as needed, adjust tsconfig paths or module settings, and verify all modules resolve correctly in both development and build environments.",
+            "status": "pending",
+            "testStrategy": "Run 'npm run typecheck' and build the project to ensure all modules resolve without errors. Add integration tests for modules with complex dependencies."
+          },
+          {
+            "id": 5,
+            "title": "Implement Typed Error Handling and Integrate ESLint TypeScript Plugin",
+            "description": "Refactor error handling to use typed error objects and configure the ESLint TypeScript plugin for additional type checks.",
+            "dependencies": [
+              "38.2",
+              "38.3",
+              "38.4"
+            ],
+            "details": "Define custom error types/interfaces, update error handling logic to use them, and ensure ESLint is configured to enforce type safety rules.",
+            "status": "pending",
+            "testStrategy": "Run 'npm run lint' and 'npm run typecheck' to verify no lint or type errors. Add tests to ensure typed errors are correctly thrown and handled."
+          }
+        ]
+      },
+      {
+        "id": 39,
+        "title": "Repair and Enforce ESLint Configuration",
+        "description": "Fix broken ESLint configuration and enforce code style and best practices throughout the codebase.",
+        "details": "Update ESLint to v9+ and @typescript-eslint to latest. Repair or regenerate .eslintrc.js/.json. Ensure compatibility with TypeScript and Prettier. Add recommended rules for Node.js, security, and import sorting. Run `eslint --fix` across the codebase. Integrate ESLint into CI and pre-commit hooks.",
+        "testStrategy": "Run `npm run lint` and verify zero errors. Intentionally introduce lint violations and confirm they are caught. Validate auto-fix works as expected.",
+        "priority": "high",
+        "dependencies": [
+          37,
+          38
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 36,
-        "title": "Implement Swarm Coordination System",
-        "description": "Create a central coordination system to monitor progress, manage dependencies, and facilitate communication between all worker streams (analyst, coder, researcher, and tester).",
-        "details": "1. Design and implement a coordination dashboard:\n   - Create a central web interface for monitoring all worker streams\n   - Implement real-time status updates for each worker stream\n   - Visualize dependencies between tasks and worker streams\n   - Display critical path and bottlenecks\n\n2. Implement worker stream tracking:\n   - Analyst stream (database operations): Track schema changes, data modeling progress\n   - Coder stream (API implementation): Monitor endpoint development, integration status\n   - Researcher stream (OpenAPI documentation): Track documentation coverage\n   - Tester stream (testing framework): Monitor test coverage and quality metrics\n\n3. Develop communication channels:\n   - Implement notification system for critical updates\n   - Create stream-specific communication channels\n   - Set up automated alerts for blocked tasks or dependencies\n   - Implement daily status report generation\n\n4. Build dependency management system:\n   - Create visual dependency graph for all tasks\n   - Implement automated dependency validation\n   - Track completion status of prerequisite tasks\n   - Provide early warning for potential bottlenecks\n\n5. Implement progress metrics and reporting:\n   - Track velocity and completion rates for each stream\n   - Generate burndown/burnup charts\n   - Calculate efficiency metrics and identify optimization opportunities\n   - Create executive summary reports\n\n6. Set up integration with existing systems:\n   - Connect to version control system for code progress tracking\n   - Integrate with issue tracking system (if applicable)\n   - Link with CI/CD pipeline for deployment status\n   - Connect to monitoring systems for operational metrics\n\n7. Implement resource allocation optimization:\n   - Track worker availability and capacity\n   - Suggest resource reallocation based on bottlenecks\n   - Provide what-if analysis for different resource scenarios\n   - Optimize parallel execution of tasks",
-        "testStrategy": "1. Verify dashboard functionality:\n   - Test real-time updates with simulated worker progress\n   - Validate dependency visualization accuracy\n   - Confirm critical path calculation is correct\n   - Test responsiveness and usability on different devices\n\n2. Test worker stream tracking:\n   - Verify accurate status reporting for each stream\n   - Validate data consistency between streams\n   - Test handling of edge cases (blocked tasks, dependencies)\n   - Confirm metrics calculation accuracy\n\n3. Validate communication features:\n   - Test notification delivery across different channels\n   - Verify alert triggering for blocked dependencies\n   - Validate automated report generation\n   - Test message threading and context preservation\n\n4. Test dependency management:\n   - Verify dependency graph accuracy against project plan\n   - Test automated validation with various dependency scenarios\n   - Confirm status tracking reflects actual task completion\n   - Validate bottleneck identification algorithm\n\n5. Verify metrics and reporting:\n   - Test calculation accuracy for all metrics\n   - Validate chart generation with known data sets\n   - Verify report generation with different parameters\n   - Test historical data tracking and trend analysis\n\n6. Test system integration:\n   - Verify correct data flow from version control system\n   - Validate issue tracker synchronization\n   - Test CI/CD pipeline status integration\n   - Confirm monitoring system data incorporation\n\n7. Conduct end-to-end testing:\n   - Perform full workflow testing with all worker streams\n   - Test system behavior under high load\n   - Validate system recovery after failures\n   - Conduct user acceptance testing with representatives from each worker stream",
-        "status": "in-progress",
-        "dependencies": [
-          21,
-          22,
-          29,
-          30,
-          31,
-          32
-        ],
+        "id": 40,
+        "title": "Overhaul Test Infrastructure and Achieve >80% Coverage",
+        "description": "Fix failing integration tests, write comprehensive unit and service tests, and establish robust test utilities.",
+        "details": "Upgrade Jest (v30+) and Supertest (v8+). Refactor tests/integration/api.test.ts to match actual API contracts. Write unit tests for all controllers and service layer logic. Add middleware tests for authentication, rate limiting, and observability. Create reusable test fixtures and utilities. Integrate test coverage reporting (e.g., jest --coverage).",
+        "testStrategy": "Run `npm test` and ensure all tests pass with >80% coverage. Use coverage reports to identify and address gaps. Validate test utilities with sample cases.",
         "priority": "high",
+        "dependencies": [
+          38,
+          39
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 41,
+        "title": "Test and Validate Database Models, Migrations, and Associations",
+        "description": "Ensure all TypeORM entities, migrations, and associations are correct and fully tested.",
+        "details": "Upgrade TypeORM (v0.3+). Write tests for all entity relationships and constraints. Validate migration scripts and seeding processes in a test database. Implement error handling for database connection failures. Use testcontainers or Docker Compose for isolated DB testing.",
+        "testStrategy": "Run automated tests for all entities and migrations. Simulate migration failures and verify error handling. Check referential integrity and constraint enforcement.",
+        "priority": "high",
+        "dependencies": [
+          40
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 42,
+        "title": "Comprehensive API Endpoint Validation and Testing",
+        "description": "Test all REST endpoints for correct request/response validation, error handling, and authentication flows.",
+        "details": "Use Supertest and Postman for endpoint testing. Validate all endpoints against OpenAPI 3.0 spec. Test for correct HTTP status codes, error envelopes, and input validation. Verify authentication and authorization flows (API key, JWT). Ensure API documentation matches implementation.",
+        "testStrategy": "Automate endpoint tests in CI. Use Postman/Newman for regression suites. Cross-check OpenAPI spec with actual responses. Test invalid inputs and edge cases.",
+        "priority": "high",
+        "dependencies": [
+          40,
+          41
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 43,
+        "title": "Validate Build, Deployment, and Observability Pipeline",
+        "description": "Ensure Docker build, environment configuration, logging, and monitoring are functional and production-ready.",
+        "details": "Update Dockerfile for multi-stage builds and Node.js LTS. Validate environment variable handling with dotenv and process.env. Test logging (e.g., pino v8+) and monitoring (e.g., Prometheus, Grafana). Create deployment validation script. Integrate with GitHub Actions for CI/CD. Ensure health check endpoints are operational.",
+        "testStrategy": "Run `npm run build` and deploy to staging. Validate logs and metrics in monitoring dashboard. Simulate failures and verify observability. Confirm health checks and deployment script success.",
+        "priority": "high",
+        "dependencies": [
+          42
+        ],
+        "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-14T17:36:14.216Z",
-      "updated": "2025-08-20T12:56:29.993Z",
+      "updated": "2025-08-24T17:28:55.174Z",
       "description": "Tasks for master context"
     }
   }

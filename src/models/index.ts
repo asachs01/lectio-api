@@ -20,7 +20,7 @@ export const entities = [
   Season,
   SpecialDay,
   Scripture,
-  Reading
+  Reading,
 ];
 
 export default entities;

@@ -15,7 +15,7 @@ export const getDatabaseConfig = (): DataSourceOptions => {
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     synchronize: isDevelopment && process.env.DB_SYNC !== 'false',
     logging: isDevelopment 
-      ? (process.env.DB_LOGGING?.split(',') as any[]) || ['query', 'error', 'warn']
+      ? (process.env.DB_LOGGING?.split(',') as ('query' | 'error' | 'warn')[]) || ['query', 'error', 'warn']
       : ['error'],
     entities,
     migrations: [__dirname + '/../migrations/*{.ts,.js}'],

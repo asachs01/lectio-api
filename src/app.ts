@@ -103,7 +103,11 @@ export class App {
     // 404 handler
     this.app.use('*', (req: Request, res: Response) => {
       res.status(404).json({
-        error: 'Not Found',
+        error: {
+          statusCode: 404,
+          message: `Route ${req.originalUrl} not found`,
+          timestamp: new Date().toISOString(),
+        },
         message: `Route ${req.originalUrl} not found`,
         timestamp: new Date().toISOString(),
       });

@@ -225,7 +225,7 @@ export class MetricsService {
     this.readingsRequested.inc({ 
       tradition, 
       date_type: dateType, 
-      cache_hit: cacheHit.toString() 
+      cache_hit: cacheHit.toString(), 
     });
   }
 
@@ -240,7 +240,7 @@ export class MetricsService {
   public recordSearchQuery(searchType: string, resultCount: number): void {
     this.searchQueriesTotal.inc({ 
       search_type: searchType, 
-      result_count: resultCount.toString() 
+      result_count: resultCount.toString(), 
     });
   }
 
@@ -288,7 +288,7 @@ export class MetricsService {
   }
 
   // Get Prometheus registry for export
-  public getRegister() {
+  public getRegister(): typeof register {
     return register;
   }
 
@@ -315,7 +315,7 @@ export class MetricsService {
     name: string, 
     help: string, 
     labelNames: string[] = [],
-    buckets?: number[]
+    buckets?: number[],
   ): Histogram<string> {
     return new Histogram({
       name: `lectionary_api_${name}`,

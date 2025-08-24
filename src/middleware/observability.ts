@@ -31,7 +31,7 @@ export function performanceTracking(req: TrackedRequest, res: Response, next: Ne
 
   // Track response
   const originalSend = res.send;
-  res.send = function(data: any) {
+  res.send = function(data: unknown): Response {
     res.send = originalSend;
     
     if (req.startTime) {
@@ -44,7 +44,7 @@ export function performanceTracking(req: TrackedRequest, res: Response, next: Ne
         route,
         res.statusCode,
         duration / 1000,
-        req.query.tradition as string
+        req.query.tradition as string,
       );
       
       // Log performance if slow
@@ -75,7 +75,7 @@ export function tracingMiddleware(req: TrackedRequest, res: Response, next: Next
   const propagator = api.propagation;
   const parentContext = propagator.extract(
     api.context.active(),
-    req.headers
+    req.headers,
   );
   
   // Start a new span
@@ -95,7 +95,7 @@ export function tracingMiddleware(req: TrackedRequest, res: Response, next: Next
         'net.peer.port': req.socket.remotePort,
       },
     },
-    parentContext
+    parentContext,
   );
   
   // Store span in request for later use
@@ -105,7 +105,7 @@ export function tracingMiddleware(req: TrackedRequest, res: Response, next: Next
   api.context.with(api.trace.setSpan(parentContext, span), () => {
     // Track response
     const originalSend = res.send;
-    res.send = function(data: any) {
+    res.send = function(data: unknown): Response {
       res.send = originalSend;
       
       // Add response attributes
@@ -150,7 +150,7 @@ export function requestResponseLogging(req: TrackedRequest, res: Response, next:
   
   // Track response
   const originalSend = res.send;
-  res.send = function(data: any) {
+  res.send = function(data: unknown): Response {
     res.send = originalSend;
     
     // Log response
@@ -173,7 +173,7 @@ export function requestResponseLogging(req: TrackedRequest, res: Response, next:
 }
 
 // Error tracking middleware
-export function errorTracking(error: Error, req: TrackedRequest, res: Response, next: NextFunction): void {
+export function errorTracking(error: Error, req: TrackedRequest, res: Response, _next: NextFunction): void {
   const errorId = uuidv4();
   
   // Log error with context
@@ -184,14 +184,14 @@ export function errorTracking(error: Error, req: TrackedRequest, res: Response, 
     path: req.path,
     query: req.query,
     body: req.body,
-    user: (req as any).user?.id,
+    user: (req as Request & { user?: { id: string } }).user?.id,
   });
   
   // Record error in metrics
   metrics.recordError(
     error.name || 'UnknownError',
     error.message,
-    req.route?.path || req.path
+    req.route?.path || req.path,
   );
   
   // Record exception in span if available
@@ -204,12 +204,12 @@ export function errorTracking(error: Error, req: TrackedRequest, res: Response, 
   }
   
   // Send error response
-  const statusCode = (error as any).statusCode || 500;
+  const statusCode = (error as { statusCode?: number }).statusCode || 500;
   res.status(statusCode).json({
     error: {
       id: errorId,
       message: error.message,
-      code: (error as any).code || 'INTERNAL_ERROR',
+      code: (error as { code?: string }).code || 'INTERNAL_ERROR',
       timestamp: new Date().toISOString(),
     },
     correlationId: req.correlationId,
@@ -220,7 +220,7 @@ export function errorTracking(error: Error, req: TrackedRequest, res: Response, 
 export function businessMetricsMiddleware(req: TrackedRequest, res: Response, next: NextFunction): void {
   // Track specific business events based on endpoints
   const originalSend = res.send;
-  res.send = function(data: any) {
+  res.send = function(data: unknown): Response {
     res.send = originalSend;
     
     if (res.statusCode < 400) {
@@ -230,7 +230,7 @@ export function businessMetricsMiddleware(req: TrackedRequest, res: Response, ne
       if (route.includes('/readings')) {
         const tradition = req.query.tradition as string || 'default';
         const dateType = req.path.includes('today') ? 'today' : 
-                        req.path.includes('range') ? 'range' : 'specific';
+          req.path.includes('range') ? 'range' : 'specific';
         const cacheHit = res.getHeader('X-Cache-Hit') === 'true';
         
         metrics.recordReadingRequest(tradition, dateType, cacheHit);
@@ -255,7 +255,7 @@ export function businessMetricsMiddleware(req: TrackedRequest, res: Response, ne
       if (route.includes('/search')) {
         const searchType = req.query.type as string || 'general';
         const results = Array.isArray(data) ? data.length : 
-                       data?.results ? data.results.length : 0;
+          (data && typeof data === 'object' && 'results' in data && Array.isArray((data as any).results)) ? (data as any).results.length : 0;
         metrics.recordSearchQuery(searchType, results);
       }
     }
@@ -294,17 +294,18 @@ export function securityMonitoring(req: TrackedRequest, res: Response, next: Nex
       
       // Optionally block the request
       if (process.env.BLOCK_SUSPICIOUS_REQUESTS === 'true') {
-        return res.status(400).json({
+        res.status(400).json({
           error: 'Invalid request',
           correlationId: req.correlationId,
         });
+        return;
       }
     }
   }
   
   // Track authentication failures
   const originalSend = res.send;
-  res.send = function(data: any) {
+  res.send = function(data: unknown): Response {
     res.send = originalSend;
     
     if (res.statusCode === 401 || res.statusCode === 403) {
@@ -327,11 +328,11 @@ export function auditLogging(req: TrackedRequest, res: Response, next: NextFunct
   // Only audit state-changing operations
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
     const originalSend = res.send;
-    res.send = function(data: any) {
+    res.send = function(data: unknown): Response {
       res.send = originalSend;
       
       if (res.statusCode < 400) {
-        const userId = (req as any).user?.id || 'anonymous';
+        const userId = (req as Request & { user?: { id: string } }).user?.id || 'anonymous';
         const resource = req.route?.path || req.path;
         const action = `${req.method} ${resource}`;
         
@@ -353,7 +354,7 @@ export function auditLogging(req: TrackedRequest, res: Response, next: NextFunct
 }
 
 // Combined observability middleware stack
-export function observabilityStack() {
+export function observabilityStack(): Array<(req: TrackedRequest, res: Response, next: NextFunction) => void> {
   return [
     correlationIdMiddleware,
     performanceTracking,
@@ -366,7 +367,7 @@ export function observabilityStack() {
 }
 
 // Prometheus metrics endpoint
-export function metricsEndpoint(req: Request, res: Response): void {
+export function metricsEndpoint(_req: Request, res: Response): void {
   res.set('Content-Type', metrics.getRegister().contentType);
   metrics.getRegister().metrics().then(data => {
     res.end(data);
@@ -376,7 +377,7 @@ export function metricsEndpoint(req: Request, res: Response): void {
 }
 
 // Status monitor configuration
-export function getStatusMonitorConfig() {
+export function getStatusMonitorConfig(): Record<string, unknown> {
   return {
     title: 'Lectionary API Status',
     path: '/status',

@@ -254,6 +254,73 @@ To provide a robust, scalable, and developer-friendly API that serves liturgical
 - Security audit and compliance
 - Ongoing maintenance and support
 
+## CRITICAL: Immediate Codebase Stabilization Requirements
+
+**URGENT PRIORITY**: The current codebase is in a critical state and is NOT production-ready. The following tasks must be completed immediately before any further development:
+
+### Critical Issues Identified
+- 50+ TypeScript compilation errors preventing development
+- Broken ESLint configuration blocking code quality enforcement
+- Failing tests with incorrect API assumptions
+- Missing or incomplete pre-commit hooks
+- Zero test coverage for critical functionality
+- Type safety violations throughout the codebase
+
+### Phase 0: Emergency Stabilization (Must Complete First)
+
+#### 1. Pre-commit Hooks Implementation
+- Set up Husky pre-commit hooks to run TypeScript checking, linting, testing, and build verification
+- Ensure no broken code can be committed to repository
+- Configure lint-staged for efficient pre-commit validation
+
+#### 2. TypeScript Error Resolution
+- Fix all compilation errors in middleware files (health-checks.ts, observability.ts, rate-limiter.ts)
+- Resolve type safety issues in models and database entities
+- Fix import/export issues and module resolution problems
+- Implement proper error handling with typed error objects
+
+#### 3. ESLint Configuration Repair
+- Fix broken ESLint configuration preventing linting
+- Ensure TypeScript ESLint rules are properly configured
+- Fix all linting errors throughout codebase
+
+#### 4. Test Infrastructure Overhaul
+- Fix failing integration tests in tests/integration/api.test.ts
+- Write comprehensive unit tests for all controllers
+- Implement service layer tests for database operations
+- Create middleware tests for authentication, rate limiting, observability
+- Establish test utilities and fixtures
+
+#### 5. Database and Model Testing
+- Test all TypeORM entities and relationships
+- Validate migration scripts and seeding processes
+- Test entity associations and constraints
+- Implement database connection error handling tests
+
+#### 6. API Validation and Testing
+- Test all REST endpoints with proper request/response validation
+- Verify error handling for invalid inputs
+- Test authentication and authorization flows
+- Validate API documentation matches implementation
+
+#### 7. Build and Deployment Validation
+- Ensure Docker build process works correctly
+- Validate environment configuration handling
+- Test logging, monitoring, and observability features
+- Create deployment validation script
+
+### Acceptance Criteria for Stabilization
+- `npm run typecheck` must pass with zero errors
+- `npm run lint` must pass with zero errors
+- `npm test` must pass all tests with >80% coverage
+- `npm run build` must complete successfully
+- Pre-commit hooks must prevent broken code commits
+- All API endpoints must have working tests
+- Database operations must be fully tested and validated
+
+### Risk if Not Completed
+**CRITICAL**: Without this stabilization work, the codebase will remain in a broken state, making further development impossible and risking production failures.
+
 ## Conclusion
 
-The Lectionary API represents a comprehensive solution for liturgical calendar and scripture reading data. By focusing on developer experience, scalability, and multi-tradition support, this API will serve as a valuable resource for the religious software development community. The phased approach ensures systematic development while maintaining quality and security standards throughout the project lifecycle.
+The Lectionary API represents a comprehensive solution for liturgical calendar and scripture reading data. However, immediate attention must be focused on critical codebase stabilization before proceeding with feature development. By prioritizing code quality, testing, and validation infrastructure, this API will serve as a valuable resource for the religious software development community. The phased approach ensures systematic development while maintaining quality and security standards throughout the project lifecycle.

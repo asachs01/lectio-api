@@ -41,7 +41,7 @@ export class ReadingsService {
     endDate: string,
     traditionId: string,
     page: number,
-    limit: number
+    limit: number,
   ): Promise<{ readings: DailyReading[]; total: number }> {
     // TODO: Implement database query with pagination
     const mockReadings: DailyReading[] = [];

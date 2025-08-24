@@ -27,10 +27,6 @@ node_modules/
 # OS specific
 .DS_Store
 
-# Task files
-# tasks.json
-# tasks/
-
 # Deployment artifacts
 .app-id
 .app-url
@@ -41,3 +37,7 @@ plans/
 
 # Prompt logs (per project requirements)
 prompt_logs/ 
+
+# Task files
+# tasks.json
+# tasks/ 

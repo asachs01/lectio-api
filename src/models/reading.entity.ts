@@ -7,7 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
-  Unique
+  Unique,
 } from 'typeorm';
 import { Tradition } from './tradition.entity';
 import { LiturgicalYear } from './liturgical-year.entity';
@@ -37,147 +37,147 @@ export enum ReadingType {
 @Unique('uq_reading_date_tradition_type', ['date', 'traditionId', 'readingType', 'scriptureId'])
 export class Reading {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+    id: string;
 
   @Column({
-    type: 'date'
+    type: 'date',
   })
-  date: Date;
+    date: Date;
 
   @Column({
     type: 'enum',
     enum: ReadingType,
-    name: 'reading_type'
+    name: 'reading_type',
   })
-  readingType: ReadingType;
+    readingType: ReadingType;
 
   @Column({
     type: 'varchar',
     length: 200,
     name: 'scripture_reference',
-    comment: 'Human-readable scripture reference (e.g., "John 3:16-17")'
+    comment: 'Human-readable scripture reference (e.g., "John 3:16-17")',
   })
-  scriptureReference: string;
+    scriptureReference: string;
 
   @Column({ 
     type: 'text',
     nullable: true,
-    comment: 'Full text of the reading, if available'
+    comment: 'Full text of the reading, if available',
   })
-  text: string;
+    text: string;
 
   @Column({
     type: 'varchar',
     length: 50,
     default: 'NRSV',
-    comment: 'Bible translation used for this reading'
+    comment: 'Bible translation used for this reading',
   })
-  translation: string;
+    translation: string;
 
   @Column({
     type: 'int',
     name: 'reading_order',
     default: 1,
-    comment: 'Order of readings within a single day/service'
+    comment: 'Order of readings within a single day/service',
   })
-  readingOrder: number;
+    readingOrder: number;
 
   @Column({
     type: 'text',
     nullable: true,
-    comment: 'Additional notes or context for this reading'
+    comment: 'Additional notes or context for this reading',
   })
-  notes: string;
+    notes: string;
 
   @Column({
     type: 'boolean',
     name: 'is_alternative',
     default: false,
-    comment: 'Whether this is an alternative reading option'
+    comment: 'Whether this is an alternative reading option',
   })
-  isAlternative: boolean;
+    isAlternative: boolean;
 
   // Foreign Keys
   @Column({
     type: 'uuid',
-    name: 'tradition_id'
+    name: 'tradition_id',
   })
-  traditionId: string;
+    traditionId: string;
 
   @Column({
     type: 'uuid',
     name: 'liturgical_year_id',
-    nullable: true
+    nullable: true,
   })
-  liturgicalYearId: string;
+    liturgicalYearId: string;
 
   @Column({
     type: 'uuid',
     name: 'season_id',
-    nullable: true
+    nullable: true,
   })
-  seasonId: string;
+    seasonId: string;
 
   @Column({
     type: 'uuid',
     name: 'special_day_id',
-    nullable: true
+    nullable: true,
   })
-  specialDayId: string;
+    specialDayId: string;
 
   @Column({
     type: 'uuid',
     name: 'scripture_id',
     nullable: true,
-    comment: 'Reference to normalized scripture text'
+    comment: 'Reference to normalized scripture text',
   })
-  scriptureId: string;
+    scriptureId: string;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'created_at',
   })
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at'
+    name: 'updated_at',
   })
-  updatedAt: Date;
+    updatedAt: Date;
 
   // Relationships
   @ManyToOne(() => Tradition, tradition => tradition.readings, {
     onDelete: 'CASCADE',
-    nullable: false
+    nullable: false,
   })
   @JoinColumn({ name: 'tradition_id' })
-  tradition: Tradition;
+    tradition: Tradition;
 
   @ManyToOne(() => LiturgicalYear, liturgicalYear => liturgicalYear.readings, {
     onDelete: 'SET NULL',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn({ name: 'liturgical_year_id' })
-  liturgicalYear: LiturgicalYear;
+    liturgicalYear: LiturgicalYear;
 
   @ManyToOne(() => Season, season => season.readings, {
     onDelete: 'SET NULL',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn({ name: 'season_id' })
-  season: Season;
+    season: Season;
 
   @ManyToOne(() => SpecialDay, specialDay => specialDay.readings, {
     onDelete: 'SET NULL',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn({ name: 'special_day_id' })
-  specialDay: SpecialDay;
+    specialDay: SpecialDay;
 
   @ManyToOne(() => Scripture, scripture => scripture.readings, {
     onDelete: 'SET NULL',
-    nullable: true
+    nullable: true,
   })
   @JoinColumn({ name: 'scripture_id' })
-  scripture: Scripture;
+    scripture: Scripture;
 }

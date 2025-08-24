@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
 import { Tradition } from '../models/tradition.entity';
 import { Reading } from '../models/reading.entity';
-import { Season } from '../models/season.entity';
-import { SpecialDay } from '../models/special-day.entity';
+import { Season, LiturgicalColor } from '../models/season.entity';
+import { SpecialDay, SpecialDayType } from '../models/special-day.entity';
 import { LiturgicalYear } from '../models/liturgical-year.entity';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
@@ -22,7 +22,7 @@ const AppDataSource = new DataSource({
   entities: [Tradition, Reading, Season, SpecialDay, LiturgicalYear],
 });
 
-async function seed() {
+async function seed(): Promise<void> {
   try {
     await AppDataSource.initialize();
     console.log('🌱 Starting database seeding...');
@@ -35,7 +35,7 @@ async function seed() {
         description: 'Three-year cycle used by many Protestant churches',
         yearCycle: 'ABC',
         startMonth: 12,
-        startCalculation: 'First Sunday of Advent'
+        startCalculation: 'First Sunday of Advent',
       },
       { 
         name: 'Roman Catholic', 
@@ -43,7 +43,7 @@ async function seed() {
         description: 'Catholic lectionary following the Roman Missal',
         yearCycle: 'ABC',
         startMonth: 12,
-        startCalculation: 'First Sunday of Advent'
+        startCalculation: 'First Sunday of Advent',
       },
       { 
         name: 'Episcopal', 
@@ -51,7 +51,7 @@ async function seed() {
         description: 'Episcopal Church lectionary',
         yearCycle: 'ABC',
         startMonth: 12,
-        startCalculation: 'First Sunday of Advent'
+        startCalculation: 'First Sunday of Advent',
       },
       { 
         name: 'Lutheran', 
@@ -59,7 +59,7 @@ async function seed() {
         description: 'Lutheran lectionary (ELCA)',
         yearCycle: 'ABC',
         startMonth: 12,
-        startCalculation: 'First Sunday of Advent'
+        startCalculation: 'First Sunday of Advent',
       },
     ];
 
@@ -96,8 +96,8 @@ async function seed() {
       const exists = await AppDataSource.getRepository(LiturgicalYear).findOne({ 
         where: { 
           year: year.year,
-          tradition: { id: year.tradition.id }
-        } 
+          tradition: { id: year.tradition?.id },
+        }, 
       });
       if (!exists) {
         const entity = await AppDataSource.getRepository(LiturgicalYear).save(year);
@@ -112,63 +112,63 @@ async function seed() {
         name: 'Advent', 
         startDate: new Date('2024-12-01'),
         endDate: new Date('2024-12-24'),
-        color: 'Purple',
+        color: LiturgicalColor.PURPLE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
-        liturgicalYear: yearEntities[0]
+        liturgicalYear: yearEntities[0],
       },
       { 
         name: 'Christmas', 
         startDate: new Date('2024-12-25'),
         endDate: new Date('2025-01-05'),
-        color: 'White',
+        color: LiturgicalColor.WHITE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
-        liturgicalYear: yearEntities[0]
+        liturgicalYear: yearEntities[0],
       },
       { 
         name: 'Epiphany', 
         startDate: new Date('2025-01-06'),
         endDate: new Date('2025-03-04'),
-        color: 'Green',
+        color: LiturgicalColor.GREEN,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
-        liturgicalYear: yearEntities[0]
+        liturgicalYear: yearEntities[0],
       },
       { 
         name: 'Lent', 
         startDate: new Date('2025-03-05'),
         endDate: new Date('2025-04-12'),
-        color: 'Purple',
+        color: LiturgicalColor.PURPLE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
-        liturgicalYear: yearEntities[0]
+        liturgicalYear: yearEntities[0],
       },
       { 
         name: 'Easter', 
         startDate: new Date('2025-04-20'),
         endDate: new Date('2025-06-07'),
-        color: 'White',
+        color: LiturgicalColor.WHITE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
-        liturgicalYear: yearEntities[0]
+        liturgicalYear: yearEntities[0],
       },
       { 
         name: 'Ordinary Time', 
         startDate: new Date('2025-06-08'),
         endDate: new Date('2025-11-29'),
-        color: 'Green',
+        color: LiturgicalColor.GREEN,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
-        liturgicalYear: yearEntities[0]
+        liturgicalYear: yearEntities[0],
       },
     ];
 
-    const seasonEntities = [];
+    const seasonEntities: Season[] = [];
     for (const season of seasons) {
       const exists = await AppDataSource.getRepository(Season).findOne({ 
         where: { 
           name: season.name,
-          liturgicalYear: { id: season.liturgicalYear.id }
-        } 
+          liturgicalYear: { id: season.liturgicalYear?.id },
+        } as any, 
       });
       if (!exists) {
-        const entity = await AppDataSource.getRepository(Season).save(season);
-        seasonEntities.push(entity);
+        const entity = await AppDataSource.getRepository(Season).save(season as any);
+        seasonEntities.push(entity as Season);
       } else {
         seasonEntities.push(exists);
       }
@@ -180,72 +180,42 @@ async function seed() {
       {
         name: 'Christmas Day',
         date: new Date('2024-12-25'),
-        type: 'feast',
-        color: 'White',
+        type: SpecialDayType.FEAST,
+        color: LiturgicalColor.WHITE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
         description: 'The Nativity of Our Lord Jesus Christ',
-        readings: {
-          firstReading: 'Isaiah 52:7-10',
-          psalm: 'Psalm 98',
-          secondReading: 'Hebrews 1:1-4',
-          gospel: 'John 1:1-14'
-        }
       },
       {
         name: 'Epiphany',
         date: new Date('2025-01-06'),
-        type: 'feast',
-        color: 'White',
+        type: SpecialDayType.FEAST,
+        color: LiturgicalColor.WHITE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
         description: 'The Manifestation of Christ to the Gentiles',
-        readings: {
-          firstReading: 'Isaiah 60:1-6',
-          psalm: 'Psalm 72:1-7, 10-14',
-          secondReading: 'Ephesians 3:1-12',
-          gospel: 'Matthew 2:1-12'
-        }
       },
       {
         name: 'Ash Wednesday',
         date: new Date('2025-03-05'),
-        type: 'fast',
-        color: 'Purple',
+        type: SpecialDayType.FAST,
+        color: LiturgicalColor.PURPLE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
         description: 'Beginning of Lent',
-        readings: {
-          firstReading: 'Joel 2:1-2, 12-17',
-          psalm: 'Psalm 51:1-17',
-          secondReading: '2 Corinthians 5:20b-6:10',
-          gospel: 'Matthew 6:1-6, 16-21'
-        }
       },
       {
         name: 'Good Friday',
         date: new Date('2025-04-18'),
-        type: 'fast',
-        color: 'Red',
+        type: SpecialDayType.FAST,
+        color: LiturgicalColor.RED,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
         description: 'Commemoration of the Crucifixion',
-        readings: {
-          firstReading: 'Isaiah 52:13-53:12',
-          psalm: 'Psalm 22',
-          secondReading: 'Hebrews 10:16-25',
-          gospel: 'John 18:1-19:42'
-        }
       },
       {
         name: 'Easter Sunday',
         date: new Date('2025-04-20'),
-        type: 'feast',
-        color: 'White',
+        type: SpecialDayType.FEAST,
+        color: LiturgicalColor.WHITE,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
         description: 'The Resurrection of Our Lord',
-        readings: {
-          firstReading: 'Acts 10:34-43',
-          psalm: 'Psalm 118:1-2, 14-24',
-          secondReading: '1 Corinthians 15:1-11',
-          gospel: 'Mark 16:1-8'
-        }
       },
     ];
 
@@ -254,18 +224,23 @@ async function seed() {
         where: { 
           name: day.name,
           date: day.date,
-          tradition: { id: day.tradition.id }
-        } 
+          tradition: { id: day.tradition?.id },
+        } as any, 
       });
       if (!exists) {
-        await AppDataSource.getRepository(SpecialDay).save(day);
+        await AppDataSource.getRepository(SpecialDay).save(day as any);
       }
     }
     console.log('✅ Special days created');
 
     // Create sample Readings for Advent Year A
-    const adventSeason = seasonEntities.find(s => s.name === 'Advent');
+    const adventSeason = seasonEntities.find(s => s && s.name === 'Advent');
     const rclTradition = traditionEntities.find(t => t.abbreviation === 'RCL');
+    
+    if (!adventSeason || !rclTradition) {
+      console.warn('Could not find Advent season or RCL tradition, skipping sample readings');
+      return;
+    }
     
     const sampleReadings = [
       {
@@ -337,7 +312,7 @@ async function seed() {
         secondReading: 'Hebrews 2:10-18',
         gospel: 'Matthew 2:13-23',
         tradition: rclTradition,
-        season: seasonEntities.find(s => s.name === 'Christmas'),
+        season: seasonEntities.find(s => s && s.name === 'Christmas') || adventSeason,
         liturgicalColor: 'White',
       },
       {
@@ -351,7 +326,7 @@ async function seed() {
         secondReading: 'Ephesians 3:1-12',
         gospel: 'Matthew 2:1-12',
         tradition: rclTradition,
-        season: seasonEntities.find(s => s.name === 'Christmas'),
+        season: seasonEntities.find(s => s && s.name === 'Christmas') || adventSeason,
         liturgicalColor: 'White',
       },
     ];
@@ -360,11 +335,11 @@ async function seed() {
       const exists = await AppDataSource.getRepository(Reading).findOne({ 
         where: { 
           date: reading.date,
-          tradition: { id: reading.tradition.id }
-        } 
+          tradition: { id: reading.tradition?.id },
+        } as any, 
       });
       if (!exists) {
-        await AppDataSource.getRepository(Reading).save(reading);
+        await AppDataSource.getRepository(Reading).save(reading as any);
       }
     }
     console.log('✅ Sample readings created');

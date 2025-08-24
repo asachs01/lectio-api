@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   Index,
-  Unique
+  Unique,
 } from 'typeorm';
 import { Reading } from './reading.entity';
 
@@ -17,86 +17,86 @@ import { Reading } from './reading.entity';
 @Unique('uq_scripture_reference_translation', ['book', 'chapter', 'verseStart', 'verseEnd', 'translation'])
 export class Scripture {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+    id: string;
 
   @Column({ 
     type: 'varchar', 
-    length: 50 
+    length: 50, 
   })
-  book: string;
-
-  @Column({
-    type: 'int'
-  })
-  chapter: number;
+    book: string;
 
   @Column({
     type: 'int',
-    name: 'verse_start'
   })
-  verseStart: number;
+    chapter: number;
+
+  @Column({
+    type: 'int',
+    name: 'verse_start',
+  })
+    verseStart: number;
 
   @Column({
     type: 'int',
     name: 'verse_end',
     nullable: true,
-    comment: 'End verse for ranges, null for single verses'
+    comment: 'End verse for ranges, null for single verses',
   })
-  verseEnd: number;
+    verseEnd: number;
 
   @Column({ 
-    type: 'text' 
+    type: 'text', 
   })
-  text: string;
+    text: string;
 
   @Column({
     type: 'varchar',
     length: 50,
     default: 'NRSV',
-    comment: 'Bible translation abbreviation'
+    comment: 'Bible translation abbreviation',
   })
-  translation: string;
+    translation: string;
 
   @Column({
     type: 'varchar',
     length: 20,
     nullable: true,
-    comment: 'Testament categorization'
+    comment: 'Testament categorization',
   })
   @Index('idx_scripture_testament')
-  testament: string;
+    testament: string;
 
   @Column({
     type: 'varchar',
     length: 50,
     nullable: true,
-    comment: 'Book category (e.g., Gospels, Epistles, Prophets)'
+    comment: 'Book category (e.g., Gospels, Epistles, Prophets)',
   })
-  bookCategory: string;
+    bookCategory: string;
 
   @Column({
     type: 'int',
     name: 'book_order',
     nullable: true,
-    comment: 'Canonical order of books'
+    comment: 'Canonical order of books',
   })
-  bookOrder: number;
+    bookOrder: number;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'created_at',
   })
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at'
+    name: 'updated_at',
   })
-  updatedAt: Date;
+    updatedAt: Date;
 
   // Relationships
   @OneToMany(() => Reading, reading => reading.scripture)
-  readings: Reading[];
+    readings: Reading[];
 
   // Computed property for full reference
   get fullReference(): string {

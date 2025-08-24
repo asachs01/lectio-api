@@ -38,13 +38,13 @@ jobs:
         run: npm ci
 
       - name: Run linter
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Run tests
-        run: npm test || true
+        run: npm test
 
       - name: Build application
-        run: npm run build || true
+        run: npm run build
 
   deploy:
     needs: test

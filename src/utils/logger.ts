@@ -1,4 +1,5 @@
 import winston from 'winston';
+import { Request, Response, NextFunction } from 'express';
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 const logFormat = process.env.LOG_FORMAT || 'json';
@@ -7,7 +8,7 @@ const logFormat = process.env.LOG_FORMAT || 'json';
 const customFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 const developmentFormat = winston.format.combine(
@@ -16,7 +17,7 @@ const developmentFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.printf(({ level, message, timestamp, stack }) => {
     return `${timestamp} [${level}]: ${stack || message}`;
-  })
+  }),
 );
 
 // Create logger instance
@@ -46,7 +47,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Create HTTP request logger
-export const requestLogger = (req: any, res: any, next: any): void => {
+export const requestLogger = (req: Request, res: Response, next: NextFunction): void => {
   const start = Date.now();
   
   res.on('finish', () => {

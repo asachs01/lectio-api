@@ -8,7 +8,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
   logger.info('Incoming Request', {
     method: req.method,
     url: req.originalUrl,
-    ip: req.ip || req.connection.remoteAddress,
+    ip: req.ip || req.connection?.remoteAddress,
     userAgent: req.get('User-Agent'),
     contentType: req.get('Content-Type'),
     contentLength: req.get('Content-Length'),
@@ -23,7 +23,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
       status: res.statusCode,
       duration: `${duration}ms`,
       contentLength: res.get('Content-Length'),
-      ip: req.ip || req.connection.remoteAddress,
+      ip: req.ip || req.connection?.remoteAddress,
     };
 
     if (res.statusCode >= 500) {

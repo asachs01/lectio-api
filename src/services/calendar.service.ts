@@ -94,7 +94,7 @@ export class CalendarService {
 
     // Find current season
     const currentSeason = seasons.find(season => 
-      todayStr >= season.startDate && todayStr <= season.endDate
+      todayStr >= season.startDate && todayStr <= season.endDate,
     );
 
     // Find upcoming special days (next 30 days)

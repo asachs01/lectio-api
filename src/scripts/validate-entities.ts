@@ -17,10 +17,10 @@ import {
   Scripture, 
   Reading, 
   ReadingType,
-  entities
+  entities,
 } from '../models';
 
-async function validateEntities() {
+async function validateEntities(): Promise<void> {
   console.log('🔍 Validating Lectio API entities...\n');
   
   try {

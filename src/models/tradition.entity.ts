@@ -5,7 +5,7 @@ import {
   CreateDateColumn, 
   UpdateDateColumn,
   OneToMany,
-  Index
+  Index,
 } from 'typeorm';
 import { LiturgicalYear } from './liturgical-year.entity';
 import { SpecialDay } from './special-day.entity';
@@ -15,55 +15,55 @@ import { Reading } from './reading.entity';
 @Index('idx_tradition_name', ['name'])
 export class Tradition {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+    id: string;
 
   @Column({ 
     type: 'varchar', 
     length: 100, 
-    unique: true 
+    unique: true, 
   })
   @Index('idx_tradition_name_unique')
-  name: string;
+    name: string;
 
   @Column({ 
     type: 'text', 
-    nullable: true 
+    nullable: true, 
   })
-  description: string;
+    description: string;
 
   @Column({
     type: 'varchar',
     length: 10,
     nullable: true,
-    comment: 'Short abbreviation for the tradition'
+    comment: 'Short abbreviation for the tradition',
   })
-  abbreviation: string;
+    abbreviation: string;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'created_at',
   })
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at'
+    name: 'updated_at',
   })
-  updatedAt: Date;
+    updatedAt: Date;
 
   // Relationships
   @OneToMany(() => LiturgicalYear, liturgicalYear => liturgicalYear.tradition, {
-    cascade: ['remove']
+    cascade: ['remove'],
   })
-  liturgicalYears: LiturgicalYear[];
+    liturgicalYears: LiturgicalYear[];
 
   @OneToMany(() => SpecialDay, specialDay => specialDay.tradition, {
-    cascade: ['remove']
+    cascade: ['remove'],
   })
-  specialDays: SpecialDay[];
+    specialDays: SpecialDay[];
 
   @OneToMany(() => Reading, reading => reading.tradition, {
-    cascade: ['remove']
+    cascade: ['remove'],
   })
-  readings: Reading[];
+    readings: Reading[];
 }

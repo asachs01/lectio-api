@@ -9,6 +9,57 @@ exports.calendarRouter = router;
 const calendarController = new calendar_controller_1.CalendarController();
 /**
  * @swagger
+ * /api/v1/calendar/current:
+ *   get:
+ *     summary: Get current liturgical calendar information
+ *     tags: [Calendar]
+ *     parameters:
+ *       - in: query
+ *         name: tradition
+ *         description: Lectionary tradition ID
+ *         schema:
+ *           type: string
+ *           default: rcl
+ *     responses:
+ *       200:
+ *         description: Current liturgical calendar information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     currentSeason:
+ *                       $ref: '#/components/schemas/LiturgicalSeason'
+ *                     currentYear:
+ *                       type: integer
+ *                     today:
+ *                       type: string
+ *                       format: date
+ *                     upcomingSpecialDays:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                           date:
+ *                             type: string
+ *                             format: date
+ *                           daysUntil:
+ *                             type: integer
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/current', (0, error_handler_1.asyncHandler)(calendarController.getCurrent.bind(calendarController)));
+/**
+ * @swagger
  * /api/v1/calendar/{year}:
  *   get:
  *     summary: Get liturgical calendar for a specific year
@@ -124,55 +175,4 @@ router.get('/:year', (0, error_handler_1.asyncHandler)(calendarController.getByY
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/:year/seasons', (0, error_handler_1.asyncHandler)(calendarController.getSeasonsByYear.bind(calendarController)));
-/**
- * @swagger
- * /api/v1/calendar/current:
- *   get:
- *     summary: Get current liturgical calendar information
- *     tags: [Calendar]
- *     parameters:
- *       - in: query
- *         name: tradition
- *         description: Lectionary tradition ID
- *         schema:
- *           type: string
- *           default: rcl
- *     responses:
- *       200:
- *         description: Current liturgical calendar information
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: object
- *                   properties:
- *                     currentSeason:
- *                       $ref: '#/components/schemas/LiturgicalSeason'
- *                     currentYear:
- *                       type: integer
- *                     today:
- *                       type: string
- *                       format: date
- *                     upcomingSpecialDays:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           name:
- *                             type: string
- *                           date:
- *                             type: string
- *                             format: date
- *                           daysUntil:
- *                             type: integer
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.get('/current', (0, error_handler_1.asyncHandler)(calendarController.getCurrent.bind(calendarController)));
 //# sourceMappingURL=calendar.routes.js.map

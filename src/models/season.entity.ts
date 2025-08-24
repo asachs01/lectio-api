@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
   Index,
-  Unique
+  Unique,
 } from 'typeorm';
 import { LiturgicalYear } from './liturgical-year.entity';
 import { Reading } from './reading.entity';
@@ -30,74 +30,74 @@ export enum LiturgicalColor {
 @Unique('uq_season_name_year', ['name', 'liturgicalYearId'])
 export class Season {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+    id: string;
 
   @Column({ 
     type: 'varchar', 
-    length: 50 
+    length: 50, 
   })
-  name: string;
+    name: string;
 
   @Column({
     type: 'date',
-    name: 'start_date'
+    name: 'start_date',
   })
-  startDate: Date;
+    startDate: Date;
 
   @Column({
     type: 'date',
-    name: 'end_date'
+    name: 'end_date',
   })
-  endDate: Date;
+    endDate: Date;
 
   @Column({
     type: 'enum',
     enum: LiturgicalColor,
-    default: LiturgicalColor.GREEN
+    default: LiturgicalColor.GREEN,
   })
-  color: LiturgicalColor;
+    color: LiturgicalColor;
 
   @Column({
     type: 'text',
     nullable: true,
-    comment: 'Additional description or notes about the season'
+    comment: 'Additional description or notes about the season',
   })
-  description: string;
+    description: string;
 
   @Column({
     type: 'int',
     name: 'sort_order',
     default: 0,
-    comment: 'Order of seasons within a liturgical year'
+    comment: 'Order of seasons within a liturgical year',
   })
-  sortOrder: number;
+    sortOrder: number;
 
   @Column({
     type: 'uuid',
-    name: 'liturgical_year_id'
+    name: 'liturgical_year_id',
   })
-  liturgicalYearId: string;
+    liturgicalYearId: string;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'created_at',
   })
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at'
+    name: 'updated_at',
   })
-  updatedAt: Date;
+    updatedAt: Date;
 
   // Relationships
   @ManyToOne(() => LiturgicalYear, liturgicalYear => liturgicalYear.seasons, {
     onDelete: 'CASCADE',
-    nullable: false
+    nullable: false,
   })
   @JoinColumn({ name: 'liturgical_year_id' })
-  liturgicalYear: LiturgicalYear;
+    liturgicalYear: LiturgicalYear;
 
   @OneToMany(() => Reading, reading => reading.season)
-  readings: Reading[];
+    readings: Reading[];
 }

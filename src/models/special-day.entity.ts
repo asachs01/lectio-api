@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
   Index,
-  Unique
+  Unique,
 } from 'typeorm';
 import { Tradition } from './tradition.entity';
 import { Reading } from './reading.entity';
@@ -38,98 +38,98 @@ export enum SpecialDayRank {
 @Unique('uq_special_day_tradition_date', ['name', 'date', 'traditionId'])
 export class SpecialDay {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+    id: string;
 
   @Column({ 
     type: 'varchar', 
-    length: 200 
+    length: 200, 
   })
-  name: string;
+    name: string;
 
   @Column({
-    type: 'date'
+    type: 'date',
   })
-  date: Date;
+    date: Date;
 
   @Column({ 
     type: 'text',
-    nullable: true
+    nullable: true,
   })
-  description: string;
+    description: string;
 
   @Column({
     type: 'enum',
     enum: SpecialDayType,
-    default: SpecialDayType.OTHER
+    default: SpecialDayType.OTHER,
   })
-  type: SpecialDayType;
+    type: SpecialDayType;
 
   @Column({
     type: 'enum',
     enum: SpecialDayRank,
     nullable: true,
-    comment: 'Liturgical rank for priority determination'
+    comment: 'Liturgical rank for priority determination',
   })
-  rank: SpecialDayRank;
+    rank: SpecialDayRank;
 
   @Column({
     type: 'boolean',
     name: 'is_feast_day',
-    default: false
+    default: false,
   })
-  isFeastDay: boolean;
+    isFeastDay: boolean;
 
   @Column({
     type: 'boolean',
     name: 'is_moveable',
     default: false,
-    comment: 'Whether this day moves based on Easter calculation'
+    comment: 'Whether this day moves based on Easter calculation',
   })
-  isMoveable: boolean;
+    isMoveable: boolean;
 
   @Column({
     type: 'varchar',
     length: 10,
     nullable: true,
-    comment: 'Liturgical color for this special day'
+    comment: 'Liturgical color for this special day',
   })
-  liturgicalColor: string;
+    liturgicalColor: string;
 
   @Column({
     type: 'int',
     name: 'year',
     nullable: true,
-    comment: 'Specific year if this is a yearly occurrence'
+    comment: 'Specific year if this is a yearly occurrence',
   })
   @Index('idx_special_day_year')
-  year: number;
+    year: number;
 
   @Column({
     type: 'uuid',
-    name: 'tradition_id'
+    name: 'tradition_id',
   })
-  traditionId: string;
+    traditionId: string;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'created_at',
   })
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at'
+    name: 'updated_at',
   })
-  updatedAt: Date;
+    updatedAt: Date;
 
   // Relationships
   @ManyToOne(() => Tradition, tradition => tradition.specialDays, {
     onDelete: 'CASCADE',
-    nullable: false
+    nullable: false,
   })
   @JoinColumn({ name: 'tradition_id' })
-  tradition: Tradition;
+    tradition: Tradition;
 
   @OneToMany(() => Reading, reading => reading.specialDay)
-  readings: Reading[];
+    readings: Reading[];
 }

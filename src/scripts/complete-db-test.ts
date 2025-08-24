@@ -18,13 +18,13 @@ import {
   LiturgicalCycle,
   LiturgicalColor,
   SpecialDayType,
-  ReadingType
+  ReadingType,
 } from '../models';
 
 // Load environment variables
 config();
 
-async function runCompleteTest() {
+async function runCompleteTest(): Promise<void> {
   console.log('🚀 Running comprehensive database test...\n');
   
   try {
@@ -32,7 +32,7 @@ async function runCompleteTest() {
     console.log('1️⃣ Testing configuration loading...');
     const { getDatabaseConfig } = await import('../config/database.config');
     const dbConfig = getDatabaseConfig();
-    console.log(`   ✅ Configuration loaded successfully`);
+    console.log('   ✅ Configuration loaded successfully');
     console.log(`   📊 Pool size: ${dbConfig.extra?.max || 'default'}`);
     console.log(`   ⏱️  Query timeout: ${dbConfig.maxQueryExecutionTime}ms`);
     console.log(`   🗃️  Entity count: ${dbConfig.entities.length}\n`);
@@ -147,7 +147,7 @@ async function runCompleteTest() {
     // Test finding with relations
     const traditionWithRelations = await traditionRepo.findOne({
       where: { id: savedTradition.id },
-      relations: ['liturgicalYears', 'specialDays', 'readings']
+      relations: ['liturgicalYears', 'specialDays', 'readings'],
     });
     
     if (traditionWithRelations) {
@@ -158,7 +158,7 @@ async function runCompleteTest() {
     const recentReadings = await readingRepo.find({
       where: { tradition: { id: savedTradition.id } },
       relations: ['scripture', 'season'],
-      take: 5
+      take: 5,
     });
     
     console.log(`     ✅ Found ${recentReadings.length} readings for tradition`);

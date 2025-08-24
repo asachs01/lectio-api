@@ -4,15 +4,15 @@ import { logger } from '../utils/logger';
 export interface AppError extends Error {
   statusCode?: number;
   isOperational?: boolean;
-  details?: any;
+  details?: unknown;
 }
 
 export class HttpError extends Error implements AppError {
   public statusCode: number;
   public isOperational: boolean;
-  public details?: any;
+  public details?: unknown;
 
-  constructor(message: string, statusCode: number = 500, details?: any) {
+  constructor(message: string, statusCode: number = 500, details?: unknown) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = true;
@@ -23,20 +23,22 @@ export class HttpError extends Error implements AppError {
 }
 
 export const errorHandler = (
-  error: AppError,
+  error: unknown,
   req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
-  const statusCode = error.statusCode || 500;
-  const isOperational = error.isOperational || false;
+  // Type guard to handle different error types
+  const appError = error as AppError;
+  const statusCode = appError.statusCode || 500;
+  const isOperational = appError.isOperational || false;
 
   // Log error details
   const errorLog = {
-    message: error.message,
+    message: appError.message || 'Unknown error',
     statusCode,
     isOperational,
-    stack: error.stack,
+    stack: appError.stack,
     url: req.originalUrl,
     method: req.method,
     ip: req.ip,
@@ -53,9 +55,9 @@ export const errorHandler = (
   }
 
   // Prepare error response
-  const errorResponse: any = {
+  const errorResponse: Record<string, unknown> = {
     error: {
-      message: error.message,
+      message: appError.message || 'An error occurred',
       statusCode,
       timestamp: new Date().toISOString(),
     },
@@ -63,34 +65,34 @@ export const errorHandler = (
 
   // Add additional details in development mode
   if (process.env.NODE_ENV === 'development') {
-    errorResponse.error.stack = error.stack;
-    errorResponse.error.details = error.details;
+    (errorResponse.error as Record<string, unknown>).stack = appError.stack;
+    (errorResponse.error as Record<string, unknown>).details = appError.details;
   }
 
   // Handle specific error types
-  if (error.name === 'ValidationError') {
-    errorResponse.error.message = 'Validation failed';
-    errorResponse.error.details = error.details;
+  if (appError.name === 'ValidationError') {
+    (errorResponse.error as Record<string, unknown>).message = 'Validation failed';
+    (errorResponse.error as Record<string, unknown>).details = appError.details;
   }
 
-  if (error.name === 'UnauthorizedError') {
-    errorResponse.error.message = 'Unauthorized access';
+  if (appError.name === 'UnauthorizedError') {
+    (errorResponse.error as Record<string, unknown>).message = 'Unauthorized access';
   }
 
-  if (error.name === 'JsonWebTokenError') {
-    errorResponse.error.message = 'Invalid token';
+  if (appError.name === 'JsonWebTokenError') {
+    (errorResponse.error as Record<string, unknown>).message = 'Invalid token';
   }
 
-  if (error.name === 'TokenExpiredError') {
-    errorResponse.error.message = 'Token expired';
+  if (appError.name === 'TokenExpiredError') {
+    (errorResponse.error as Record<string, unknown>).message = 'Token expired';
   }
 
   // Send error response
   res.status(statusCode).json(errorResponse);
 };
 
-export const asyncHandler = (fn: Function) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };

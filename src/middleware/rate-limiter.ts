@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { RateLimiterRedis, RateLimiterMemory, RateLimiterRes, IRateLimiterOptions } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 import { metrics } from '../observability/metrics';
-import { logger } from '../utils/logger';
+import { logger } from '../observability/logger';
 
 interface RateLimitConfig {
   points: number;        // Number of requests
@@ -34,7 +34,7 @@ class RateLimiterService {
         this.redisClient = new Redis(process.env.REDIS_URL, {
           enableOfflineQueue: false,
           maxRetriesPerRequest: 3,
-          retryStrategy: (times) => {
+          retryStrategy: (times: number): number | null => {
             if (times > 3) {
               logger.error('Redis connection failed after 3 retries, falling back to memory rate limiter');
               this.isRedisAvailable = false;
@@ -59,7 +59,7 @@ class RateLimiterService {
         this.isRedisAvailable = true;
       }
     } catch (error) {
-      logger.warn('Redis not available, using in-memory rate limiting', error);
+      logger.warn('Redis not available, using in-memory rate limiting', error as Record<string, unknown>);
       this.isRedisAvailable = false;
     }
   }
@@ -169,7 +169,7 @@ class RateLimiterService {
   public async consume(
     limiterName: string, 
     key: string, 
-    points: number = 1
+    points: number = 1,
   ): Promise<RateLimiterRes | null> {
     const limiter = this.limiters.get(limiterName);
     if (!limiter) {
@@ -204,13 +204,20 @@ class RateLimiterService {
 
   public async getStatus(limiterName: string, key: string): Promise<RateLimiterRes | null> {
     const limiter = this.limiters.get(limiterName);
-    if (!limiter) return null;
+    if (!limiter) {
+      return null;
+    }
 
     try {
       return await limiter.get(key);
     } catch {
       return null;
     }
+  }
+
+  public getLimiterPoints(limiterName: string): number {
+    const limiter = this.limiters.get(limiterName);
+    return limiter?.points || 0;
   }
 }
 
@@ -219,7 +226,7 @@ const rateLimiterService = new RateLimiterService();
 
 // Middleware factory for different rate limit tiers
 export function createRateLimiter(tier: string = 'public') {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Determine the key based on authentication status
       const key = getClientKey(req);
@@ -233,7 +240,8 @@ export function createRateLimiter(tier: string = 'public') {
           metrics.recordRateLimitHit(endpoint, 'endpoint-specific');
         } catch (rejRes) {
           if (rejRes instanceof RateLimiterRes) {
-            return handleRateLimitExceeded(res, rejRes, endpoint);
+            handleRateLimitExceeded(res, rejRes, endpoint);
+            return;
           }
           throw rejRes;
         }
@@ -244,8 +252,9 @@ export function createRateLimiter(tier: string = 'public') {
       const result = await rateLimiterService.consume(userTier, key);
       
       if (result) {
-        // Add rate limit headers
-        res.setHeader('X-RateLimit-Limit', result.points.toString());
+        // Add rate limit headers  
+        const points = rateLimiterService.getLimiterPoints(userTier);
+        res.setHeader('X-RateLimit-Limit', points.toString());
         res.setHeader('X-RateLimit-Remaining', result.remainingPoints.toString());
         res.setHeader('X-RateLimit-Reset', new Date(Date.now() + result.msBeforeNext).toISOString());
         
@@ -255,11 +264,12 @@ export function createRateLimiter(tier: string = 'public') {
       next();
     } catch (rejRes) {
       if (rejRes instanceof RateLimiterRes) {
-        return handleRateLimitExceeded(res, rejRes, req.path);
+        handleRateLimitExceeded(res, rejRes, req.path);
+        return;
       }
       
       // If rate limiting fails, log but don't block the request
-      logger.error('Rate limiting error:', rejRes);
+      logger.error('Rate limiting error:', rejRes as Error);
       next();
     }
   };
@@ -272,8 +282,8 @@ function getClientKey(req: Request): string {
     return `api:${req.headers['x-api-key']}`;
   }
   
-  if ((req as any).user?.id) {
-    return `user:${(req as any).user.id}`;
+  if ((req as Request & { user?: { id: string } }).user?.id) {
+    return `user:${(req as Request & { user?: { id: string } }).user.id}`;
   }
   
   // Use IP address as fallback
@@ -286,12 +296,20 @@ function getClientKey(req: Request): string {
 }
 
 function getUserTier(req: Request): string | null {
-  const user = (req as any).user;
-  if (!user) return null;
+  const user = (req as Request & { user?: { id: string; role: string; subscription: string } }).user;
+  if (!user) {
+    return null;
+  }
   
-  if (user.role === 'admin') return 'admin';
-  if (user.subscription === 'premium') return 'premium';
-  if (user.id) return 'authenticated';
+  if (user.role === 'admin') {
+    return 'admin';
+  }
+  if (user.subscription === 'premium') {
+    return 'premium';
+  }
+  if (user.id) {
+    return 'authenticated';
+  }
   
   return 'public';
 }
@@ -309,19 +327,17 @@ function getEndpointLimiter(endpoint: string): string | null {
   return endpointLimiters[endpoint] || null;
 }
 
-function handleRateLimitExceeded(res: Response, rejRes: RateLimiterRes, endpoint: string): Response {
+function handleRateLimitExceeded(res: Response, rejRes: RateLimiterRes, endpoint: string): void {
   const retryAfter = Math.round(rejRes.msBeforeNext / 1000) || 60;
   
   res.setHeader('Retry-After', retryAfter.toString());
-  res.setHeader('X-RateLimit-Limit', rejRes.points.toString());
   res.setHeader('X-RateLimit-Remaining', rejRes.remainingPoints.toString());
   res.setHeader('X-RateLimit-Reset', new Date(Date.now() + rejRes.msBeforeNext).toISOString());
   
-  return res.status(429).json({
+  res.status(429).json({
     error: 'Too Many Requests',
     message: `Rate limit exceeded for ${endpoint}. Please retry after ${retryAfter} seconds.`,
     retryAfter,
-    limit: rejRes.points,
     remaining: rejRes.remainingPoints,
     reset: new Date(Date.now() + rejRes.msBeforeNext).toISOString(),
   });
@@ -330,28 +346,28 @@ function handleRateLimitExceeded(res: Response, rejRes: RateLimiterRes, endpoint
 // Advanced rate limiting strategies
 export const rateLimitStrategies = {
   // Sliding window rate limiter
-  slidingWindow: (windowMs: number, max: number) => {
+  slidingWindow: (_windowMs: number, _max: number): RequestHandler => {
     return createRateLimiter('public');
   },
 
   // Token bucket rate limiter
-  tokenBucket: (capacity: number, refillRate: number) => {
+  tokenBucket: (_capacity: number, _refillRate: number): RequestHandler => {
     return createRateLimiter('public');
   },
 
   // Distributed rate limiter for microservices
-  distributed: (service: string) => {
+  distributed: (_service: string): RequestHandler => {
     return createRateLimiter('public');
   },
 
   // Dynamic rate limiting based on server load
-  dynamic: () => {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  dynamic: (): RequestHandler => {
+    return async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
       const load = process.cpuUsage();
-      const memUsage = process.memoryUsage();
+      process.memoryUsage();
       
       // Adjust rate limits based on system load
-      const loadFactor = Math.min(2, 1 + (load.user + load.system) / 1000000);
+      Math.min(2, 1 + (load.user + load.system) / 1000000);
       
       // Apply adjusted rate limit
       next();
@@ -359,10 +375,10 @@ export const rateLimitStrategies = {
   },
 
   // Geo-based rate limiting
-  geographic: () => {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  geographic: (): RequestHandler => {
+    return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
       // Implement geo-based rate limiting
-      const country = req.headers['cf-ipcountry'] || 'unknown';
+      req.headers['cf-ipcountry'] || 'unknown';
       
       // Apply different limits based on geography
       next();

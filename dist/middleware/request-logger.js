@@ -8,7 +8,7 @@ const requestLogger = (req, res, next) => {
     logger_1.logger.info('Incoming Request', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.ip || req.connection.remoteAddress,
+        ip: req.ip || req.connection?.remoteAddress,
         userAgent: req.get('User-Agent'),
         contentType: req.get('Content-Type'),
         contentLength: req.get('Content-Length'),
@@ -22,7 +22,7 @@ const requestLogger = (req, res, next) => {
             status: res.statusCode,
             duration: `${duration}ms`,
             contentLength: res.get('Content-Length'),
-            ip: req.ip || req.connection.remoteAddress,
+            ip: req.ip || req.connection?.remoteAddress,
         };
         if (res.statusCode >= 500) {
             logger_1.logger.error('HTTP Response', logData);

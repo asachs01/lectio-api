@@ -13,14 +13,16 @@ class HttpError extends Error {
 }
 exports.HttpError = HttpError;
 const errorHandler = (error, req, res, _next) => {
-    const statusCode = error.statusCode || 500;
-    const isOperational = error.isOperational || false;
+    // Type guard to handle different error types
+    const appError = error;
+    const statusCode = appError.statusCode || 500;
+    const isOperational = appError.isOperational || false;
     // Log error details
     const errorLog = {
-        message: error.message,
+        message: appError.message || 'Unknown error',
         statusCode,
         isOperational,
-        stack: error.stack,
+        stack: appError.stack,
         url: req.originalUrl,
         method: req.method,
         ip: req.ip,
@@ -38,28 +40,28 @@ const errorHandler = (error, req, res, _next) => {
     // Prepare error response
     const errorResponse = {
         error: {
-            message: error.message,
+            message: appError.message || 'An error occurred',
             statusCode,
             timestamp: new Date().toISOString(),
         },
     };
     // Add additional details in development mode
     if (process.env.NODE_ENV === 'development') {
-        errorResponse.error.stack = error.stack;
-        errorResponse.error.details = error.details;
+        errorResponse.error.stack = appError.stack;
+        errorResponse.error.details = appError.details;
     }
     // Handle specific error types
-    if (error.name === 'ValidationError') {
+    if (appError.name === 'ValidationError') {
         errorResponse.error.message = 'Validation failed';
-        errorResponse.error.details = error.details;
+        errorResponse.error.details = appError.details;
     }
-    if (error.name === 'UnauthorizedError') {
+    if (appError.name === 'UnauthorizedError') {
         errorResponse.error.message = 'Unauthorized access';
     }
-    if (error.name === 'JsonWebTokenError') {
+    if (appError.name === 'JsonWebTokenError') {
         errorResponse.error.message = 'Invalid token';
     }
-    if (error.name === 'TokenExpiredError') {
+    if (appError.name === 'TokenExpiredError') {
         errorResponse.error.message = 'Token expired';
     }
     // Send error response

@@ -95,6 +95,6 @@ export interface ErrorResponse {
     message: string;
     statusCode: number;
     timestamp: string;
-    details?: any;
+    details?: unknown;
   };
 }

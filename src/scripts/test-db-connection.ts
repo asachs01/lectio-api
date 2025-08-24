@@ -12,7 +12,7 @@ import { DatabaseService } from '../services/database.service';
 // Load environment variables
 config();
 
-async function testDatabaseConnection() {
+async function testDatabaseConnection(): Promise<void> {
   console.log('🔍 Testing database connection...\n');
   
   try {

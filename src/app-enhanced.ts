@@ -10,7 +10,6 @@ import { apiRouter } from './routes';
 
 // Import observability components
 import { telemetry } from './observability/telemetry';
-import { metrics } from './observability/metrics';
 import { logger } from './observability/logger';
 import { 
   observabilityStack, 
@@ -19,7 +18,6 @@ import {
   getStatusMonitorConfig 
 } from './middleware/observability';
 import { 
-  healthCheckService,
   livenessProbe,
   readinessProbe,
   startupProbe,
@@ -44,7 +42,7 @@ export class EnhancedApp {
       await telemetry.initialize();
       logger.info('🔭 Observability initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize observability', error);
+      logger.error('Failed to initialize observability', error as Error);
     }
   }
 
@@ -279,7 +277,7 @@ export class EnhancedApp {
         logger.info('Graceful shutdown completed');
         process.exit(0);
       } catch (error) {
-        logger.error('Error during graceful shutdown', error);
+        logger.error('Error during graceful shutdown', error as Error);
         process.exit(1);
       }
     };

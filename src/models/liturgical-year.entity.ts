@@ -8,7 +8,7 @@ import {
   OneToMany,
   JoinColumn,
   Index,
-  Unique
+  Unique,
 } from 'typeorm';
 import { Tradition } from './tradition.entity';
 import { Season } from './season.entity';
@@ -26,72 +26,72 @@ export enum LiturgicalCycle {
 @Unique('uq_liturgical_year_tradition_name', ['name', 'traditionId'])
 export class LiturgicalYear {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+    id: string;
 
   @Column({ 
     type: 'varchar', 
-    length: 50 
+    length: 50, 
   })
-  name: string;
+    name: string;
 
   @Column({
     type: 'date',
-    name: 'start_date'
+    name: 'start_date',
   })
-  startDate: Date;
+    startDate: Date;
 
   @Column({
     type: 'date',
-    name: 'end_date'
+    name: 'end_date',
   })
-  endDate: Date;
+    endDate: Date;
 
   @Column({
     type: 'enum',
     enum: LiturgicalCycle,
     nullable: true,
-    comment: 'Liturgical cycle (A, B, C) for traditions that use them'
+    comment: 'Liturgical cycle (A, B, C) for traditions that use them',
   })
-  cycle: LiturgicalCycle;
+    cycle: LiturgicalCycle;
 
   @Column({
     type: 'int',
-    comment: 'Calendar year this liturgical year primarily represents'
+    comment: 'Calendar year this liturgical year primarily represents',
   })
   @Index('idx_liturgical_year_year')
-  year: number;
+    year: number;
 
   @Column({
     type: 'uuid',
-    name: 'tradition_id'
+    name: 'tradition_id',
   })
-  traditionId: string;
+    traditionId: string;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at'
+    name: 'created_at',
   })
-  createdAt: Date;
+    createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at'
+    name: 'updated_at',
   })
-  updatedAt: Date;
+    updatedAt: Date;
 
   // Relationships
   @ManyToOne(() => Tradition, tradition => tradition.liturgicalYears, {
     onDelete: 'CASCADE',
-    nullable: false
+    nullable: false,
   })
   @JoinColumn({ name: 'tradition_id' })
-  tradition: Tradition;
+    tradition: Tradition;
 
   @OneToMany(() => Season, season => season.liturgicalYear, {
-    cascade: ['remove']
+    cascade: ['remove'],
   })
-  seasons: Season[];
+    seasons: Season[];
 
   @OneToMany(() => Reading, reading => reading.liturgicalYear)
-  readings: Reading[];
+    readings: Reading[];
 }

@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import * as os from 'os';
 import * as fs from 'fs';
 import { promisify } from 'util';
-import { metrics } from '../observability/metrics';
 import { logger } from '../observability/logger';
 
 const fsAccess = promisify(fs.access);
@@ -16,7 +15,7 @@ interface HealthCheckResult {
       status: 'pass' | 'warn' | 'fail';
       message?: string;
       duration?: number;
-      metadata?: any;
+      metadata?: unknown;
     };
   };
   version: string;
@@ -59,7 +58,6 @@ export class HealthCheckService {
 
   // Liveness probe - checks if the application is running
   public async performLivenessCheck(): Promise<HealthCheckResult> {
-    const startTime = Date.now();
     const checks: HealthCheckResult['checks'] = {};
 
     // Basic application health
@@ -157,7 +155,7 @@ export class HealthCheckService {
     if (this.dbPool) {
       const dbStart = Date.now();
       try {
-        const result = await this.dbPool.query('SELECT 1');
+        await this.dbPool.query('SELECT 1');
         const duration = Date.now() - dbStart;
         
         checks.database = {
@@ -172,13 +170,14 @@ export class HealthCheckService {
         };
         dependencies.database = true;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
         checks.database = {
           status: 'fail',
-          message: `Database connection failed: ${error.message}`,
+          message: `Database connection failed: ${errorMessage}`,
           duration: Date.now() - dbStart,
         };
         dependencies.database = false;
-        logger.error('Database health check failed', error);
+        logger.error('Database health check failed', error as Error);
       }
     } else {
       checks.database = {
@@ -205,13 +204,14 @@ export class HealthCheckService {
         };
         dependencies.redis = true;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown Redis error';
         checks.redis = {
           status: 'fail',
-          message: `Redis connection failed: ${error.message}`,
+          message: `Redis connection failed: ${errorMessage}`,
           duration: Date.now() - redisStart,
         };
         dependencies.redis = false;
-        logger.error('Redis health check failed', error);
+        logger.error('Redis health check failed', error as Error);
       }
     } else {
       checks.redis = {
@@ -346,7 +346,7 @@ export class HealthCheckService {
   }
 
   // Deep health check - comprehensive system analysis
-  public async performDeepHealthCheck(): Promise<any> {
+  public async performDeepHealthCheck(): Promise<Record<string, unknown>> {
     const [liveness, readiness, startup] = await Promise.all([
       this.performLivenessCheck(),
       this.performReadinessCheck(),
@@ -384,7 +384,7 @@ export class HealthCheckService {
     };
   }
 
-  private async getMetricValue(metricName: string): Promise<any> {
+  private async getMetricValue(_metricName: string): Promise<number> {
     // This would integrate with your metrics system
     // For now, returning placeholder
     return 0;
@@ -394,61 +394,65 @@ export class HealthCheckService {
 // Middleware functions
 export const healthCheckService = HealthCheckService.getInstance();
 
-export const livenessProbe = async (req: Request, res: Response): Promise<void> => {
+export const livenessProbe = async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await healthCheckService.performLivenessCheck();
     const statusCode = result.status === 'healthy' ? 200 : result.status === 'degraded' ? 200 : 503;
     
     res.status(statusCode).json(result);
   } catch (error) {
-    logger.error('Liveness probe failed', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Liveness probe failed', error as Error);
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: errorMessage,
     });
   }
 };
 
-export const readinessProbe = async (req: Request, res: Response): Promise<void> => {
+export const readinessProbe = async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await healthCheckService.performReadinessCheck();
     const statusCode = result.ready ? 200 : 503;
     
     res.status(statusCode).json(result);
   } catch (error) {
-    logger.error('Readiness probe failed', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Readiness probe failed', error as Error);
     res.status(503).json({
       status: 'unhealthy',
       ready: false,
-      error: error.message,
+      error: errorMessage,
     });
   }
 };
 
-export const startupProbe = async (req: Request, res: Response): Promise<void> => {
+export const startupProbe = async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await healthCheckService.performStartupCheck();
     const statusCode = result.status === 'healthy' ? 200 : result.status === 'degraded' ? 200 : 503;
     
     res.status(statusCode).json(result);
   } catch (error) {
-    logger.error('Startup probe failed', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Startup probe failed', error as Error);
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: errorMessage,
     });
   }
 };
 
-export const deepHealthCheck = async (req: Request, res: Response): Promise<void> => {
+export const deepHealthCheck = async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await healthCheckService.performDeepHealthCheck();
     res.status(200).json(result);
   } catch (error) {
-    logger.error('Deep health check failed', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Deep health check failed', error as Error);
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: errorMessage,
     });
   }
 };

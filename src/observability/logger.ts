@@ -41,13 +41,13 @@ const logFormat = winston.format.combine(
     const userId = requestContext.get('userId');
     const requestId = requestContext.get('requestId');
     
-    const meta = {
+    const meta: Record<string, unknown> = {
       correlationId,
       ...(traceId && { traceId }),
       ...(spanId && { spanId }),
       ...(userId && { userId }),
       ...(requestId && { requestId }),
-      ...info.metadata,
+      ...(typeof info.metadata === 'object' && info.metadata !== null ? info.metadata : {}),
     };
 
     // Structured JSON logging
@@ -60,7 +60,7 @@ const logFormat = winston.format.combine(
       ...meta,
       ...(info.stack && { stack: info.stack }),
     });
-  })
+  }),
 );
 
 // Console format for development
@@ -74,7 +74,9 @@ const consoleFormat = winston.format.combine(
     const userId = requestContext.get('userId');
     
     let message = `${info.timestamp} [${info.level}] [${correlationId}]`;
-    if (userId) message += ` [user:${userId}]`;
+    if (userId) {
+      message += ` [user:${userId}]`;
+    }
     message += `: ${info.message}`;
     
     if (info.stack) {
@@ -82,7 +84,7 @@ const consoleFormat = winston.format.combine(
     }
     
     return message;
-  })
+  }),
 );
 
 class LoggerService {
@@ -97,7 +99,7 @@ class LoggerService {
       transports.push(
         new winston.transports.Console({
           format: process.env.NODE_ENV === 'production' ? logFormat : consoleFormat,
-        })
+        }),
       );
     }
 
@@ -111,7 +113,7 @@ class LoggerService {
           format: logFormat,
           maxsize: 10485760, // 10MB
           maxFiles: 5,
-        })
+        }),
       );
 
       // Combined log file
@@ -121,7 +123,7 @@ class LoggerService {
           format: logFormat,
           maxsize: 10485760, // 10MB
           maxFiles: 10,
-        })
+        }),
       );
     }
 
@@ -138,10 +140,10 @@ class LoggerService {
           json: true,
           format: winston.format.json(),
           replaceTimestamp: true,
-          onConnectionError: (err) => {
+          onConnectionError: (err: Error): void => {
             console.error('Loki connection error:', err);
           },
-        })
+        }),
       );
     }
 
@@ -177,7 +179,7 @@ class LoggerService {
   }
 
   // Core logging methods with metadata support
-  public fatal(message: string, metadata?: any): void {
+  public fatal(message: string, metadata?: Record<string, unknown>): void {
     this.logger.log('fatal', message, { metadata });
     
     // Also record in OpenTelemetry
@@ -190,13 +192,13 @@ class LoggerService {
     }
   }
 
-  public error(message: string, error?: Error | any, metadata?: any): void {
+  public error(message: string, error?: Error | Record<string, unknown>, metadata?: Record<string, unknown>): void {
     const meta = {
       ...metadata,
       ...(error && {
-        error_name: error.name,
-        error_message: error.message,
-        error_stack: error.stack,
+        error_name: error instanceof Error ? error.name : 'UnknownError',
+        error_message: error instanceof Error ? error.message : JSON.stringify(error),
+        error_stack: error instanceof Error ? error.stack : undefined,
       }),
     };
     
@@ -205,15 +207,22 @@ class LoggerService {
     // Record in OpenTelemetry
     const span = api.trace.getActiveSpan();
     if (span && error) {
-      span.recordException(error);
-      span.setStatus({
-        code: api.SpanStatusCode.ERROR,
-        message: error.message,
-      });
+      if (error instanceof Error) {
+        span.recordException(error);
+        span.setStatus({
+          code: api.SpanStatusCode.ERROR,
+          message: error.message,
+        });
+      } else {
+        span.setStatus({
+          code: api.SpanStatusCode.ERROR,
+          message: typeof error === 'object' ? JSON.stringify(error) : String(error),
+        });
+      }
     }
   }
 
-  public warn(message: string, metadata?: any): void {
+  public warn(message: string, metadata?: Record<string, unknown>): void {
     this.logger.warn(message, { metadata });
     
     const span = api.trace.getActiveSpan();
@@ -225,20 +234,20 @@ class LoggerService {
     }
   }
 
-  public info(message: string, metadata?: any): void {
+  public info(message: string, metadata?: Record<string, unknown>): void {
     this.logger.info(message, { metadata });
   }
 
-  public debug(message: string, metadata?: any): void {
+  public debug(message: string, metadata?: Record<string, unknown>): void {
     this.logger.debug(message, { metadata });
   }
 
-  public trace(message: string, metadata?: any): void {
+  public trace(message: string, metadata?: Record<string, unknown>): void {
     this.logger.log('trace', message, { metadata });
   }
 
   // HTTP request/response logging
-  public logRequest(req: Request, metadata?: any): void {
+  public logRequest(req: Request, metadata?: Record<string, unknown>): void {
     this.info('Incoming request', {
       method: req.method,
       path: req.path,
@@ -250,9 +259,9 @@ class LoggerService {
     });
   }
 
-  public logResponse(req: Request, res: Response, duration: number, metadata?: any): void {
+  public logResponse(req: Request, res: Response, duration: number, metadata?: Record<string, unknown>): void {
     const level = res.statusCode >= 500 ? 'error' : 
-                  res.statusCode >= 400 ? 'warn' : 'info';
+      res.statusCode >= 400 ? 'warn' : 'info';
     
     this.logger.log(level, 'HTTP response', {
       metadata: {
@@ -266,7 +275,7 @@ class LoggerService {
   }
 
   // Database query logging
-  public logQuery(query: string, parameters?: any[], duration?: number): void {
+  public logQuery(query: string, parameters?: unknown[], duration?: number): void {
     this.debug('Database query', {
       query: this.sanitizeQuery(query),
       parameters: parameters?.map(p => typeof p === 'string' && p.length > 100 ? `${p.substring(0, 100)}...` : p),
@@ -275,33 +284,33 @@ class LoggerService {
   }
 
   // Cache operations logging
-  public logCacheHit(key: string, metadata?: any): void {
+  public logCacheHit(key: string, metadata?: Record<string, unknown>): void {
     this.trace('Cache hit', { key, ...metadata });
   }
 
-  public logCacheMiss(key: string, metadata?: any): void {
+  public logCacheMiss(key: string, metadata?: Record<string, unknown>): void {
     this.trace('Cache miss', { key, ...metadata });
   }
 
-  public logCacheSet(key: string, ttl?: number, metadata?: any): void {
+  public logCacheSet(key: string, ttl?: number, metadata?: Record<string, unknown>): void {
     this.trace('Cache set', { key, ttl, ...metadata });
   }
 
   // Business events logging
-  public logBusinessEvent(event: string, metadata?: any): void {
+  public logBusinessEvent(event: string, metadata?: Record<string, unknown>): void {
     this.info(`Business event: ${event}`, metadata);
     
     const span = api.trace.getActiveSpan();
     if (span) {
-      span.addEvent(event, metadata || {});
+      span.addEvent(event, metadata as api.Attributes || {});
     }
   }
 
   // Security events logging
-  public logSecurityEvent(event: string, severity: 'low' | 'medium' | 'high' | 'critical', metadata?: any): void {
+  public logSecurityEvent(event: string, severity: 'low' | 'medium' | 'high' | 'critical', metadata?: Record<string, unknown>): void {
     const level = severity === 'critical' ? 'fatal' :
-                  severity === 'high' ? 'error' :
-                  severity === 'medium' ? 'warn' : 'info';
+      severity === 'high' ? 'error' :
+        severity === 'medium' ? 'warn' : 'info';
     
     this.logger.log(level, `Security event: ${event}`, {
       metadata: {
@@ -313,7 +322,7 @@ class LoggerService {
   }
 
   // Audit logging
-  public logAudit(action: string, userId: string, resource: string, metadata?: any): void {
+  public logAudit(action: string, userId: string, resource: string, metadata?: Record<string, unknown>): void {
     this.info('Audit log', {
       audit_action: action,
       user_id: userId,
@@ -324,9 +333,9 @@ class LoggerService {
   }
 
   // Performance logging
-  public logPerformance(operation: string, duration: number, metadata?: any): void {
+  public logPerformance(operation: string, duration: number, metadata?: Record<string, unknown>): void {
     const level = duration > 5000 ? 'warn' :
-                  duration > 1000 ? 'info' : 'debug';
+      duration > 1000 ? 'info' : 'debug';
     
     this.logger.log(level, `Performance: ${operation}`, {
       metadata: {
@@ -339,8 +348,12 @@ class LoggerService {
   }
 
   // Helper methods
-  private sanitizeHeaders(headers: any): any {
-    const sanitized = { ...headers };
+  private sanitizeHeaders(headers: unknown): unknown {
+    if (typeof headers !== 'object' || headers === null) {
+      return headers;
+    }
+    
+    const sanitized = { ...(headers as Record<string, unknown>) };
     const sensitiveHeaders = ['authorization', 'x-api-key', 'cookie', 'x-auth-token'];
     
     sensitiveHeaders.forEach(header => {
@@ -355,9 +368,9 @@ class LoggerService {
   private sanitizeQuery(query: string): string {
     // Remove potential sensitive data from queries
     return query
-      .replace(/password\s*=\s*'[^']*'/gi, "password='[REDACTED]'")
-      .replace(/token\s*=\s*'[^']*'/gi, "token='[REDACTED]'")
-      .replace(/api_key\s*=\s*'[^']*'/gi, "api_key='[REDACTED]'");
+      .replace(/password\s*=\s*'[^']*'/gi, 'password=\'[REDACTED]\'')
+      .replace(/token\s*=\s*'[^']*'/gi, 'token=\'[REDACTED]\'')
+      .replace(/api_key\s*=\s*'[^']*'/gi, 'api_key=\'[REDACTED]\'');
   }
 
   // Get the raw Winston logger for advanced usage
@@ -387,8 +400,8 @@ export function correlationIdMiddleware(req: Request, res: Response, next: NextF
     }
     
     // Set user context if available
-    if ((req as any).user) {
-      requestContext.set('userId', (req as any).user.id);
+    if ((req as Request & { user?: { id: string } }).user) {
+      requestContext.set('userId', (req as Request & { user?: { id: string } }).user.id);
     }
     
     // Add correlation ID to response headers
