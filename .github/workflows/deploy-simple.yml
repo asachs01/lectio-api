@@ -1,0 +1,60 @@
+name: Simple Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy to DigitalOcean App Platform
+        run: |
+          # Check if app exists
+          if doctl apps list --format Name --no-header | grep -q "^lectio-api$"; then
+            echo "App exists, updating..."
+            # Update existing app
+            APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api$" | awk '{print $1}')
+            doctl apps update $APP_ID --spec app.yaml
+            
+            # Create deployment
+            echo "Creating deployment..."
+            doctl apps create-deployment $APP_ID --wait
+          else
+            echo "Creating new app..."
+            # Create new app
+            doctl apps create --spec app.yaml --wait
+          fi
+
+      - name: Get app info
+        run: |
+          # Get app details
+          APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api$" | awk '{print $1}')
+          if [ ! -z "$APP_ID" ]; then
+            echo "App ID: $APP_ID"
+            APP_URL=$(doctl apps get $APP_ID --format DefaultIngress --no-header)
+            echo "App URL: https://$APP_URL"
+            echo "APP_URL=https://$APP_URL" >> $GITHUB_ENV
+          else
+            echo "App not found or deployment in progress"
+          fi
+
+      - name: Display status
+        run: |
+          echo "✅ Deployment triggered successfully!"
+          echo "Check the DigitalOcean dashboard for deployment progress:"
+          echo "https://cloud.digitalocean.com/apps"
+          if [ ! -z "$APP_URL" ]; then
+            echo "Once deployed, your app will be available at: $APP_URL"
+          fi
