@@ -27,8 +27,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm ci --omit=dev --ignore-scripts
+# Install production dependencies and ts-node for fallback
+RUN npm ci --omit=dev --ignore-scripts && \
+    npm install --save ts-node typescript
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
@@ -36,6 +37,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/ormconfig.js ./ormconfig.js
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
@@ -52,5 +54,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Start the application - check if dist exists, otherwise use ts-node
-CMD ["sh", "-c", "[ -f dist/index.js ] && node dist/index.js || npx ts-node src/index.ts"]
+# Start the application
+CMD ["npm", "start"]

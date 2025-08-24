@@ -4,7 +4,7 @@
   "description": "A modern REST API for serving lectionary readings and liturgical calendar data",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/index.js || npx ts-node src/index.ts",
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "test": "jest",
