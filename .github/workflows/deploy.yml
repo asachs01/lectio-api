@@ -49,10 +49,11 @@ jobs:
 
       - name: Deploy to DigitalOcean App Platform
         run: |
-          # Check if app exists
-          if doctl apps list --format Name --no-header | grep -q "^lectio-api$"; then
-            echo "App exists, updating..."
-            APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api$" | awk '{print $1}')
+          # Check if app exists (case-insensitive)
+          APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio-api" | awk '{print $1}')
+          
+          if [ -n "$APP_ID" ]; then
+            echo "App exists with ID: $APP_ID, updating..."
             doctl apps update $APP_ID --spec app.yaml
             
             # Create deployment
@@ -65,7 +66,7 @@ jobs:
       - name: Get app URL
         id: app-url
         run: |
-          APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api$" | awk '{print $1}')
+          APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio-api" | awk '{print $1}')
           APP_URL=$(doctl apps get $APP_ID --format DefaultIngress --no-header)
           echo "url=https://$APP_URL" >> $GITHUB_OUTPUT
           echo "App deployed to: https://$APP_URL"
