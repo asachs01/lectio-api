@@ -84,6 +84,12 @@ export class App {
         explorer: true,
         customCss: '.swagger-ui .topbar { display: none }',
         customSiteTitle: 'Lectionary API Documentation',
+        swaggerOptions: {
+          persistAuthorization: true,
+          tryItOutEnabled: true,
+          filter: true,
+          displayRequestDuration: true,
+        },
       }));
 
       // Serve OpenAPI spec as JSON
