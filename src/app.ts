@@ -24,11 +24,11 @@ export class App {
     this.app.use(helmet({
       contentSecurityPolicy: {
         directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", "data:"],
-          fontSrc: ["'self'"],
+          defaultSrc: ['\'self\''],
+          styleSrc: ['\'self\'', '\'unsafe-inline\''],
+          scriptSrc: ['\'self\''],
+          imgSrc: ['\'self\'', 'data:'],
+          fontSrc: ['\'self\''],
           upgradeInsecureRequests: null, // Disable HTTPS upgrade for development
         },
       },
@@ -85,6 +85,12 @@ export class App {
         customCss: '.swagger-ui .topbar { display: none }',
         customSiteTitle: 'Lectionary API Documentation',
       }));
+
+      // Serve OpenAPI spec as JSON
+      this.app.get('/api/docs.json', (_req: Request, res: Response) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(swaggerSpec);
+      });
     }
 
     // API routes
