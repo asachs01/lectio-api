@@ -1,7 +1,7 @@
 name: lectio-api
 region: nyc
 domains:
-  - domain: lectionary-api.org
+  - domain: lectio-api.org
     type: PRIMARY
 services:
   - name: api

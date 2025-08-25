@@ -5,6 +5,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.swaggerSpec = void 0;
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
+// Determine server order based on environment
+const getServers = () => {
+    const servers = [];
+    // In production, put production server first
+    if (process.env.NODE_ENV === 'production') {
+        servers.push({
+            url: 'https://lectio-api-o6ed3.ondigitalocean.app',
+            description: 'Current server',
+        });
+        servers.push({
+            url: 'https://lectionary-api.org',
+            description: 'Production server (coming soon)',
+        });
+    }
+    // Always include localhost for development/testing
+    servers.push({
+        url: `http://localhost:${process.env.PORT || 3000}`,
+        description: 'Development server',
+    });
+    // In development, put localhost first
+    if (process.env.NODE_ENV !== 'production') {
+        servers.unshift(...servers.splice(-1));
+    }
+    return servers;
+};
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -22,20 +47,7 @@ const options = {
                 url: 'https://opensource.org/licenses/MIT',
             },
         },
-        servers: [
-            {
-                url: `http://localhost:${process.env.PORT || 3000}`,
-                description: 'Development server',
-            },
-            {
-                url: 'https://lectionary-api.org',
-                description: 'Production server',
-            },
-            {
-                url: 'https://lectio-api-o6ed3.ondigitalocean.app',
-                description: 'Staging server (DigitalOcean)',
-            },
-        ],
+        servers: getServers(),
         components: {
             securitySchemes: {
                 ApiKeyAuth: {

@@ -4,10 +4,10 @@
 
 The Lectio API is a modern REST API for serving lectionary readings and liturgical calendar data. It provides comprehensive access to daily readings from multiple Christian traditions including the Revised Common Lectionary (RCL), Catholic Lectionary, Episcopal Lectionary, and Lutheran Lectionary.
 
-**Base URL**: https://lectionary-api.org (Production)  
+**Base URL**: https://lectio-api.org (Production)  
 **Current Deployment**: https://lectio-api-o6ed3.ondigitalocean.app  
 **API Version**: v1  
-**Documentation**: https://lectionary-api.org/api/docs
+**Documentation**: https://lectio-api.org/api/docs
 
 ## Authentication
 
@@ -336,22 +336,22 @@ The API uses standard HTTP status codes and returns errors in a consistent forma
 
 ### Get Today's Catholic Readings
 ```bash
-curl "https://lectionary-api.org/api/v1/readings/today?tradition=CAT"
+curl "https://lectio-api.org/api/v1/readings/today?tradition=CAT"
 ```
 
 ### Get RCL Readings for Christmas Day
 ```bash
-curl "https://lectionary-api.org/api/v1/readings?date=2024-12-25&tradition=RCL"
+curl "https://lectio-api.org/api/v1/readings?date=2024-12-25&tradition=RCL"
 ```
 
 ### Get Calendar for 2025
 ```bash
-curl "https://lectionary-api.org/api/v1/calendar/2025"
+curl "https://lectio-api.org/api/v1/calendar/2025"
 ```
 
 ### Get All Available Traditions
 ```bash
-curl "https://lectionary-api.org/api/v1/traditions"
+curl "https://lectio-api.org/api/v1/traditions"
 ```
 
 ## SDK Support
@@ -360,7 +360,7 @@ While we don't currently provide official SDKs, the API follows standard REST co
 
 ### JavaScript/TypeScript Example
 ```javascript
-const API_BASE = 'https://lectionary-api.org';
+const API_BASE = 'https://lectio-api.org';
 
 async function getTodaysReadings(tradition = 'RCL') {
   const response = await fetch(`${API_BASE}/api/v1/readings/today?tradition=${tradition}`);
@@ -380,7 +380,7 @@ getTodaysReadings('RCL')
 ```python
 import requests
 
-API_BASE = 'https://lectionary-api.org'
+API_BASE = 'https://lectio-api.org'
 
 def get_todays_readings(tradition='RCL'):
     response = requests.get(f'{API_BASE}/api/v1/readings/today', 
@@ -410,7 +410,7 @@ Future enhancements planned for the API:
 
 For issues, feature requests, or questions:
 - GitHub: https://github.com/asachs01/lectio-api
-- Email: api@lectionary-api.org
+- Email: api@lectio-api.org
 
 ## License
 
