@@ -1,5 +1,8 @@
 name: lectio-api
 region: nyc
+domains:
+  - domain: lectionary-api.org
+    type: PRIMARY
 services:
   - name: api
     dockerfile_path: Dockerfile
