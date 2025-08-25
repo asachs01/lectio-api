@@ -10,7 +10,7 @@ const options: swaggerJSDoc.Options = {
       contact: {
         name: 'API Support',
         url: 'https://github.com/asachs01/lectio-api',
-        email: 'api@lectio-api.com',
+        email: 'api@lectionary-api.org',
       },
       license: {
         name: 'MIT',
@@ -23,8 +23,12 @@ const options: swaggerJSDoc.Options = {
         description: 'Development server',
       },
       {
+        url: 'https://lectionary-api.org',
+        description: 'Production server',
+      },
+      {
         url: 'https://lectio-api-o6ed3.ondigitalocean.app',
-        description: 'Production server (DigitalOcean)',
+        description: 'Staging server (DigitalOcean)',
       },
     ],
     components: {

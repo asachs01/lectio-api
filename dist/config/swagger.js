@@ -14,8 +14,8 @@ const options = {
             description: 'A modern REST API for serving lectionary readings and liturgical calendar data',
             contact: {
                 name: 'API Support',
-                url: 'https://github.com/your-repo/lectionary-api',
-                email: 'support@example.com',
+                url: 'https://github.com/asachs01/lectio-api',
+                email: 'api@lectio-api.com',
             },
             license: {
                 name: 'MIT',
@@ -28,8 +28,8 @@ const options = {
                 description: 'Development server',
             },
             {
-                url: 'https://api.lectionary.example.com',
-                description: 'Production server',
+                url: 'https://lectio-api-o6ed3.ondigitalocean.app',
+                description: 'Production server (DigitalOcean)',
             },
         ],
         components: {

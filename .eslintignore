@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+build/
+*.js
+!src/**/*.js
+.env
+.env.*
+docs/
+*.md
