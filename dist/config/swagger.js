@@ -11,12 +11,12 @@ const getServers = () => {
     // In production, put production server first
     if (process.env.NODE_ENV === 'production') {
         servers.push({
-            url: 'https://lectio-api-o6ed3.ondigitalocean.app',
-            description: 'Current server',
+            url: 'https://lectio-api.org',
+            description: 'Production server',
         });
         servers.push({
-            url: 'https://lectionary-api.org',
-            description: 'Production server (coming soon)',
+            url: 'https://lectio-api-o6ed3.ondigitalocean.app',
+            description: 'DigitalOcean App',
         });
     }
     // Always include localhost for development/testing
@@ -40,7 +40,7 @@ const options = {
             contact: {
                 name: 'API Support',
                 url: 'https://github.com/asachs01/lectio-api',
-                email: 'api@lectionary-api.org',
+                email: 'api@lectio-api.org',
             },
             license: {
                 name: 'MIT',
