@@ -7,12 +7,12 @@ const getServers = () => {
   // In production, put production server first
   if (process.env.NODE_ENV === 'production') {
     servers.push({
-      url: 'https://lectio-api-o6ed3.ondigitalocean.app',
-      description: 'Current server',
-    });
-    servers.push({
       url: 'https://lectio-api.org',
       description: 'Production server',
+    });
+    servers.push({
+      url: 'https://lectio-api-o6ed3.ondigitalocean.app',
+      description: 'DigitalOcean App',
     });
   }
   
