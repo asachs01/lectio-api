@@ -1,0 +1,48 @@
+{
+  "name": "@lectio-api/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Lectionary API with decision tree-based tools",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "mcp": "tsx src/index.ts",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.7.0",
+    "axios": "^1.6.2",
+    "express": "^4.18.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.1.0",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "lectionary",
+    "liturgical",
+    "api",
+    "church",
+    "readings"
+  ],
+  "author": "Aaron Sachs",
+  "license": "MIT"
+}
