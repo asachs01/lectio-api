@@ -1,0 +1,13 @@
+default-group: docs
+groups:
+  docs:
+    generators:
+      - name: fernapi/fern-openapi-docs
+        version: 0.4.24
+        output:
+          location: local-file-system
+          path: ../docs-preview
+        config:
+          title: Lectio API Documentation
+          description: A modern REST API for serving lectionary readings and liturgical calendar data
+          favicon: ./assets/favicon.ico

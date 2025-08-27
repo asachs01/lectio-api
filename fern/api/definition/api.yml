@@ -1,0 +1,3 @@
+name: lectio
+imports:
+  openapi: ../openapi.yml
