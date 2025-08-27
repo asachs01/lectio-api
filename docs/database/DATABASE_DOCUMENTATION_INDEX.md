@@ -14,7 +14,7 @@ This document serves as the main index for all database-related documentation fo
    - Multi-tradition support mechanisms
    - Environment configuration guide
 
-2. **[plans/database-erd.md](./plans/database-erd.md)**
+2. **[ENTITY_DIAGRAM.md](./ENTITY_DIAGRAM.md)**
    - Comprehensive Mermaid ERD diagram
    - Detailed relationship explanations
    - Cascade rules and foreign key behavior
@@ -26,13 +26,19 @@ This document serves as the main index for all database-related documentation fo
    - Example migrations and troubleshooting
    - Database maintenance procedures
 
-4. **[SEED_DATA_GUIDE.md](./SEED_DATA_GUIDE.md)**
+4. **[DATABASE_SETUP.md](./DATABASE_SETUP.md)**
+   - Initial database setup and configuration
+   - Connection settings and pooling
+   - Environment-specific configurations
+   - Health check procedures
+
+5. **[../guides/SEED_DATA_GUIDE.md](../guides/SEED_DATA_GUIDE.md)**
    - RCL tradition seed data structure
    - Sample data for all entities
    - Implementation guidelines and validation
    - Data volume estimates and sources
 
-5. **[QUERY_OPTIMIZATION_GUIDE.md](./QUERY_OPTIMIZATION_GUIDE.md)**
+6. **[../operations/QUERY_OPTIMIZATION_GUIDE.md](../operations/QUERY_OPTIMIZATION_GUIDE.md)**
    - Common query patterns and optimization
    - Index strategy and performance tuning
    - Caching recommendations
@@ -74,10 +80,10 @@ npm run db:test:complete
 ```
 
 ### 2. Load Sample Data
-See [SEED_DATA_GUIDE.md](./SEED_DATA_GUIDE.md) for RCL tradition examples.
+See [../guides/SEED_DATA_GUIDE.md](../guides/SEED_DATA_GUIDE.md) for RCL tradition examples.
 
 ### 3. Performance Monitoring
-Refer to [QUERY_OPTIMIZATION_GUIDE.md](./QUERY_OPTIMIZATION_GUIDE.md) for monitoring queries.
+Refer to [../operations/QUERY_OPTIMIZATION_GUIDE.md](../operations/QUERY_OPTIMIZATION_GUIDE.md) for monitoring queries.
 
 ## Development Workflow
 
@@ -168,7 +174,7 @@ Refer to [QUERY_OPTIMIZATION_GUIDE.md](./QUERY_OPTIMIZATION_GUIDE.md) for monito
 
 ### Common Issues
 1. **Migration failures**: See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md#troubleshooting)
-2. **Performance problems**: See [QUERY_OPTIMIZATION_GUIDE.md](./QUERY_OPTIMIZATION_GUIDE.md#monitoring-and-alerting)
+2. **Performance problems**: See [../operations/QUERY_OPTIMIZATION_GUIDE.md](../operations/QUERY_OPTIMIZATION_GUIDE.md#monitoring-and-alerting)
 3. **Data integrity issues**: Use validation scripts in `src/scripts/`
 
 ### Support Resources
