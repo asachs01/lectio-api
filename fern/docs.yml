@@ -1,15 +1,11 @@
 instances:
   - url: https://lectio-api.docs.buildwithfern.com
     
-title: Lectio API | Documentation
+title: Lectio API
 
 navigation:
   - api: API Reference
     
 colors:
-  accentPrimary:
-    light: '#6b46c1'
-    dark: '#9061f9'
-  background:
-    light: '#ffffff'
-    dark: '#0f0f0f'
+  accentPrimary: '#6b46c1'
+  background: '#0f0f0f'
