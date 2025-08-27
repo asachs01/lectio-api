@@ -9,13 +9,9 @@ config();
 
 async function bootstrap(): Promise<void> {
   try {
-    // Initialize database connection (skip for now in development)
-    if (process.env.NODE_ENV === 'production') {
-      await DatabaseService.initialize();
-      logger.info('Database connection established');
-    } else {
-      logger.info('Running in development mode without database connection');
-    }
+    // Initialize database connection
+    await DatabaseService.initialize();
+    logger.info('Database connection established');
 
     // Create and start the application
     const app = new App();

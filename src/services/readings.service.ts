@@ -3,17 +3,21 @@ import { DatabaseService } from './database.service';
 import { Reading } from '../models/reading.entity';
 import { Between, Repository } from 'typeorm';
 import { logger } from '../utils/logger';
+import { LiturgicalCalendarService } from './liturgical-calendar.service';
 
 export class ReadingsService {
   private readingRepository: Repository<Reading>;
+  private calendarService: LiturgicalCalendarService;
 
   constructor() {
     try {
       const dataSource = DatabaseService.getDataSource();
       this.readingRepository = dataSource.getRepository(Reading);
+      this.calendarService = new LiturgicalCalendarService();
     } catch (error) {
       logger.error('Failed to initialize ReadingsService:', error);
       // Initialize later if database not ready yet
+      this.calendarService = new LiturgicalCalendarService();
     }
   }
 
@@ -28,13 +32,26 @@ export class ReadingsService {
   public async getByDate(date: string, traditionId: string): Promise<DailyReading | null> {
     try {
       const repository = this.ensureRepository();
+      // Parse date string to avoid timezone issues - ensure we're working with the date as-is
+      const [yearStr, monthStr, dayStr] = date.split('-');
+      const dateObj = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 12, 0, 0); // Set to noon to avoid timezone issues
+      const year = dateObj.getFullYear();
+      
+      // Get liturgical information for this date
+      const liturgicalInfo = this.calendarService.getLiturgicalYearInfo(year);
+      const season = this.calendarService.getSeasonForDate(dateObj, year);
+      const properNumber = this.calendarService.getProperNumber(dateObj, year);
       
       // Query the database for readings on this date
+      // Use date range to avoid timezone issues
+      const startOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 0, 0, 0);
+      const endOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 23, 59, 59);
+      
       const readings = await repository.find({
         where: {
-          date: new Date(date),
+          date: Between(startOfDay, endOfDay),
           tradition: {
-            id: traditionId.toLowerCase(),
+            abbreviation: traditionId.toUpperCase(), // RCL not rcl
           },
         },
         relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
@@ -46,32 +63,95 @@ export class ReadingsService {
       if (!readings || readings.length === 0) {
         logger.warn(`No readings found for date ${date} and tradition ${traditionId}`);
         
-        // Return mock data as fallback for now
-        // TODO: Remove this once we have complete data
-        return this.getMockReading(date, traditionId);
+        // Try to find readings by liturgical cycle and proper/season
+        const alternateReadings = await this.findReadingsByLiturgicalContext(
+          dateObj,
+          traditionId,
+          liturgicalInfo.cycle,
+          season,
+          properNumber,
+        );
+        
+        if (alternateReadings && alternateReadings.length > 0) {
+          return this.formatDailyReading(alternateReadings, date, traditionId, season?.name || 'ordinary');
+        }
+        
+        // Return null - no mock data fallback
+        return null;
       }
 
-      // Group readings by date and format response
-      const dailyReading: DailyReading = {
-        id: `${traditionId}-${date}`,
-        date,
-        traditionId,
-        seasonId: readings[0].seasonId || 'ordinary',
-        readings: readings.map(r => ({
-          type: r.readingType as ReadingType,
-          citation: r.scriptureReference,
-          text: r.text || '',
-        })),
-        createdAt: readings[0].createdAt,
-        updatedAt: readings[0].updatedAt,
-      };
-
-      return dailyReading;
+      // Format and return the readings
+      return this.formatDailyReading(readings, date, traditionId, readings[0].seasonId || season?.name || 'ordinary');
     } catch (error) {
       logger.error(`Error fetching readings for date ${date}:`, error);
-      // Return mock data as fallback
-      return this.getMockReading(date, traditionId);
+      return null;
     }
+  }
+
+  private async findReadingsByLiturgicalContext(
+    _date: Date,
+    traditionId: string,
+    cycle: string,
+    season: any,
+    properNumber: number | null,
+  ): Promise<Reading[]> {
+    try {
+      const repository = this.ensureRepository();
+      
+      // Build query conditions based on liturgical context
+      const conditions: any = {
+        tradition: {
+          abbreviation: traditionId.toUpperCase(),
+        },
+      };
+      
+      // For Ordinary Time, look for readings by proper number
+      if (season?.id === 'ordinary' && properNumber) {
+        conditions.notes = `Proper ${properNumber}`;
+      }
+      
+      // Add liturgical year cycle condition
+      if (cycle) {
+        conditions.liturgicalYear = {
+          yearCycle: cycle,
+        };
+      }
+      
+      const readings = await repository.find({
+        where: conditions,
+        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+        order: {
+          readingOrder: 'ASC',
+        },
+      });
+      
+      return readings;
+    } catch (error) {
+      logger.error('Error finding readings by liturgical context:', error);
+      return [];
+    }
+  }
+
+  private formatDailyReading(
+    readings: Reading[],
+    date: string,
+    traditionId: string,
+    seasonId: string,
+  ): DailyReading {
+    return {
+      id: `${traditionId}-${date}`,
+      date,
+      traditionId,
+      seasonId,
+      readings: readings.map(r => ({
+        type: r.readingType as ReadingType,
+        citation: r.scriptureReference,
+        text: r.text || '',
+        isAlternative: r.isAlternative || false,
+      })),
+      createdAt: readings[0]?.createdAt || new Date(),
+      updatedAt: readings[0]?.updatedAt || new Date(),
+    };
   }
 
   public async getByDateRange(
@@ -123,19 +203,41 @@ export class ReadingsService {
       });
 
       // Convert to DailyReading format
-      const dailyReadings: DailyReading[] = Array.from(readingsByDate.entries()).map(([dateStr, dateReadings]) => ({
-        id: `${traditionId}-${dateStr}`,
-        date: dateStr,
-        traditionId,
-        seasonId: dateReadings[0].seasonId || 'ordinary',
-        readings: dateReadings.map(r => ({
-          type: r.readingType as ReadingType,
-          citation: r.scriptureReference,
-          text: r.text || '',
-        })),
-        createdAt: dateReadings[0].createdAt,
-        updatedAt: dateReadings[0].updatedAt,
-      }));
+      const dailyReadings: DailyReading[] = Array.from(readingsByDate.entries()).map(([dateStr, dateReadings]) => {
+        const dateObj = new Date(dateStr);
+        const year = dateObj.getFullYear();
+        const season = this.calendarService.getSeasonForDate(dateObj, year);
+        
+        return {
+          id: `${traditionId}-${dateStr}`,
+          date: dateStr,
+          traditionId,
+          seasonId: dateReadings[0].seasonId || season?.name || 'ordinary',
+          readings: dateReadings.map(r => ({
+            type: r.readingType as ReadingType,
+            citation: r.scriptureReference,
+            text: r.text || '',
+            isAlternative: r.isAlternative || false,
+          })),
+          createdAt: dateReadings[0].createdAt,
+          updatedAt: dateReadings[0].updatedAt,
+        };
+      });
+
+      // If no readings found in database, return empty result
+      if (dailyReadings.length === 0) {
+        logger.warn(`No readings found for date range ${startDate} to ${endDate} in tradition ${traditionId}`);
+        
+        // Calculate how many days are in the range for proper response
+        // const start = new Date(startDate);
+        // const end = new Date(endDate);
+        // const dayCount = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        
+        return {
+          readings: [],
+          total: 0,
+        };
+      }
 
       return {
         readings: dailyReadings,
@@ -144,114 +246,98 @@ export class ReadingsService {
     } catch (error) {
       logger.error(`Error fetching readings for date range ${startDate} to ${endDate}:`, error);
       
-      // Fallback to mock data
-      return this.getMockReadingsRange(startDate, endDate, traditionId, page, limit);
-    }
-  }
-
-  // Temporary mock data methods until we have complete database data
-  private getMockReading(date: string, traditionId: string): DailyReading {
-    // Determine the proper liturgical season and readings based on the date
-    const dateObj = new Date(date);
-    const month = dateObj.getMonth();
-    const day = dateObj.getDate();
-    
-    // Very simplified liturgical calendar logic
-    // August 25, 2025 is in Ordinary Time (Proper 16)
-    if (month === 7 && day === 25) { // August is month 7 (0-indexed)
       return {
-        id: `${traditionId}-${date}`,
-        date,
-        traditionId,
-        seasonId: 'ordinary',
-        readings: [
-          {
-            type: ReadingType.FIRST,
-            citation: 'Jeremiah 1:4-10',
-            text: 'Now the word of the Lord came to me saying...',
-          },
-          {
-            type: ReadingType.PSALM,
-            citation: 'Psalm 71:1-6',
-            text: 'In you, O Lord, I take refuge...',
-          },
-          {
-            type: ReadingType.SECOND,
-            citation: 'Hebrews 12:18-29',
-            text: 'You have not come to something that can be touched...',
-          },
-          {
-            type: ReadingType.GOSPEL,
-            citation: 'Luke 13:10-17',
-            text: 'Now he was teaching in one of the synagogues on the sabbath...',
-          },
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        readings: [],
+        total: 0,
       };
     }
-    
-    // Default Advent readings (for other dates as placeholder)
-    return {
-      id: `${traditionId}-${date}`,
-      date,
-      traditionId,
-      seasonId: 'advent',
-      readings: [
-        {
-          type: ReadingType.FIRST,
-          citation: 'Isaiah 64:1-9',
-          text: 'O that you would tear open the heavens and come down...',
-        },
-        {
-          type: ReadingType.PSALM,
-          citation: 'Psalm 80:1-7, 17-19',
-          text: 'Give ear, O Shepherd of Israel...',
-        },
-        {
-          type: ReadingType.SECOND,
-          citation: '1 Corinthians 1:3-9',
-          text: 'Grace to you and peace from God our Father...',
-        },
-        {
-          type: ReadingType.GOSPEL,
-          citation: 'Mark 13:24-37',
-          text: 'But in those days, after that suffering...',
-        },
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
   }
 
-  private async getMockReadingsRange(
-    startDate: string,
-    endDate: string,
+  public async getReadingsByProper(
+    properNumber: number,
     traditionId: string,
-    page: number,
-    limit: number,
-  ): Promise<{ readings: DailyReading[]; total: number }> {
-    const mockReadings: DailyReading[] = [];
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    // Generate mock readings for the date range
-    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-      const dateStr = date.toISOString().split('T')[0];
-      const reading = this.getMockReading(dateStr, traditionId);
-      if (reading) {
-        mockReadings.push(reading);
+    cycle: string,
+  ): Promise<DailyReading | null> {
+    try {
+      const repository = this.ensureRepository();
+      
+      // Query for readings by proper number
+      const readings = await repository.find({
+        where: {
+          notes: `Proper ${properNumber}`,
+          tradition: {
+            id: traditionId.toLowerCase(),
+          },
+          liturgicalYear: {
+            cycle: cycle as any,
+          },
+        },
+        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+        order: {
+          readingOrder: 'ASC',
+        },
+      });
+      
+      if (!readings || readings.length === 0) {
+        return null;
       }
+      
+      // Use a representative date for the proper
+      const year = new Date().getFullYear();
+      // For Proper 16, we can use a date around August 25
+      // In reality, this would be calculated based on the liturgical calendar
+      const date = `${year}-08-25`;
+      
+      return this.formatDailyReading(readings, date, traditionId, 'ordinary');
+    } catch (error) {
+      logger.error(`Error fetching readings for Proper ${properNumber}:`, error);
+      return null;
     }
+  }
 
-    // Apply pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedReadings = mockReadings.slice(startIndex, endIndex);
-
-    return {
-      readings: paginatedReadings,
-      total: mockReadings.length,
-    };
+  public async getReadingsBySeason(
+    seasonId: string,
+    traditionId: string,
+    cycle: string,
+  ): Promise<DailyReading[]> {
+    try {
+      const repository = this.ensureRepository();
+      
+      const readings = await repository.find({
+        where: {
+          season: {
+            id: seasonId,
+          },
+          tradition: {
+            id: traditionId.toLowerCase(),
+          },
+          liturgicalYear: {
+            cycle: cycle as any,
+          },
+        },
+        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+        order: {
+          date: 'ASC',
+          readingOrder: 'ASC',
+        },
+      });
+      
+      // Group by date and format
+      const readingsByDate = new Map<string, Reading[]>();
+      readings.forEach(reading => {
+        const dateStr = reading.date.toISOString().split('T')[0];
+        if (!readingsByDate.has(dateStr)) {
+          readingsByDate.set(dateStr, []);
+        }
+        readingsByDate.get(dateStr)!.push(reading);
+      });
+      
+      return Array.from(readingsByDate.entries()).map(([dateStr, dateReadings]) => 
+        this.formatDailyReading(dateReadings, dateStr, traditionId, seasonId),
+      );
+    } catch (error) {
+      logger.error(`Error fetching readings for season ${seasonId}:`, error);
+      return [];
+    }
   }
 }

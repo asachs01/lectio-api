@@ -9,14 +9,9 @@ const database_service_1 = require("./services/database.service");
 (0, dotenv_1.config)();
 async function bootstrap() {
     try {
-        // Initialize database connection (skip for now in development)
-        if (process.env.NODE_ENV === 'production') {
-            await database_service_1.DatabaseService.initialize();
-            logger_1.logger.info('Database connection established');
-        }
-        else {
-            logger_1.logger.info('Running in development mode without database connection');
-        }
+        // Initialize database connection
+        await database_service_1.DatabaseService.initialize();
+        logger_1.logger.info('Database connection established');
         // Create and start the application
         const app = new app_1.App();
         const port = process.env.PORT || 3000;

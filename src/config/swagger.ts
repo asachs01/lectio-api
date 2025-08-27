@@ -228,23 +228,23 @@ const options: swaggerJSDoc.Options = {
     tags: [
       {
         name: 'Health',
-        description: 'Health check endpoints',
+        description: 'Health check and monitoring endpoints for API status',
       },
       {
         name: 'Traditions',
-        description: 'Lectionary tradition endpoints',
+        description: 'Manage and query different lectionary traditions (RCL, Catholic, Episcopal, etc.)',
       },
       {
         name: 'Readings',
-        description: 'Daily reading endpoints',
+        description: 'Retrieve daily scripture readings based on liturgical calendar',
       },
       {
         name: 'Calendar',
-        description: 'Liturgical calendar endpoints',
+        description: 'Access liturgical calendar information including seasons and special days',
       },
       {
         name: 'Search',
-        description: 'Search and query endpoints',
+        description: 'Search and query scripture passages and liturgical content',
       },
     ],
   },

@@ -27,7 +27,8 @@
     "db:sync": "typeorm schema:sync -d ormconfig.js",
     "entities:validate": "ts-node src/scripts/validate-entities.ts",
     "db:test": "ts-node src/scripts/test-db-connection.ts",
-    "db:test:complete": "ts-node src/scripts/complete-db-test.ts"
+    "db:test:complete": "ts-node src/scripts/complete-db-test.ts",
+    "data:import-lectionary": "ts-node src/scripts/import-lectionary-data.ts"
   },
   "keywords": [
     "lectionary",

@@ -1,0 +1,658 @@
+{
+  "year": "B",
+  "description": "Revised Common Lectionary Year B - Gospel of Mark Focus",
+  "seasons": {
+    "advent": {
+      "name": "Advent",
+      "sundays": [
+        {
+          "id": "advent-1-b",
+          "name": "First Sunday of Advent",
+          "date_pattern": "advent_1",
+          "readings": {
+            "first": "Isaiah 64:1-9",
+            "psalm": "Psalm 80:1-7, 17-19",
+            "second": "1 Corinthians 1:3-9",
+            "gospel": "Mark 13:24-37"
+          }
+        },
+        {
+          "id": "advent-2-b",
+          "name": "Second Sunday of Advent",
+          "date_pattern": "advent_2",
+          "readings": {
+            "first": "Isaiah 40:1-11",
+            "psalm": "Psalm 85:1-2, 8-13",
+            "second": "2 Peter 3:8-15a",
+            "gospel": "Mark 1:1-8"
+          }
+        },
+        {
+          "id": "advent-3-b",
+          "name": "Third Sunday of Advent",
+          "date_pattern": "advent_3",
+          "readings": {
+            "first": "Isaiah 61:1-4, 8-11",
+            "psalm": "Psalm 126 OR Luke 1:47-55",
+            "second": "1 Thessalonians 5:16-24",
+            "gospel": "John 1:6-8, 19-28"
+          }
+        },
+        {
+          "id": "advent-4-b",
+          "name": "Fourth Sunday of Advent",
+          "date_pattern": "advent_4",
+          "readings": {
+            "first": "2 Samuel 7:1-11, 16",
+            "psalm": "Luke 1:47-55 OR Psalm 89:1-4, 19-26",
+            "second": "Romans 16:25-27",
+            "gospel": "Luke 1:26-38"
+          }
+        }
+      ]
+    },
+    "christmas": {
+      "name": "Christmas",
+      "feast_days": [
+        {
+          "id": "christmas-eve-b",
+          "name": "Christmas Eve",
+          "date_pattern": "december_24",
+          "readings": {
+            "first": "Isaiah 9:2-7",
+            "psalm": "Psalm 96",
+            "second": "Titus 2:11-14",
+            "gospel": "Luke 2:1-14 (15-20)"
+          }
+        },
+        {
+          "id": "christmas-day-b",
+          "name": "Christmas Day",
+          "date_pattern": "december_25",
+          "readings": {
+            "first": "Isaiah 52:7-10",
+            "psalm": "Psalm 98",
+            "second": "Hebrews 1:1-4 (5-12)",
+            "gospel": "John 1:1-14"
+          }
+        },
+        {
+          "id": "christmas-1-b",
+          "name": "First Sunday after Christmas",
+          "date_pattern": "christmas_1",
+          "readings": {
+            "first": "1 Samuel 2:18-20, 26",
+            "psalm": "Psalm 148",
+            "second": "Colossians 3:12-17",
+            "gospel": "Luke 2:41-52"
+          }
+        }
+      ]
+    },
+    "epiphany": {
+      "name": "Epiphany",
+      "feast_days": [
+        {
+          "id": "epiphany-b",
+          "name": "Epiphany of the Lord",
+          "date_pattern": "january_6",
+          "readings": {
+            "first": "Isaiah 60:1-6",
+            "psalm": "Psalm 72:1-7, 10-14",
+            "second": "Ephesians 3:1-12",
+            "gospel": "Matthew 2:1-12"
+          }
+        }
+      ],
+      "sundays": [
+        {
+          "id": "baptism-lord-b",
+          "name": "Baptism of the Lord",
+          "date_pattern": "baptism_lord",
+          "readings": {
+            "first": "Genesis 1:1-5",
+            "psalm": "Psalm 29",
+            "second": "Acts 19:1-7",
+            "gospel": "Mark 1:4-11"
+          }
+        },
+        {
+          "id": "epiphany-2-b",
+          "name": "Second Sunday after Epiphany",
+          "date_pattern": "epiphany_2",
+          "readings": {
+            "first": "1 Samuel 3:1-10 (11-20)",
+            "psalm": "Psalm 139:1-6, 13-18",
+            "second": "1 Corinthians 6:12-20",
+            "gospel": "John 1:43-51"
+          }
+        },
+        {
+          "id": "epiphany-3-b",
+          "name": "Third Sunday after Epiphany",
+          "date_pattern": "epiphany_3",
+          "readings": {
+            "first": "Jonah 3:1-5, 10",
+            "psalm": "Psalm 62:5-12",
+            "second": "1 Corinthians 7:29-31",
+            "gospel": "Mark 1:14-20"
+          }
+        },
+        {
+          "id": "transfiguration-b",
+          "name": "Transfiguration Sunday",
+          "date_pattern": "transfiguration",
+          "readings": {
+            "first": "2 Kings 2:1-12",
+            "psalm": "Psalm 50:1-6",
+            "second": "2 Corinthians 4:3-6",
+            "gospel": "Mark 9:2-9"
+          }
+        }
+      ]
+    },
+    "lent": {
+      "name": "Lent",
+      "feast_days": [
+        {
+          "id": "ash-wednesday-b",
+          "name": "Ash Wednesday",
+          "date_pattern": "ash_wednesday",
+          "readings": {
+            "first": "Joel 2:1-2, 12-17 OR Isaiah 58:1-12",
+            "psalm": "Psalm 51:1-17",
+            "second": "2 Corinthians 5:20b-6:10",
+            "gospel": "Matthew 6:1-6, 16-21"
+          }
+        }
+      ],
+      "sundays": [
+        {
+          "id": "lent-1-b",
+          "name": "First Sunday in Lent",
+          "date_pattern": "lent_1",
+          "readings": {
+            "first": "Genesis 9:8-17",
+            "psalm": "Psalm 25:1-10",
+            "second": "1 Peter 3:18-22",
+            "gospel": "Mark 1:9-15"
+          }
+        },
+        {
+          "id": "lent-2-b",
+          "name": "Second Sunday in Lent",
+          "date_pattern": "lent_2",
+          "readings": {
+            "first": "Genesis 17:1-7, 15-16",
+            "psalm": "Psalm 22:23-31",
+            "second": "Romans 4:13-25",
+            "gospel": "Mark 8:31-38"
+          }
+        },
+        {
+          "id": "lent-3-b",
+          "name": "Third Sunday in Lent",
+          "date_pattern": "lent_3",
+          "readings": {
+            "first": "Exodus 20:1-17",
+            "psalm": "Psalm 19",
+            "second": "1 Corinthians 1:18-25",
+            "gospel": "John 2:13-22"
+          }
+        },
+        {
+          "id": "lent-4-b",
+          "name": "Fourth Sunday in Lent",
+          "date_pattern": "lent_4",
+          "readings": {
+            "first": "Numbers 21:4-9",
+            "psalm": "Psalm 107:1-3, 17-22",
+            "second": "Ephesians 2:1-10",
+            "gospel": "John 3:14-21"
+          }
+        },
+        {
+          "id": "lent-5-b",
+          "name": "Fifth Sunday in Lent",
+          "date_pattern": "lent_5",
+          "readings": {
+            "first": "Jeremiah 31:31-34",
+            "psalm": "Psalm 51:1-12 OR Psalm 119:9-16",
+            "second": "Hebrews 5:5-10",
+            "gospel": "John 12:20-33"
+          }
+        },
+        {
+          "id": "palm-sunday-b",
+          "name": "Palm Sunday",
+          "date_pattern": "palm_sunday",
+          "readings": {
+            "first": "Isaiah 50:4-9a",
+            "psalm": "Psalm 31:9-16",
+            "second": "Philippians 2:5-11",
+            "gospel": "Mark 14:1-15:47 OR Mark 15:1-39 (40-47)"
+          }
+        }
+      ]
+    },
+    "easter": {
+      "name": "Easter",
+      "feast_days": [
+        {
+          "id": "easter-vigil-b",
+          "name": "Easter Vigil",
+          "date_pattern": "easter_vigil",
+          "readings": {
+            "first": "Genesis 1:1-2:4a",
+            "psalm": "Psalm 136:1-9, 23-26",
+            "second": "Romans 6:3-11",
+            "gospel": "Mark 16:1-8"
+          }
+        },
+        {
+          "id": "easter-day-b",
+          "name": "Easter Day",
+          "date_pattern": "easter_day",
+          "readings": {
+            "first": "Acts 10:34-43 OR Isaiah 25:6-9",
+            "psalm": "Psalm 118:1-2, 14-24",
+            "second": "1 Corinthians 15:1-11 OR Acts 10:34-43",
+            "gospel": "John 20:1-18 OR Mark 16:1-8"
+          }
+        }
+      ],
+      "sundays": [
+        {
+          "id": "easter-2-b",
+          "name": "Second Sunday of Easter",
+          "date_pattern": "easter_2",
+          "readings": {
+            "first": "Acts 4:32-35",
+            "psalm": "Psalm 133",
+            "second": "1 John 1:1-2:2",
+            "gospel": "John 20:19-31"
+          }
+        },
+        {
+          "id": "easter-3-b",
+          "name": "Third Sunday of Easter",
+          "date_pattern": "easter_3",
+          "readings": {
+            "first": "Acts 3:12-19",
+            "psalm": "Psalm 4",
+            "second": "1 John 3:1-7",
+            "gospel": "Luke 24:36b-48"
+          }
+        },
+        {
+          "id": "easter-4-b",
+          "name": "Fourth Sunday of Easter",
+          "date_pattern": "easter_4",
+          "readings": {
+            "first": "Acts 4:5-12",
+            "psalm": "Psalm 23",
+            "second": "1 John 3:16-24",
+            "gospel": "John 10:11-18"
+          }
+        },
+        {
+          "id": "easter-5-b",
+          "name": "Fifth Sunday of Easter",
+          "date_pattern": "easter_5",
+          "readings": {
+            "first": "Acts 8:26-40",
+            "psalm": "Psalm 22:25-31",
+            "second": "1 John 4:7-21",
+            "gospel": "John 15:1-8"
+          }
+        },
+        {
+          "id": "easter-6-b",
+          "name": "Sixth Sunday of Easter",
+          "date_pattern": "easter_6",
+          "readings": {
+            "first": "Acts 10:44-48",
+            "psalm": "Psalm 98",
+            "second": "1 John 5:1-6",
+            "gospel": "John 15:9-17"
+          }
+        },
+        {
+          "id": "ascension-b",
+          "name": "Ascension Day",
+          "date_pattern": "ascension",
+          "readings": {
+            "first": "Acts 1:1-11",
+            "psalm": "Psalm 47 OR Psalm 93",
+            "second": "Ephesians 1:15-23",
+            "gospel": "Luke 24:44-53"
+          }
+        },
+        {
+          "id": "easter-7-b",
+          "name": "Seventh Sunday of Easter",
+          "date_pattern": "easter_7",
+          "readings": {
+            "first": "Acts 1:15-17, 21-26",
+            "psalm": "Psalm 1",
+            "second": "1 John 5:9-13",
+            "gospel": "John 17:6-19"
+          }
+        },
+        {
+          "id": "pentecost-b",
+          "name": "Day of Pentecost",
+          "date_pattern": "pentecost",
+          "readings": {
+            "first": "Acts 2:1-21 OR Ezekiel 37:1-14",
+            "psalm": "Psalm 104:24-34, 35b",
+            "second": "Romans 8:22-27 OR Acts 2:1-21",
+            "gospel": "John 15:26-27; 16:4b-15"
+          }
+        }
+      ]
+    },
+    "ordinary_time": {
+      "name": "Ordinary Time",
+      "sundays": [
+        {
+          "id": "trinity-sunday-b",
+          "name": "Trinity Sunday",
+          "date_pattern": "trinity_sunday",
+          "readings": {
+            "first": "Isaiah 6:1-8",
+            "psalm": "Psalm 29",
+            "second": "Romans 8:12-17",
+            "gospel": "John 3:1-17"
+          }
+        },
+        {
+          "id": "proper-4-b",
+          "name": "Proper 4 (Ordinary 9)",
+          "date_pattern": "proper_4",
+          "readings": {
+            "first": "1 Samuel 3:1-10 (11-20)",
+            "psalm": "Psalm 139:1-6, 13-18",
+            "second": "2 Corinthians 4:5-12",
+            "gospel": "Mark 2:23-3:6"
+          }
+        },
+        {
+          "id": "proper-5-b",
+          "name": "Proper 5 (Ordinary 10)",
+          "date_pattern": "proper_5",
+          "readings": {
+            "first": "1 Samuel 8:4-11 (12-15) 16-20 (11:14-15)",
+            "psalm": "Psalm 138",
+            "second": "2 Corinthians 4:13-5:1",
+            "gospel": "Mark 3:20-35"
+          }
+        },
+        {
+          "id": "proper-6-b",
+          "name": "Proper 6 (Ordinary 11)",
+          "date_pattern": "proper_6",
+          "readings": {
+            "first": "1 Samuel 15:34-16:13",
+            "psalm": "Psalm 20",
+            "second": "2 Corinthians 5:6-10 (11-13) 14-17",
+            "gospel": "Mark 4:26-34"
+          }
+        },
+        {
+          "id": "proper-7-b",
+          "name": "Proper 7 (Ordinary 12)",
+          "date_pattern": "proper_7",
+          "readings": {
+            "first": "1 Samuel 17:(1a, 4-11, 19-23) 32-49",
+            "psalm": "Psalm 9:9-20 OR Psalm 133",
+            "second": "2 Corinthians 6:1-13",
+            "gospel": "Mark 4:35-41"
+          }
+        },
+        {
+          "id": "proper-8-b",
+          "name": "Proper 8 (Ordinary 13)",
+          "date_pattern": "proper_8",
+          "readings": {
+            "first": "2 Samuel 1:1, 17-27",
+            "psalm": "Psalm 130",
+            "second": "2 Corinthians 8:7-15",
+            "gospel": "Mark 5:21-43"
+          }
+        },
+        {
+          "id": "proper-9-b",
+          "name": "Proper 9 (Ordinary 14)",
+          "date_pattern": "proper_9",
+          "readings": {
+            "first": "2 Samuel 5:1-5, 9-10",
+            "psalm": "Psalm 48",
+            "second": "2 Corinthians 12:2-10",
+            "gospel": "Mark 6:1-13"
+          }
+        },
+        {
+          "id": "proper-10-b",
+          "name": "Proper 10 (Ordinary 15)",
+          "date_pattern": "proper_10",
+          "readings": {
+            "first": "2 Samuel 6:1-5, 12b-19",
+            "psalm": "Psalm 24",
+            "second": "Ephesians 1:3-14",
+            "gospel": "Mark 6:14-29"
+          }
+        },
+        {
+          "id": "proper-11-b",
+          "name": "Proper 11 (Ordinary 16)",
+          "date_pattern": "proper_11",
+          "readings": {
+            "first": "2 Samuel 7:1-14a",
+            "psalm": "Psalm 89:20-37",
+            "second": "Ephesians 2:11-22",
+            "gospel": "Mark 6:30-34, 53-56"
+          }
+        },
+        {
+          "id": "proper-12-b",
+          "name": "Proper 12 (Ordinary 17)",
+          "date_pattern": "proper_12",
+          "readings": {
+            "first": "2 Samuel 11:1-15",
+            "psalm": "Psalm 14",
+            "second": "Ephesians 3:14-21",
+            "gospel": "John 6:1-21"
+          }
+        },
+        {
+          "id": "proper-13-b",
+          "name": "Proper 13 (Ordinary 18)",
+          "date_pattern": "proper_13",
+          "readings": {
+            "first": "2 Samuel 11:26-12:13a",
+            "psalm": "Psalm 51:1-12",
+            "second": "Ephesians 4:1-16",
+            "gospel": "John 6:24-35"
+          }
+        },
+        {
+          "id": "proper-14-b",
+          "name": "Proper 14 (Ordinary 19)",
+          "date_pattern": "proper_14",
+          "readings": {
+            "first": "2 Samuel 18:5-9, 15, 31-33",
+            "psalm": "Psalm 130",
+            "second": "Ephesians 4:25-5:2",
+            "gospel": "John 6:35, 41-51"
+          }
+        },
+        {
+          "id": "proper-15-b",
+          "name": "Proper 15 (Ordinary 20)",
+          "date_pattern": "proper_15",
+          "readings": {
+            "first": "1 Kings 2:10-12; 3:3-14",
+            "psalm": "Psalm 111",
+            "second": "Ephesians 5:15-20",
+            "gospel": "John 6:51-58"
+          }
+        },
+        {
+          "id": "proper-16-b",
+          "name": "Proper 16 (Ordinary 21)",
+          "date_pattern": "proper_16",
+          "readings": {
+            "first": "1 Kings 8:(1, 6, 10-11) 22-30, 41-43",
+            "psalm": "Psalm 84",
+            "second": "Ephesians 6:10-20",
+            "gospel": "John 6:56-69"
+          }
+        },
+        {
+          "id": "proper-17-b",
+          "name": "Proper 17 (Ordinary 22)",
+          "date_pattern": "proper_17",
+          "readings": {
+            "first": "Song of Solomon 2:8-13",
+            "psalm": "Psalm 45:1-2, 6-9",
+            "second": "James 1:17-27",
+            "gospel": "Mark 7:1-8, 14-15, 21-23"
+          }
+        },
+        {
+          "id": "proper-18-b",
+          "name": "Proper 18 (Ordinary 23)",
+          "date_pattern": "proper_18",
+          "readings": {
+            "first": "Proverbs 22:1-2, 8-9, 22-23",
+            "psalm": "Psalm 125",
+            "second": "James 2:1-10 (11-13) 14-17",
+            "gospel": "Mark 7:24-37"
+          }
+        },
+        {
+          "id": "proper-19-b",
+          "name": "Proper 19 (Ordinary 24)",
+          "date_pattern": "proper_19",
+          "readings": {
+            "first": "Proverbs 1:20-33",
+            "psalm": "Psalm 19 OR Wisdom 7:26-8:1",
+            "second": "James 3:1-12",
+            "gospel": "Mark 8:27-38"
+          }
+        },
+        {
+          "id": "proper-20-b",
+          "name": "Proper 20 (Ordinary 25)",
+          "date_pattern": "proper_20",
+          "readings": {
+            "first": "Proverbs 31:10-31",
+            "psalm": "Psalm 1",
+            "second": "James 3:13-4:3, 7-8a",
+            "gospel": "Mark 9:30-37"
+          }
+        },
+        {
+          "id": "proper-21-b",
+          "name": "Proper 21 (Ordinary 26)",
+          "date_pattern": "proper_21",
+          "readings": {
+            "first": "Esther 7:1-6, 9-10; 9:20-22",
+            "psalm": "Psalm 124",
+            "second": "James 5:13-20",
+            "gospel": "Mark 9:38-50"
+          }
+        },
+        {
+          "id": "proper-22-b",
+          "name": "Proper 22 (Ordinary 27)",
+          "date_pattern": "proper_22",
+          "readings": {
+            "first": "Job 1:1; 2:1-10",
+            "psalm": "Psalm 26",
+            "second": "Hebrews 1:1-4; 2:5-12",
+            "gospel": "Mark 10:2-16"
+          }
+        },
+        {
+          "id": "proper-23-b",
+          "name": "Proper 23 (Ordinary 28)",
+          "date_pattern": "proper_23",
+          "readings": {
+            "first": "Job 23:1-9, 16-17",
+            "psalm": "Psalm 22:1-15",
+            "second": "Hebrews 4:12-16",
+            "gospel": "Mark 10:17-31"
+          }
+        },
+        {
+          "id": "proper-24-b",
+          "name": "Proper 24 (Ordinary 29)",
+          "date_pattern": "proper_24",
+          "readings": {
+            "first": "Job 38:1-7 (34-41)",
+            "psalm": "Psalm 104:1-9, 24, 35c",
+            "second": "Hebrews 5:1-10",
+            "gospel": "Mark 10:35-45"
+          }
+        },
+        {
+          "id": "proper-25-b",
+          "name": "Proper 25 (Ordinary 30)",
+          "date_pattern": "proper_25",
+          "readings": {
+            "first": "Job 42:1-6, 10-17",
+            "psalm": "Psalm 34:1-8 (19-22)",
+            "second": "Hebrews 7:23-28",
+            "gospel": "Mark 10:46-52"
+          }
+        },
+        {
+          "id": "proper-26-b",
+          "name": "Proper 26 (Ordinary 31)",
+          "date_pattern": "proper_26",
+          "readings": {
+            "first": "Ruth 1:1-18",
+            "psalm": "Psalm 146",
+            "second": "Hebrews 9:11-14",
+            "gospel": "Mark 12:28-34"
+          }
+        },
+        {
+          "id": "proper-27-b",
+          "name": "Proper 27 (Ordinary 32)",
+          "date_pattern": "proper_27",
+          "readings": {
+            "first": "Ruth 3:1-5; 4:13-17",
+            "psalm": "Psalm 127",
+            "second": "Hebrews 9:24-28",
+            "gospel": "Mark 12:38-44"
+          }
+        },
+        {
+          "id": "proper-28-b",
+          "name": "Proper 28 (Ordinary 33)",
+          "date_pattern": "proper_28",
+          "readings": {
+            "first": "1 Samuel 1:4-20",
+            "psalm": "1 Samuel 2:1-10",
+            "second": "Hebrews 10:11-14 (15-18) 19-25",
+            "gospel": "Mark 13:1-8"
+          }
+        },
+        {
+          "id": "christ-king-b",
+          "name": "Christ the King Sunday",
+          "date_pattern": "christ_king",
+          "readings": {
+            "first": "2 Samuel 23:1-7",
+            "psalm": "Psalm 132:1-12 (13-18)",
+            "second": "Revelation 1:4b-8",
+            "gospel": "John 18:33-37"
+          }
+        }
+      ]
+    }
+  }
+}

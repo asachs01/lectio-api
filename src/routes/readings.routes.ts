@@ -9,7 +9,9 @@ const readingsController = new ReadingsController();
  * @swagger
  * /api/v1/readings:
  *   get:
+ *     operationId: getReadingsByDate
  *     summary: Get readings for a specific date
+ *     description: Retrieves all scripture readings (First, Psalm, Second, Gospel) for a specific date according to the specified lectionary tradition
  *     tags: [Readings]
  *     parameters:
  *       - in: query
@@ -60,7 +62,9 @@ router.get('/', asyncHandler(readingsController.getByDate.bind(readingsControlle
  * @swagger
  * /api/v1/readings/today:
  *   get:
+ *     operationId: getTodaysReadings
  *     summary: Get today's readings
+ *     description: Retrieves all scripture readings for the current date according to the specified lectionary tradition
  *     tags: [Readings]
  *     parameters:
  *       - in: query
@@ -98,7 +102,9 @@ router.get('/today', asyncHandler(readingsController.getToday.bind(readingsContr
  * @swagger
  * /api/v1/readings/range:
  *   get:
+ *     operationId: getReadingsByDateRange
  *     summary: Get readings for a date range
+ *     description: Retrieves all scripture readings within a specified date range with pagination support
  *     tags: [Readings]
  *     parameters:
  *       - in: query

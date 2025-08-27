@@ -9,7 +9,9 @@ const traditionsController = new TraditionsController();
  * @swagger
  * /api/v1/traditions:
  *   get:
+ *     operationId: getAllTraditions
  *     summary: Get all lectionary traditions
+ *     description: Retrieves a list of all available lectionary traditions (RCL, Catholic, Episcopal, Lutheran, etc.)
  *     tags: [Traditions]
  *     responses:
  *       200:
@@ -39,7 +41,9 @@ router.get('/', asyncHandler(traditionsController.getAll.bind(traditionsControll
  * @swagger
  * /api/v1/traditions/{id}:
  *   get:
+ *     operationId: getTraditionById
  *     summary: Get a specific lectionary tradition
+ *     description: Retrieves detailed information about a specific lectionary tradition by its ID
  *     tags: [Traditions]
  *     parameters:
  *       - in: path
@@ -77,7 +81,9 @@ router.get('/:id', asyncHandler(traditionsController.getById.bind(traditionsCont
  * @swagger
  * /api/v1/traditions/{id}/seasons:
  *   get:
+ *     operationId: getTraditionSeasons
  *     summary: Get liturgical seasons for a tradition
+ *     description: Retrieves all liturgical seasons (Advent, Christmas, Epiphany, Lent, Easter, Pentecost) for a specific tradition and optional year
  *     tags: [Traditions]
  *     parameters:
  *       - in: path

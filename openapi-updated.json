@@ -1,0 +1,919 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Lectionary API",
+        "version": "1.0.0",
+        "description": "A modern REST API for serving lectionary readings and liturgical calendar data",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/asachs01/lectio-api",
+            "email": "api@lectio-api.org"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Development server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-API-Key",
+                "description": "API Key for authentication"
+            },
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT token for authentication"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "Error message"
+                            },
+                            "statusCode": {
+                                "type": "integer",
+                                "description": "HTTP status code"
+                            },
+                            "timestamp": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "Timestamp of the error"
+                            },
+                            "details": {
+                                "type": "object",
+                                "description": "Additional error details (development mode only)"
+                            }
+                        }
+                    }
+                }
+            },
+            "HealthCheck": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "healthy",
+                            "unhealthy"
+                        ],
+                        "description": "Health status of the API"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp of the health check"
+                    },
+                    "uptime": {
+                        "type": "number",
+                        "description": "Server uptime in seconds"
+                    },
+                    "environment": {
+                        "type": "string",
+                        "description": "Current environment"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "API version"
+                    }
+                }
+            },
+            "LectionaryTradition": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the tradition"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the lectionary tradition"
+                    },
+                    "abbreviation": {
+                        "type": "string",
+                        "description": "Common abbreviation for the tradition"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the tradition"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Start date of the tradition calendar"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "End date of the tradition calendar"
+                    }
+                }
+            },
+            "LiturgicalSeason": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the season"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the liturgical season"
+                    },
+                    "color": {
+                        "type": "string",
+                        "description": "Liturgical color for the season"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Start date of the season"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "End date of the season"
+                    },
+                    "traditionId": {
+                        "type": "string",
+                        "description": "ID of the associated tradition"
+                    }
+                }
+            },
+            "DailyReading": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier for the reading"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Date of the reading"
+                    },
+                    "traditionId": {
+                        "type": "string",
+                        "description": "ID of the associated tradition"
+                    },
+                    "seasonId": {
+                        "type": "string",
+                        "description": "ID of the associated season"
+                    },
+                    "readings": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "first",
+                                        "psalm",
+                                        "second",
+                                        "gospel"
+                                    ],
+                                    "description": "Type of reading"
+                                },
+                                "citation": {
+                                    "type": "string",
+                                    "description": "Scripture citation"
+                                },
+                                "text": {
+                                    "type": "string",
+                                    "description": "Full text of the reading"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Health",
+            "description": "Health check and monitoring endpoints for API status"
+        },
+        {
+            "name": "Traditions",
+            "description": "Manage and query different lectionary traditions (RCL, Catholic, Episcopal, etc.)"
+        },
+        {
+            "name": "Readings",
+            "description": "Retrieve daily scripture readings based on liturgical calendar"
+        },
+        {
+            "name": "Calendar",
+            "description": "Access liturgical calendar information including seasons and special days"
+        },
+        {
+            "name": "Search",
+            "description": "Search and query scripture passages and liturgical content"
+        }
+    ],
+    "paths": {
+        "/api/v1/calendar/current": {
+            "get": {
+                "operationId": "getCurrentCalendar",
+                "summary": "Get current liturgical calendar information",
+                "description": "Retrieves the current liturgical season, year, and upcoming special days for today's date",
+                "tags": [
+                    "Calendar"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "tradition",
+                        "description": "Lectionary tradition ID",
+                        "schema": {
+                            "type": "string",
+                            "default": "rcl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current liturgical calendar information",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "currentSeason": {
+                                                    "$ref": "#/components/schemas/LiturgicalSeason"
+                                                },
+                                                "currentYear": {
+                                                    "type": "integer"
+                                                },
+                                                "today": {
+                                                    "type": "string",
+                                                    "format": "date"
+                                                },
+                                                "upcomingSpecialDays": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date"
+                                                            },
+                                                            "daysUntil": {
+                                                                "type": "integer"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/calendar/{year}": {
+            "get": {
+                "operationId": "getCalendarByYear",
+                "summary": "Get liturgical calendar for a specific year",
+                "description": "Retrieves complete liturgical calendar information including all seasons and special days for the specified year",
+                "tags": [
+                    "Calendar"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "year",
+                        "required": true,
+                        "description": "Liturgical year",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tradition",
+                        "description": "Lectionary tradition ID",
+                        "schema": {
+                            "type": "string",
+                            "default": "rcl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liturgical calendar for the specified year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "year": {
+                                                    "type": "integer"
+                                                },
+                                                "tradition": {
+                                                    "type": "string"
+                                                },
+                                                "seasons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/LiturgicalSeason"
+                                                    }
+                                                },
+                                                "specialDays": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date"
+                                                            },
+                                                            "type": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Calendar not found for the specified year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/calendar/{year}/seasons": {
+            "get": {
+                "operationId": "getSeasonsByYear",
+                "summary": "Get liturgical seasons for a specific year",
+                "description": "Retrieves all liturgical seasons (Advent, Christmas, Lent, Easter, etc.) for the specified liturgical year",
+                "tags": [
+                    "Calendar"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "year",
+                        "required": true,
+                        "description": "Liturgical year",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tradition",
+                        "description": "Lectionary tradition ID",
+                        "schema": {
+                            "type": "string",
+                            "default": "rcl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of liturgical seasons for the year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LiturgicalSeason"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/readings": {
+            "get": {
+                "operationId": "getReadingsByDate",
+                "summary": "Get readings for a specific date",
+                "description": "Retrieves all scripture readings (First, Psalm, Second, Gospel) for a specific date according to the specified lectionary tradition",
+                "tags": [
+                    "Readings"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "date",
+                        "required": true,
+                        "description": "Date in YYYY-MM-DD format",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tradition",
+                        "description": "Lectionary tradition ID",
+                        "schema": {
+                            "type": "string",
+                            "default": "rcl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daily readings for the specified date",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/DailyReading"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No readings found for the specified date",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/readings/today": {
+            "get": {
+                "operationId": "getTodaysReadings",
+                "summary": "Get today's readings",
+                "description": "Retrieves all scripture readings for the current date according to the specified lectionary tradition",
+                "tags": [
+                    "Readings"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "tradition",
+                        "description": "Lectionary tradition ID",
+                        "schema": {
+                            "type": "string",
+                            "default": "rcl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Today's readings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/DailyReading"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No readings found for today",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/readings/range": {
+            "get": {
+                "operationId": "getReadingsByDateRange",
+                "summary": "Get readings for a date range",
+                "description": "Retrieves all scripture readings within a specified date range with pagination support",
+                "tags": [
+                    "Readings"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "required": true,
+                        "description": "Start date in YYYY-MM-DD format",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "required": true,
+                        "description": "End date in YYYY-MM-DD format",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tradition",
+                        "description": "Lectionary tradition ID",
+                        "schema": {
+                            "type": "string",
+                            "default": "rcl"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "description": "Page number for pagination",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "description": "Number of results per page",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of readings for the date range",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/DailyReading"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "type": "object",
+                                            "properties": {
+                                                "page": {
+                                                    "type": "integer"
+                                                },
+                                                "limit": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date range",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/traditions": {
+            "get": {
+                "operationId": "getAllTraditions",
+                "summary": "Get all lectionary traditions",
+                "description": "Retrieves a list of all available lectionary traditions (RCL, Catholic, Episcopal, Lutheran, etc.)",
+                "tags": [
+                    "Traditions"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of all available lectionary traditions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LectionaryTradition"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of traditions"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/traditions/{id}": {
+            "get": {
+                "operationId": "getTraditionById",
+                "summary": "Get a specific lectionary tradition",
+                "description": "Retrieves detailed information about a specific lectionary tradition by its ID",
+                "tags": [
+                    "Traditions"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "description": "Tradition ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tradition details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/LectionaryTradition"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tradition not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/traditions/{id}/seasons": {
+            "get": {
+                "operationId": "getTraditionSeasons",
+                "summary": "Get liturgical seasons for a tradition",
+                "description": "Retrieves all liturgical seasons (Advent, Christmas, Epiphany, Lent, Easter, Pentecost) for a specific tradition and optional year",
+                "tags": [
+                    "Traditions"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "description": "Tradition ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "year",
+                        "description": "Liturgical year",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of liturgical seasons",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LiturgicalSeason"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tradition not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -11,7 +11,9 @@ const calendarController = new calendar_controller_1.CalendarController();
  * @swagger
  * /api/v1/calendar/current:
  *   get:
+ *     operationId: getCurrentCalendar
  *     summary: Get current liturgical calendar information
+ *     description: Retrieves the current liturgical season, year, and upcoming special days for today's date
  *     tags: [Calendar]
  *     parameters:
  *       - in: query
@@ -62,7 +64,9 @@ router.get('/current', (0, error_handler_1.asyncHandler)(calendarController.getC
  * @swagger
  * /api/v1/calendar/{year}:
  *   get:
+ *     operationId: getCalendarByYear
  *     summary: Get liturgical calendar for a specific year
+ *     description: Retrieves complete liturgical calendar information including all seasons and special days for the specified year
  *     tags: [Calendar]
  *     parameters:
  *       - in: path
@@ -132,7 +136,9 @@ router.get('/:year', (0, error_handler_1.asyncHandler)(calendarController.getByY
  * @swagger
  * /api/v1/calendar/{year}/seasons:
  *   get:
+ *     operationId: getSeasonsByYear
  *     summary: Get liturgical seasons for a specific year
+ *     description: Retrieves all liturgical seasons (Advent, Christmas, Lent, Easter, etc.) for the specified liturgical year
  *     tags: [Calendar]
  *     parameters:
  *       - in: path
