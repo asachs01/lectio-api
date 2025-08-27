@@ -1,0 +1,66 @@
+{
+  "name": "lectio-api-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Lectionary API - Access liturgical readings and calendar data through decision tree-based tools",
+  "author": "Aaron Sachs",
+  "license": "MIT",
+  "runtime": "node",
+  "main": "dist/index.js",
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/index.js"]
+    },
+    {
+      "type": "http",
+      "url": "http://localhost:3001",
+      "endpoints": {
+        "rpc": "/rpc",
+        "batch": "/rpc/batch",
+        "sse": "/sse",
+        "health": "/health",
+        "tools": "/tools"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "get_readings",
+      "description": "Get scripture readings for any date or today",
+      "category": "readings"
+    },
+    {
+      "name": "explore_calendar",
+      "description": "Explore liturgical calendar - seasons, years, special days",
+      "category": "calendar"
+    },
+    {
+      "name": "search_lectionary",
+      "description": "Search by date range, season, scripture, or feast day",
+      "category": "search"
+    },
+    {
+      "name": "analyze_liturgical_context",
+      "description": "Get comprehensive liturgical analysis for any date",
+      "category": "analysis"
+    }
+  ],
+  "environment": {
+    "LECTIO_API_URL": {
+      "description": "Base URL for the Lectionary API",
+      "default": "http://localhost:3000/api/v1",
+      "required": false
+    },
+    "MCP_TRANSPORT": {
+      "description": "Transport type (stdio or http)",
+      "default": "stdio",
+      "required": false
+    },
+    "PORT": {
+      "description": "Port for HTTP transport",
+      "default": "3001",
+      "required": false
+    }
+  }
+}
