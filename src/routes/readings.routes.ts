@@ -3,7 +3,16 @@ import { ReadingsController } from '../controllers/readings.controller';
 import { asyncHandler } from '../middleware/error-handler';
 
 const router = Router();
-const readingsController = new ReadingsController();
+
+// Lazy initialization to ensure database is connected
+let readingsController: ReadingsController;
+
+const getController = (): ReadingsController => {
+  if (!readingsController) {
+    readingsController = new ReadingsController();
+  }
+  return readingsController;
+};
 
 /**
  * @swagger
@@ -56,7 +65,7 @@ const readingsController = new ReadingsController();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', asyncHandler(readingsController.getByDate.bind(readingsController)));
+router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)));
 
 /**
  * @swagger
@@ -96,7 +105,7 @@ router.get('/', asyncHandler(readingsController.getByDate.bind(readingsControlle
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/today', asyncHandler(readingsController.getToday.bind(readingsController)));
+router.get('/today', asyncHandler((req, res) => getController().getToday(req, res)));
 
 /**
  * @swagger
@@ -176,6 +185,6 @@ router.get('/today', asyncHandler(readingsController.getToday.bind(readingsContr
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/range', asyncHandler(readingsController.getByDateRange.bind(readingsController)));
+router.get('/range', asyncHandler((req, res) => getController().getByDateRange(req, res)));
 
 export { router as readingsRouter };

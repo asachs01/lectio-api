@@ -3,7 +3,16 @@ import { CalendarController } from '../controllers/calendar.controller';
 import { asyncHandler } from '../middleware/error-handler';
 
 const router = Router();
-const calendarController = new CalendarController();
+
+// Lazy initialization to ensure database is connected
+let calendarController: CalendarController;
+
+const getController = (): CalendarController => {
+  if (!calendarController) {
+    calendarController = new CalendarController();
+  }
+  return calendarController;
+};
 
 /**
  * @swagger
@@ -57,7 +66,7 @@ const calendarController = new CalendarController();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/current', asyncHandler(calendarController.getCurrent.bind(calendarController)));
+router.get('/current', asyncHandler((req, res) => getController().getCurrent(req, res)));
 
 /**
  * @swagger
@@ -130,7 +139,7 @@ router.get('/current', asyncHandler(calendarController.getCurrent.bind(calendarC
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:year', asyncHandler(calendarController.getByYear.bind(calendarController)));
+router.get('/:year', asyncHandler((req, res) => getController().getByYear(req, res)));
 
 /**
  * @swagger
@@ -180,6 +189,6 @@ router.get('/:year', asyncHandler(calendarController.getByYear.bind(calendarCont
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:year/seasons', asyncHandler(calendarController.getSeasonsByYear.bind(calendarController)));
+router.get('/:year/seasons', asyncHandler((req, res) => getController().getSeasonsByYear(req, res)));
 
 export { router as calendarRouter };

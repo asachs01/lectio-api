@@ -3,7 +3,16 @@ import { TraditionsController } from '../controllers/traditions.controller';
 import { asyncHandler } from '../middleware/error-handler';
 
 const router = Router();
-const traditionsController = new TraditionsController();
+
+// Lazy initialization to ensure database is connected
+let traditionsController: TraditionsController;
+
+const getController = (): TraditionsController => {
+  if (!traditionsController) {
+    traditionsController = new TraditionsController();
+  }
+  return traditionsController;
+};
 
 /**
  * @swagger
@@ -35,7 +44,7 @@ const traditionsController = new TraditionsController();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', asyncHandler(traditionsController.getAll.bind(traditionsController)));
+router.get('/', asyncHandler((req, res) => getController().getAll(req, res)));
 
 /**
  * @swagger
@@ -75,7 +84,7 @@ router.get('/', asyncHandler(traditionsController.getAll.bind(traditionsControll
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', asyncHandler(traditionsController.getById.bind(traditionsController)));
+router.get('/:id', asyncHandler((req, res) => getController().getById(req, res)));
 
 /**
  * @swagger
@@ -124,6 +133,6 @@ router.get('/:id', asyncHandler(traditionsController.getById.bind(traditionsCont
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id/seasons', asyncHandler(traditionsController.getSeasons.bind(traditionsController)));
+router.get('/:id/seasons', asyncHandler((req, res) => getController().getSeasons(req, res)));
 
 export { router as traditionsRouter };
