@@ -21,27 +21,28 @@ jobs:
 
       - name: Deploy to DigitalOcean App Platform
         run: |
-          # Check if app exists
-          if doctl apps list --format Name --no-header | grep -q "^lectio-api$"; then
-            echo "App exists, updating..."
-            # Update existing app
-            APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api$" | awk '{print $1}')
+          # Get app ID with case-insensitive search for better matching
+          APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio" | head -1 | awk '{print $1}' || true)
+          
+          if [ -n "$APP_ID" ]; then
+            echo "Found existing app with ID: $APP_ID"
+            echo "Updating existing app..."
             doctl apps update $APP_ID --spec app.yaml
             
             # Create deployment
             echo "Creating deployment..."
             doctl apps create-deployment $APP_ID --wait
           else
-            echo "Creating new app..."
+            echo "No existing app found, creating new app..."
             # Create new app
             doctl apps create --spec app.yaml --wait
           fi
 
       - name: Get app info
         run: |
-          # Get app details
-          APP_ID=$(doctl apps list --format ID,Name --no-header | grep "lectio-api$" | awk '{print $1}')
-          if [ ! -z "$APP_ID" ]; then
+          # Get app details with case-insensitive search
+          APP_ID=$(doctl apps list --format ID,Name --no-header | grep -i "lectio" | head -1 | awk '{print $1}' || true)
+          if [ -n "$APP_ID" ]; then
             echo "App ID: $APP_ID"
             APP_URL=$(doctl apps get $APP_ID --format DefaultIngress --no-header)
             echo "App URL: https://$APP_URL"
