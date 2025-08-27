@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # MCP Server with HTTP streaming
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lectio-mcp-server
+    ports:
+      - "3001:3001"
+    environment:
+      - MCP_TRANSPORT=http
+      - PORT=3001
+      - LECTIO_API_URL=${LECTIO_API_URL:-http://host.docker.internal:3000/api/v1}
+      - NODE_ENV=production
+    restart: unless-stopped
+    labels:
+      - "com.lectio.service=mcp-server"
+      - "com.lectio.description=MCP server for Lectionary API"
