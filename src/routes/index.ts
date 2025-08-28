@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { traditionsRouter } from './traditions.routes';
 import { readingsRouter } from './readings.routes';
 import { calendarRouter } from './calendar.routes';
+import { adminRouter } from './admin.routes';
 
 const router = Router();
 
@@ -12,6 +13,7 @@ const API_VERSION = process.env.API_VERSION || 'v1';
 router.use(`/${API_VERSION}/traditions`, traditionsRouter);
 router.use(`/${API_VERSION}/readings`, readingsRouter);
 router.use(`/${API_VERSION}/calendar`, calendarRouter);
+router.use(`/${API_VERSION}/admin`, adminRouter);
 
 // Root API info
 router.get(`/${API_VERSION}`, (_req, res) => {
