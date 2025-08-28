@@ -245,6 +245,7 @@ async function initializeDatabase(): Promise<void> {
     database: process.env.DB_NAME || 'lectionary_api',
     synchronize: false,
     logging: false,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     entities: process.env.NODE_ENV === 'production' 
       ? [path.join(__dirname, '../models/*.entity.js')]
       : [path.join(__dirname, '../models/*.entity.ts')],
