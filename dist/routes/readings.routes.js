@@ -6,7 +6,14 @@ const readings_controller_1 = require("../controllers/readings.controller");
 const error_handler_1 = require("../middleware/error-handler");
 const router = (0, express_1.Router)();
 exports.readingsRouter = router;
-const readingsController = new readings_controller_1.ReadingsController();
+// Lazy initialization to ensure database is connected
+let readingsController;
+const getController = () => {
+    if (!readingsController) {
+        readingsController = new readings_controller_1.ReadingsController();
+    }
+    return readingsController;
+};
 /**
  * @swagger
  * /api/v1/readings:
@@ -58,7 +65,7 @@ const readingsController = new readings_controller_1.ReadingsController();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', (0, error_handler_1.asyncHandler)(readingsController.getByDate.bind(readingsController)));
+router.get('/', (0, error_handler_1.asyncHandler)((req, res) => getController().getByDate(req, res)));
 /**
  * @swagger
  * /api/v1/readings/today:
@@ -97,7 +104,7 @@ router.get('/', (0, error_handler_1.asyncHandler)(readingsController.getByDate.b
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/today', (0, error_handler_1.asyncHandler)(readingsController.getToday.bind(readingsController)));
+router.get('/today', (0, error_handler_1.asyncHandler)((req, res) => getController().getToday(req, res)));
 /**
  * @swagger
  * /api/v1/readings/range:
@@ -176,5 +183,5 @@ router.get('/today', (0, error_handler_1.asyncHandler)(readingsController.getTod
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/range', (0, error_handler_1.asyncHandler)(readingsController.getByDateRange.bind(readingsController)));
+router.get('/range', (0, error_handler_1.asyncHandler)((req, res) => getController().getByDateRange(req, res)));
 //# sourceMappingURL=readings.routes.js.map

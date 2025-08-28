@@ -6,7 +6,14 @@ const traditions_controller_1 = require("../controllers/traditions.controller");
 const error_handler_1 = require("../middleware/error-handler");
 const router = (0, express_1.Router)();
 exports.traditionsRouter = router;
-const traditionsController = new traditions_controller_1.TraditionsController();
+// Lazy initialization to ensure database is connected
+let traditionsController;
+const getController = () => {
+    if (!traditionsController) {
+        traditionsController = new traditions_controller_1.TraditionsController();
+    }
+    return traditionsController;
+};
 /**
  * @swagger
  * /api/v1/traditions:
@@ -37,7 +44,7 @@ const traditionsController = new traditions_controller_1.TraditionsController();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/', (0, error_handler_1.asyncHandler)(traditionsController.getAll.bind(traditionsController)));
+router.get('/', (0, error_handler_1.asyncHandler)((req, res) => getController().getAll(req, res)));
 /**
  * @swagger
  * /api/v1/traditions/{id}:
@@ -76,7 +83,7 @@ router.get('/', (0, error_handler_1.asyncHandler)(traditionsController.getAll.bi
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id', (0, error_handler_1.asyncHandler)(traditionsController.getById.bind(traditionsController)));
+router.get('/:id', (0, error_handler_1.asyncHandler)((req, res) => getController().getById(req, res)));
 /**
  * @swagger
  * /api/v1/traditions/{id}/seasons:
@@ -124,5 +131,5 @@ router.get('/:id', (0, error_handler_1.asyncHandler)(traditionsController.getByI
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:id/seasons', (0, error_handler_1.asyncHandler)(traditionsController.getSeasons.bind(traditionsController)));
+router.get('/:id/seasons', (0, error_handler_1.asyncHandler)((req, res) => getController().getSeasons(req, res)));
 //# sourceMappingURL=traditions.routes.js.map
