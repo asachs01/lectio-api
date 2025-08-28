@@ -71,31 +71,5 @@ databases:
     size: db-s-dev-database
     num_nodes: 1
 
-jobs:
-  - name: seed-database
-    kind: POST_DEPLOY
-    github:
-      branch: main
-      deploy_on_push: false
-      repo: asachs01/lectio-api
-    dockerfile_path: Dockerfile
-    source_dir: /
-    run_command: npx typeorm migration:run -d ormconfig.js && node dist/scripts/import-rcl-with-dates.js
-    instance_count: 1
-    instance_size_slug: basic-xxs
-    envs:
-      - key: NODE_ENV
-        value: production
-      - key: DB_HOST
-        value: ${lectio-db.HOSTNAME}
-      - key: DB_PORT
-        value: ${lectio-db.PORT}
-      - key: DB_NAME
-        value: ${lectio-db.DATABASE}
-      - key: DB_USERNAME
-        value: ${lectio-db.USERNAME}
-      - key: DB_PASSWORD
-        value: ${lectio-db.PASSWORD}
-        type: SECRET
-      - key: DB_SSL
-        value: "true"
+# Post-deploy job temporarily disabled - causing deployment failures
+# Will seed database manually after deployment completes
