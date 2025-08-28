@@ -80,7 +80,7 @@ jobs:
       repo: asachs01/lectio-api
     dockerfile_path: Dockerfile
     source_dir: /
-    run_command: /bin/sh -c "npx typeorm migration:run -d ormconfig.js && node dist/scripts/import-rcl-with-dates.js"
+    run_command: node dist/scripts/import-rcl-with-dates.js
     instance_count: 1
     instance_size_slug: basic-xxs
     envs:
