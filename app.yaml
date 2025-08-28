@@ -80,7 +80,7 @@ jobs:
       repo: asachs01/lectio-api
     dockerfile_path: Dockerfile
     source_dir: /
-    run_command: npm run db:migrate && npm run data:import-rcl
+    run_command: npm run db:seed-production
     instance_count: 1
     instance_size_slug: basic-xxs
     envs:
