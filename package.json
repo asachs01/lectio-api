@@ -31,7 +31,7 @@
     "data:import-lectionary": "ts-node src/scripts/import-lectionary-data.ts",
     "data:import-rcl": "ts-node src/scripts/import-rcl-with-dates.ts",
     "data:import-rcl:prod": "node dist/scripts/import-rcl-with-dates.js",
-    "db:seed-production": "npm run db:migrate && npm run data:import-rcl:prod"
+    "db:seed-production": "sh scripts/seed-production.sh"
   },
   "keywords": [
     "lectionary",
