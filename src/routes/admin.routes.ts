@@ -17,18 +17,11 @@ router.post('/seed-database', async (req: Request, res: Response): Promise<Respo
   }
   
   try {
-    // Run migrations first
-    console.log('Running migrations...');
-    try {
-      execSync('npx typeorm migration:run -d ormconfig.js', { encoding: 'utf8' });
-    } catch (migrationError) {
-      console.log('Migration may have already run, continuing...');
-    }
-    
-    // Run import script
+    // Skip migrations - they should already be run
+    // Just run the import script
     console.log('Importing RCL data...');
-    const output = execSync('node dist/scripts/import-rcl-with-dates.js', { encoding: 'utf8' });
-    console.log('Import output:', output);
+    execSync('node dist/scripts/import-rcl-with-dates.js', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+    console.log('Import completed');
     
     return res.json({ 
       success: true, 
