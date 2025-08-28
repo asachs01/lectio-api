@@ -245,9 +245,9 @@ async function initializeDatabase(): Promise<void> {
     database: process.env.DB_NAME || 'lectionary_api',
     synchronize: false,
     logging: false,
-    entities: [
-      path.join(__dirname, '../models/*.entity.ts'),
-    ],
+    entities: process.env.NODE_ENV === 'production' 
+      ? [path.join(__dirname, '../models/*.entity.js')]
+      : [path.join(__dirname, '../models/*.entity.ts')],
   });
   await AppDataSource.initialize();
   console.log('Database connection initialized');

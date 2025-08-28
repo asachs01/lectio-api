@@ -15,11 +15,15 @@ const AppDataSource = new DataSource({
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   synchronize: false, // Always false for migrations
   logging: process.env.NODE_ENV === 'development' ? ['query', 'error'] : ['error'],
-  entities: [
-    path.join(__dirname, 'src/models/*.entity{.ts,.js}'),
-    path.join(__dirname, 'dist/models/*.entity.js')
-  ],
-  migrations: [path.join(__dirname, 'src/migrations/*{.ts,.js}')],
+  entities: process.env.NODE_ENV === 'production' 
+    ? [path.join(__dirname, 'dist/models/*.entity.js')]
+    : [
+        path.join(__dirname, 'src/models/*.entity{.ts,.js}'),
+        path.join(__dirname, 'dist/models/*.entity.js')
+      ],
+  migrations: process.env.NODE_ENV === 'production'
+    ? [path.join(__dirname, 'dist/migrations/*.js')]
+    : [path.join(__dirname, 'src/migrations/*{.ts,.js}')],
   subscribers: [path.join(__dirname, 'src/subscribers/*{.ts,.js}')],
 });
 
