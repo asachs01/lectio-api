@@ -39,15 +39,18 @@ export class CreateInitialTables1703000000001 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "seasons" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
-        "name" character varying NOT NULL,
-        "color" character varying NOT NULL,
-        "start_date" TIMESTAMP NOT NULL,
-        "end_date" TIMESTAMP NOT NULL,
+        "name" character varying(50) NOT NULL,
+        "start_date" date NOT NULL,
+        "end_date" date NOT NULL,
+        "color" character varying NOT NULL DEFAULT 'green',
+        "description" text,
+        "sort_order" integer NOT NULL DEFAULT 0,
         "liturgical_year_id" uuid NOT NULL,
-        "created_at" TIMESTAMP NOT NULL DEFAULT now(),
-        "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
+        "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
         CONSTRAINT "PK_seasons" PRIMARY KEY ("id"),
-        CONSTRAINT "FK_seasons_liturgical_year" FOREIGN KEY ("liturgical_year_id") REFERENCES "liturgical_years"("id") ON DELETE CASCADE
+        CONSTRAINT "FK_seasons_liturgical_year" FOREIGN KEY ("liturgical_year_id") REFERENCES "liturgical_years"("id") ON DELETE CASCADE,
+        CONSTRAINT "uq_season_name_year" UNIQUE ("name", "liturgical_year_id")
       )
     `);
 
@@ -115,31 +118,31 @@ export class CreateInitialTables1703000000001 implements MigrationInterface {
         AND table_name IN ('readings', 'traditions', 'liturgical_years', 'seasons', 'special_days')
     `);
     
-    if (tables.some((t: any) => t.table_name === 'readings')) {
-      await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_readings_date" ON "readings" ("date")`);
-      await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_readings_tradition" ON "readings" ("tradition_id")`);
+    if (tables.some((t: { table_name: string }) => t.table_name === 'readings')) {
+      await queryRunner.query('CREATE INDEX IF NOT EXISTS "IDX_readings_date" ON "readings" ("date")');
+      await queryRunner.query('CREATE INDEX IF NOT EXISTS "IDX_readings_tradition" ON "readings" ("tradition_id")');
     }
     
-    if (tables.some((t: any) => t.table_name === 'liturgical_years')) {
-      await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_liturgical_years_tradition" ON "liturgical_years" ("tradition_id")`);
+    if (tables.some((t: { table_name: string }) => t.table_name === 'liturgical_years')) {
+      await queryRunner.query('CREATE INDEX IF NOT EXISTS "IDX_liturgical_years_tradition" ON "liturgical_years" ("tradition_id")');
     }
     
-    if (tables.some((t: any) => t.table_name === 'seasons')) {
-      await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_seasons_liturgical_year" ON "seasons" ("liturgical_year_id")`);
+    if (tables.some((t: { table_name: string }) => t.table_name === 'seasons')) {
+      await queryRunner.query('CREATE INDEX IF NOT EXISTS "IDX_seasons_liturgical_year" ON "seasons" ("liturgical_year_id")');
     }
     
-    if (tables.some((t: any) => t.table_name === 'special_days')) {
-      await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_special_days_liturgical_year" ON "special_days" ("liturgical_year_id")`);
+    if (tables.some((t: { table_name: string }) => t.table_name === 'special_days')) {
+      await queryRunner.query('CREATE INDEX IF NOT EXISTS "IDX_special_days_liturgical_year" ON "special_days" ("liturgical_year_id")');
     }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop tables in reverse order (to respect foreign keys)
-    await queryRunner.query(`DROP TABLE IF EXISTS "scriptures"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "readings"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "special_days"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "seasons"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "liturgical_years"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "traditions"`);
+    await queryRunner.query('DROP TABLE IF EXISTS "scriptures"');
+    await queryRunner.query('DROP TABLE IF EXISTS "readings"');
+    await queryRunner.query('DROP TABLE IF EXISTS "special_days"');
+    await queryRunner.query('DROP TABLE IF EXISTS "seasons"');
+    await queryRunner.query('DROP TABLE IF EXISTS "liturgical_years"');
+    await queryRunner.query('DROP TABLE IF EXISTS "traditions"');
   }
 }
