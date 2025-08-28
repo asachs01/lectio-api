@@ -28,7 +28,8 @@
     "entities:validate": "ts-node src/scripts/validate-entities.ts",
     "db:test": "ts-node src/scripts/test-db-connection.ts",
     "db:test:complete": "ts-node src/scripts/complete-db-test.ts",
-    "data:import-lectionary": "ts-node src/scripts/import-lectionary-data.ts"
+    "data:import-lectionary": "ts-node src/scripts/import-lectionary-data.ts",
+    "data:import-rcl": "ts-node src/scripts/import-rcl-with-dates.ts"
   },
   "keywords": [
     "lectionary",
