@@ -7,6 +7,35 @@ const router = Router();
 const ADMIN_KEY = process.env.ADMIN_KEY || 'default-admin-key-change-me';
 
 /**
+ * Run migrations endpoint
+ */
+router.post('/run-migrations', async (req: Request, res: Response): Promise<Response> => {
+  const { key } = req.body;
+  
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    console.log('Running migrations...');
+    const output = execSync('npx typeorm migration:run -d ormconfig.js', { encoding: 'utf8' });
+    
+    return res.json({ 
+      success: true, 
+      message: 'Migrations completed',
+      output: output,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Migration failed:', error);
+    return res.status(500).json({ 
+      error: 'Migration failed', 
+      details: error instanceof Error ? error.message : 'Unknown error', 
+    });
+  }
+});
+
+/**
  * Seed database endpoint - for manual triggering
  */
 router.post('/seed-database', async (req: Request, res: Response): Promise<Response> => {
