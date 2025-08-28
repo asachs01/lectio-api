@@ -74,18 +74,31 @@ export class AddMissingColumns1703000000002 implements MigrationInterface {
       ALTER COLUMN "updated_at" TYPE timestamp with time zone
     `);
 
-    // Add foreign key constraints if they don't exist
-    await queryRunner.query(`
-      ALTER TABLE "readings"
-      ADD CONSTRAINT IF NOT EXISTS "FK_readings_liturgical_year"
-      FOREIGN KEY ("liturgical_year_id") REFERENCES "liturgical_years"("id") ON DELETE CASCADE
+    // Add foreign key constraints (check if they exist first)
+    const constraints = await queryRunner.query(`
+      SELECT constraint_name 
+      FROM information_schema.table_constraints 
+      WHERE table_name = 'readings' 
+      AND constraint_type = 'FOREIGN KEY'
     `);
+    
+    const existingConstraints = constraints.map((c: any) => c.constraint_name);
+    
+    if (!existingConstraints.includes('FK_readings_liturgical_year')) {
+      await queryRunner.query(`
+        ALTER TABLE "readings"
+        ADD CONSTRAINT "FK_readings_liturgical_year"
+        FOREIGN KEY ("liturgical_year_id") REFERENCES "liturgical_years"("id") ON DELETE CASCADE
+      `);
+    }
 
-    await queryRunner.query(`
-      ALTER TABLE "readings" 
-      ADD CONSTRAINT IF NOT EXISTS "FK_readings_scripture"
-      FOREIGN KEY ("scripture_id") REFERENCES "scriptures"("id") ON DELETE SET NULL
-    `);
+    if (!existingConstraints.includes('FK_readings_scripture')) {
+      await queryRunner.query(`
+        ALTER TABLE "readings" 
+        ADD CONSTRAINT "FK_readings_scripture"
+        FOREIGN KEY ("scripture_id") REFERENCES "scriptures"("id") ON DELETE SET NULL
+      `);
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
