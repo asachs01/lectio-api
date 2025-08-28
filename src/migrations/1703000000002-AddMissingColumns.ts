@@ -37,7 +37,7 @@ export class AddMissingColumns1703000000002 implements MigrationInterface {
       DROP COLUMN IF EXISTS "sunday_or_feast",
       ADD COLUMN IF NOT EXISTS "scripture_reference" varchar(200),
       ADD COLUMN IF NOT EXISTS "text" text,
-      ADD COLUMN IF NOT EXISTS "version" varchar(50) DEFAULT 'NRSV',
+      ADD COLUMN IF NOT EXISTS "translation" varchar(50) DEFAULT 'NRSV',
       ADD COLUMN IF NOT EXISTS "reading_order" integer DEFAULT 1,
       ADD COLUMN IF NOT EXISTS "notes" text,
       ADD COLUMN IF NOT EXISTS "is_alternative" boolean DEFAULT false,
@@ -113,7 +113,7 @@ export class AddMissingColumns1703000000002 implements MigrationInterface {
       ALTER TABLE "readings"
       DROP COLUMN IF EXISTS "scripture_reference",
       DROP COLUMN IF EXISTS "text", 
-      DROP COLUMN IF EXISTS "version",
+      DROP COLUMN IF EXISTS "translation",
       DROP COLUMN IF EXISTS "reading_order",
       DROP COLUMN IF EXISTS "notes",
       DROP COLUMN IF EXISTS "is_alternative",
