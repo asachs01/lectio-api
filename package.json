@@ -1,6 +1,6 @@
 {
   "name": "lectionary-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A modern REST API for serving lectionary readings and liturgical calendar data",
   "main": "dist/index.js",
   "scripts": {
