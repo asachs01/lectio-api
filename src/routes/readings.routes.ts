@@ -187,4 +187,51 @@ router.get('/today', asyncHandler((req, res) => getController().getToday(req, re
  */
 router.get('/range', asyncHandler((req, res) => getController().getByDateRange(req, res)));
 
+/**
+ * @swagger
+ * /api/v1/readings/daily-office:
+ *   get:
+ *     operationId: getDailyOfficeReadings
+ *     summary: Get daily office readings
+ *     description: Retrieves morning and evening prayer readings for a specific date from the Daily Office Lectionary
+ *     tags: [Readings]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         description: Date in YYYY-MM-DD format
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Daily office readings for the specified date
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/DailyReading'
+ *       400:
+ *         description: Invalid date format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: No daily office readings found for the specified date
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/daily-office', asyncHandler((req, res) => getController().getDailyOffice(req, res)));
+
 export { router as readingsRouter };

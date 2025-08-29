@@ -5,6 +5,7 @@ export declare class ReadingsController {
     getByDate(req: Request, res: Response): Promise<void>;
     getToday(req: Request, res: Response): Promise<void>;
     getByDateRange(req: Request, res: Response): Promise<void>;
+    getDailyOffice(req: Request, res: Response): Promise<void>;
     private isValidDate;
 }
 //# sourceMappingURL=readings.controller.d.ts.map

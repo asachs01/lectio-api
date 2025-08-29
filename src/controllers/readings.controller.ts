@@ -150,6 +150,39 @@ export class ReadingsController {
     }
   }
 
+  public async getDailyOffice(req: Request, res: Response): Promise<void> {
+    try {
+      const { date } = req.query;
+      
+      if (!date) {
+        throw new HttpError('Date parameter is required', 400);
+      }
+
+      const dateStr = date as string;
+
+      // Validate date format
+      if (!this.isValidDate(dateStr)) {
+        throw new HttpError('Invalid date format. Use YYYY-MM-DD', 400);
+      }
+
+      const readings = await this.readingsService.getDailyOfficeReadings(dateStr);
+      
+      if (!readings) {
+        throw new HttpError(`No daily office readings found for date '${dateStr}'`, 404);
+      }
+
+      res.json({
+        data: readings,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof HttpError) {
+        throw error;
+      }
+      throw new HttpError('Failed to fetch daily office readings', 500, { originalError: error });
+    }
+  }
+
   private isValidDate(dateString: string): boolean {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(dateString)) {

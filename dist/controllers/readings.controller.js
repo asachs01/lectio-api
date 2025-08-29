@@ -123,6 +123,33 @@ class ReadingsController {
             throw new error_handler_1.HttpError('Failed to fetch readings for date range', 500, { originalError: error });
         }
     }
+    async getDailyOffice(req, res) {
+        try {
+            const { date } = req.query;
+            if (!date) {
+                throw new error_handler_1.HttpError('Date parameter is required', 400);
+            }
+            const dateStr = date;
+            // Validate date format
+            if (!this.isValidDate(dateStr)) {
+                throw new error_handler_1.HttpError('Invalid date format. Use YYYY-MM-DD', 400);
+            }
+            const readings = await this.readingsService.getDailyOfficeReadings(dateStr);
+            if (!readings) {
+                throw new error_handler_1.HttpError(`No daily office readings found for date '${dateStr}'`, 404);
+            }
+            res.json({
+                data: readings,
+                timestamp: new Date().toISOString(),
+            });
+        }
+        catch (error) {
+            if (error instanceof error_handler_1.HttpError) {
+                throw error;
+            }
+            throw new error_handler_1.HttpError('Failed to fetch daily office readings', 500, { originalError: error });
+        }
+    }
     isValidDate(dateString) {
         const regex = /^\d{4}-\d{2}-\d{2}$/;
         if (!regex.test(dateString)) {
