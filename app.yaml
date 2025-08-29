@@ -63,6 +63,8 @@ services:
         value: "900000"
       - key: RATE_LIMIT_MAX_REQUESTS
         value: "100"
+      - key: ADMIN_KEY
+        type: SECRET
 
 databases:
   - name: lectio-db
@@ -71,5 +73,31 @@ databases:
     size: db-s-dev-database
     num_nodes: 1
 
-# Post-deploy job temporarily disabled - causing deployment failures
-# Will seed database manually after deployment completes
+# Jobs for database setup
+jobs:
+  - name: migrate-and-seed
+    kind: POST_DEPLOY
+    github:
+      branch: main
+      repo: asachs01/lectio-api
+    dockerfile_path: Dockerfile
+    source_dir: /
+    run_command: "npm run db:migrate && npm run db:seed:prod"
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        value: ${lectio-db.HOSTNAME}
+      - key: DB_PORT
+        value: ${lectio-db.PORT}
+      - key: DB_NAME
+        value: ${lectio-db.DATABASE}
+      - key: DB_USERNAME
+        value: ${lectio-db.USERNAME}
+      - key: DB_PASSWORD
+        value: ${lectio-db.PASSWORD}
+        type: SECRET
+      - key: DB_SSL
+        value: "true"
