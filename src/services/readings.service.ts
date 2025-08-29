@@ -1,7 +1,7 @@
 import { DailyReading, ReadingType } from '../types/lectionary.types';
 import { DatabaseService } from './database.service';
-import { Reading } from '../models/reading.entity';
-import { Between, Repository } from 'typeorm';
+import { Reading, ReadingOffice } from '../models/reading.entity';
+import { Between, Repository, In } from 'typeorm';
 import { logger } from '../utils/logger';
 import { LiturgicalCalendarService } from './liturgical-calendar.service';
 
@@ -338,6 +338,71 @@ export class ReadingsService {
     } catch (error) {
       logger.error(`Error fetching readings for season ${seasonId}:`, error);
       return [];
+    }
+  }
+
+  public async getDailyOfficeReadings(date: string): Promise<DailyReading | null> {
+    try {
+      const repository = this.ensureRepository();
+      
+      // Parse date string
+      const [yearStr, monthStr, dayStr] = date.split('-');
+      const startOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 0, 0, 0);
+      const endOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 23, 59, 59);
+      
+      // Import necessary operators
+      const { Not, IsNull } = await import('typeorm');
+      
+      // Get daily office readings
+      const readings = await repository.find({
+        where: {
+          date: Between(startOfDay, endOfDay),
+          traditionId: Not(IsNull()),
+          readingOffice: In([ReadingOffice.MORNING, ReadingOffice.EVENING]),
+        },
+        relations: ['tradition'],
+        order: {
+          readingOffice: 'ASC',
+          readingOrder: 'ASC',
+        },
+      });
+
+      if (!readings || readings.length === 0) {
+        return null;
+      }
+
+      // Group by office (morning/evening)
+      const morningReadings = readings.filter(r => r.readingOffice === ReadingOffice.MORNING);
+      const eveningReadings = readings.filter(r => r.readingOffice === ReadingOffice.EVENING);
+
+      // Format as DailyReading
+      return {
+        id: `daily-${date}`,
+        date,
+        traditionId: 'daily-office',
+        seasonId: null,
+        readings: [
+          ...morningReadings.map(r => ({
+            type: r.readingType as any,
+            citation: r.scriptureReference,
+            text: r.text || '',
+            isAlternative: r.isAlternative,
+            office: 'morning' as const,
+          })),
+          ...eveningReadings.map(r => ({
+            type: r.readingType as any,
+            citation: r.scriptureReference,
+            text: r.text || '',
+            isAlternative: r.isAlternative,
+            office: 'evening' as const,
+          })),
+        ],
+        createdAt: readings[0]?.createdAt || new Date(),
+        updatedAt: readings[0]?.updatedAt || new Date(),
+      };
+    } catch (error) {
+      logger.error(`Error fetching daily office readings for ${date}:`, error);
+      return null;
     }
   }
 }

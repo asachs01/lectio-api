@@ -22,7 +22,21 @@ export enum ReadingType {
   GOSPEL = 'gospel',
   ALLELUIA = 'alleluia',
   SEQUENCE = 'sequence',
-  TRACT = 'tract'
+  TRACT = 'tract',
+  // Daily Office types
+  OLD_TESTAMENT = 'old_testament',
+  NEW_TESTAMENT = 'new_testament',
+  MORNING_PSALM = 'morning_psalm',
+  EVENING_PSALM = 'evening_psalm'
+}
+
+export enum ReadingOffice {
+  SUNDAY = 'sunday',          // Sunday service
+  WEEKDAY = 'weekday',        // Weekday service
+  MORNING = 'morning',        // Morning Prayer/Matins
+  EVENING = 'evening',        // Evening Prayer/Vespers
+  COMPLINE = 'compline',      // Night Prayer
+  SPECIAL = 'special'         // Special services
 }
 
 @Entity('readings')
@@ -34,7 +48,9 @@ export enum ReadingType {
 @Index('idx_reading_scripture', ['scriptureId'])
 @Index('idx_reading_type', ['readingType'])
 @Index('idx_reading_date_tradition', ['date', 'traditionId'])
-@Unique('uq_reading_date_tradition_type', ['date', 'traditionId', 'readingType', 'scriptureId'])
+@Index('idx_reading_office', ['readingOffice'])
+@Index('idx_reading_date_office', ['date', 'readingOffice'])
+@Unique('uq_reading_date_tradition_type_office', ['date', 'traditionId', 'readingType', 'readingOffice', 'scriptureId'])
 export class Reading {
   @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -96,6 +112,24 @@ export class Reading {
     comment: 'Whether this is an alternative reading option',
   })
     isAlternative: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ReadingOffice,
+    name: 'reading_office',
+    default: ReadingOffice.SUNDAY,
+    comment: 'Which office/service this reading belongs to',
+  })
+    readingOffice: ReadingOffice;
+
+  @Column({
+    type: 'varchar',
+    length: 10,
+    name: 'cycle_year',
+    nullable: true,
+    comment: 'Cycle year for daily office (Year1/Year2) or lectionary year (A/B/C)',
+  })
+    cycleYear: string;
 
   // Foreign Keys
   @Column({
