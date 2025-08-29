@@ -48,17 +48,26 @@ router.post('/seed-database', async (req: Request, res: Response): Promise<Respo
   try {
     const results = [];
     
+    // Use compiled JS in production, ts-node in development
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     // Import RCL data if requested
     if (type === 'all' || type === 'rcl') {
       console.log('Importing RCL data...');
-      execSync('npx ts-node src/scripts/import-rcl-with-dates.ts', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+      const cmd = isProduction 
+        ? 'node dist/scripts/import-rcl-with-dates.js'
+        : 'npx ts-node src/scripts/import-rcl-with-dates.ts';
+      execSync(cmd, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
       results.push('RCL data imported');
     }
     
     // Import Daily Lectionary data if requested
     if (type === 'all' || type === 'daily') {
       console.log('Importing Daily Lectionary data...');
-      execSync('npx ts-node src/scripts/import-daily-lectionary.ts', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+      const cmd = isProduction
+        ? 'node dist/scripts/import-daily-lectionary.js'
+        : 'npx ts-node src/scripts/import-daily-lectionary.ts';
+      execSync(cmd, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
       results.push('Daily Lectionary data imported');
     }
     
