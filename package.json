@@ -33,6 +33,7 @@
     "data:import-lectionary": "ts-node src/scripts/import-lectionary-data.ts",
     "data:import-rcl": "ts-node src/scripts/import-rcl-with-dates.ts",
     "data:import-rcl:prod": "node dist/scripts/import-rcl-with-dates.js",
+    "data:import-daily": "ts-node src/scripts/import-daily-lectionary.ts",
     "db:seed-production": "sh scripts/seed-production.sh"
   },
   "keywords": [
