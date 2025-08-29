@@ -25,6 +25,8 @@
     "db:revert": "typeorm migration:revert -d ormconfig.js",
     "db:drop": "typeorm schema:drop -d ormconfig.js",
     "db:sync": "typeorm schema:sync -d ormconfig.js",
+    "db:seed": "ts-node src/scripts/import-rcl-with-dates.ts",
+    "db:seed:prod": "node dist/scripts/import-rcl-with-dates.js",
     "entities:validate": "ts-node src/scripts/validate-entities.ts",
     "db:test": "ts-node src/scripts/test-db-connection.ts",
     "db:test:complete": "ts-node src/scripts/complete-db-test.ts",

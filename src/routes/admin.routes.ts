@@ -47,9 +47,9 @@ router.post('/seed-database', async (req: Request, res: Response): Promise<Respo
   
   try {
     // Skip migrations - they should already be run
-    // Just run the import script
+    // Just run the import script with ts-node for proper entity loading
     console.log('Importing RCL data...');
-    execSync('node dist/scripts/import-rcl-with-dates.js', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+    execSync('npx ts-node src/scripts/import-rcl-with-dates.ts', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
     console.log('Import completed');
     
     return res.json({ 
