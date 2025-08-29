@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReadingsService = void 0;
 const database_service_1 = require("./database.service");
@@ -272,6 +305,65 @@ class ReadingsService {
         catch (error) {
             logger_1.logger.error(`Error fetching readings for season ${seasonId}:`, error);
             return [];
+        }
+    }
+    async getDailyOfficeReadings(date) {
+        try {
+            const repository = this.ensureRepository();
+            // Parse date string
+            const [yearStr, monthStr, dayStr] = date.split('-');
+            const startOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 0, 0, 0);
+            const endOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 23, 59, 59);
+            // Import necessary operators
+            const { Not, IsNull } = await Promise.resolve().then(() => __importStar(require('typeorm')));
+            // Get daily office readings
+            const readings = await repository.find({
+                where: {
+                    date: (0, typeorm_1.Between)(startOfDay, endOfDay),
+                    traditionId: Not(IsNull()),
+                    readingOffice: (0, typeorm_1.In)([reading_entity_1.ReadingOffice.MORNING, reading_entity_1.ReadingOffice.EVENING]),
+                },
+                relations: ['tradition'],
+                order: {
+                    readingOffice: 'ASC',
+                    readingOrder: 'ASC',
+                },
+            });
+            if (!readings || readings.length === 0) {
+                return null;
+            }
+            // Group by office (morning/evening)
+            const morningReadings = readings.filter(r => r.readingOffice === reading_entity_1.ReadingOffice.MORNING);
+            const eveningReadings = readings.filter(r => r.readingOffice === reading_entity_1.ReadingOffice.EVENING);
+            // Format as DailyReading
+            return {
+                id: `daily-${date}`,
+                date,
+                traditionId: 'daily-office',
+                seasonId: null,
+                readings: [
+                    ...morningReadings.map(r => ({
+                        type: r.readingType,
+                        citation: r.scriptureReference,
+                        text: r.text || '',
+                        isAlternative: r.isAlternative,
+                        office: 'morning',
+                    })),
+                    ...eveningReadings.map(r => ({
+                        type: r.readingType,
+                        citation: r.scriptureReference,
+                        text: r.text || '',
+                        isAlternative: r.isAlternative,
+                        office: 'evening',
+                    })),
+                ],
+                createdAt: readings[0]?.createdAt || new Date(),
+                updatedAt: readings[0]?.updatedAt || new Date(),
+            };
+        }
+        catch (error) {
+            logger_1.logger.error(`Error fetching daily office readings for ${date}:`, error);
+            return null;
         }
     }
 }

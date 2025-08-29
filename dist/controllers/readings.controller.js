@@ -39,11 +39,26 @@ class ReadingsController {
     async getToday(req, res) {
         try {
             const tradition = req.query['tradition'] || 'rcl';
+            const includeDaily = req.query['includeDaily'] === 'true' || req.query['daily'] === 'true';
             const today = new Date().toISOString().split('T')[0];
             const traditionId = String(tradition);
-            const readings = await this.readingsService.getByDate(today, traditionId);
+            // Try to get Sunday/special readings first
+            let readings = await this.readingsService.getByDate(today, traditionId);
+            // If no Sunday readings and daily requested, get daily office readings
+            if (!readings && includeDaily) {
+                readings = await this.readingsService.getDailyOfficeReadings(today);
+            }
+            // If still no readings, check if it's a weekday and get daily readings
             if (!readings) {
-                throw new error_handler_1.HttpError(`No readings found for today in tradition '${traditionId}'`, 404);
+                const dayOfWeek = new Date(today).getDay();
+                // 0 = Sunday, 6 = Saturday
+                if (dayOfWeek !== 0) {
+                    // It's a weekday, get daily office readings
+                    readings = await this.readingsService.getDailyOfficeReadings(today);
+                }
+            }
+            if (!readings) {
+                throw new error_handler_1.HttpError('No readings found for today', 404);
             }
             res.json({
                 data: readings,

@@ -13,5 +13,6 @@ export declare class ReadingsService {
     }>;
     getReadingsByProper(properNumber: number, traditionId: string, cycle: string): Promise<DailyReading | null>;
     getReadingsBySeason(seasonId: string, traditionId: string, cycle: string): Promise<DailyReading[]>;
+    getDailyOfficeReadings(date: string): Promise<DailyReading | null>;
 }
 //# sourceMappingURL=readings.service.d.ts.map

@@ -39,22 +39,33 @@ router.post('/run-migrations', async (req: Request, res: Response): Promise<Resp
  * Seed database endpoint - for manual triggering
  */
 router.post('/seed-database', async (req: Request, res: Response): Promise<Response> => {
-  const { key } = req.body;
+  const { key, type = 'all' } = req.body;
   
   if (key !== ADMIN_KEY) {
     return res.status(403).json({ error: 'Unauthorized' });
   }
   
   try {
-    // Skip migrations - they should already be run
-    // Just run the import script with ts-node for proper entity loading
-    console.log('Importing RCL data...');
-    execSync('npx ts-node src/scripts/import-rcl-with-dates.ts', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
-    console.log('Import completed');
+    const results = [];
+    
+    // Import RCL data if requested
+    if (type === 'all' || type === 'rcl') {
+      console.log('Importing RCL data...');
+      execSync('npx ts-node src/scripts/import-rcl-with-dates.ts', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+      results.push('RCL data imported');
+    }
+    
+    // Import Daily Lectionary data if requested
+    if (type === 'all' || type === 'daily') {
+      console.log('Importing Daily Lectionary data...');
+      execSync('npx ts-node src/scripts/import-daily-lectionary.ts', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+      results.push('Daily Lectionary data imported');
+    }
     
     return res.json({ 
       success: true, 
       message: 'Database seeded successfully',
+      results,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

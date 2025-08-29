@@ -13,4 +13,8 @@ node_modules/.bin/typeorm migration:run -d ormconfig.js || {
 echo "Importing RCL data..."
 node dist/scripts/import-rcl-with-dates.js
 
+# Import Daily Lectionary data
+echo "Importing Daily Lectionary data..."
+node dist/scripts/import-daily-lectionary.js
+
 echo "Production database seed completed!"
