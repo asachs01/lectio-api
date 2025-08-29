@@ -13,10 +13,8 @@ RUN npm ci --ignore-scripts
 # Copy source code
 COPY . .
 
-# Build the application (skip TypeScript errors for now)
-RUN npm run build || true
-# Copy source as fallback
-COPY src ./src
+# Build the application
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS production
@@ -27,17 +25,15 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies and ts-node for fallback
-RUN npm ci --omit=dev --ignore-scripts && \
-    npm install --save ts-node typescript
+# Install production dependencies only
+RUN npm ci --omit=dev --ignore-scripts
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
-# Also copy source for development
-COPY --from=builder /app/src ./src
+# Copy data and config files
+COPY --from=builder /app/src/data ./src/data
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/ormconfig.js ./ormconfig.js
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
 # Copy startup script
 COPY scripts/start-production.sh ./scripts/start-production.sh
 RUN chmod +x ./scripts/start-production.sh
