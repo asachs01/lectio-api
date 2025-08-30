@@ -53,8 +53,24 @@ async function importDailyLectionary() {
   }
 
   try {
-    // Load daily lectionary data
-    const dataPath = path.join(__dirname, '..', 'data', 'daily-lectionary.json');
+    // Load daily lectionary data - check multiple possible locations
+    let dataPath = path.join(__dirname, '..', 'data', 'daily-lectionary.json');
+    
+    // In production, the compiled code is in dist/scripts, so data would be at ../../src/data
+    if (!fs.existsSync(dataPath)) {
+      dataPath = path.join(__dirname, '..', '..', 'src', 'data', 'daily-lectionary.json');
+    }
+    
+    // Also check if it's in the same directory structure as source
+    if (!fs.existsSync(dataPath)) {
+      dataPath = path.join(process.cwd(), 'src', 'data', 'daily-lectionary.json');
+    }
+    
+    if (!fs.existsSync(dataPath)) {
+      throw new Error(`Daily lectionary data file not found. Tried: ${dataPath}`);
+    }
+    
+    console.log(`Loading data from: ${dataPath}`);
     const rawData = fs.readFileSync(dataPath, 'utf-8');
     const lectData = JSON.parse(rawData);
     const dailyReadings: DailyReadingData[] = lectData.readings;
