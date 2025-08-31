@@ -1,7 +1,33 @@
 import { LiturgicalCalendar, LiturgicalSeason, SpecialDay, CurrentCalendarInfo } from '../types/lectionary.types';
+import { DatabaseService } from './database.service';
+import { Season } from '../models/season.entity';
+import { SpecialDay as SpecialDayEntity } from '../models/special-day.entity';
+import { Tradition } from '../models/tradition.entity';
+import { LiturgicalYear } from '../models/liturgical-year.entity';
+import { Repository } from 'typeorm';
 
 export class CalendarService {
   
+  private getTraditionRepository(): Repository<Tradition> {
+    return DatabaseService.getDataSource().getRepository(Tradition);
+  }
+
+
+  private getSpecialDayRepository(): Repository<SpecialDayEntity> {
+    return DatabaseService.getDataSource().getRepository(SpecialDayEntity);
+  }
+
+  private getLiturgicalYearRepository(): Repository<LiturgicalYear> {
+    return DatabaseService.getDataSource().getRepository(LiturgicalYear);
+  }
+
+  private async findTraditionByAbbreviation(traditionId: string): Promise<Tradition | null> {
+    const traditionRepo = this.getTraditionRepository();
+    return await traditionRepo.findOne({ 
+      where: { abbreviation: traditionId.toUpperCase() },
+    });
+  }
+
   public async getByYear(year: number, traditionId: string): Promise<LiturgicalCalendar | null> {
     // TODO: Implement database query
     const seasons = await this.getSeasonsByYear(year, traditionId);
@@ -19,83 +45,126 @@ export class CalendarService {
   }
 
   public async getSeasonsByYear(year: number, traditionId: string): Promise<LiturgicalSeason[]> {
-    // TODO: Implement database query
-    return [
-      {
-        id: 'advent',
-        name: 'Advent',
-        color: 'purple',
-        startDate: `${year}-12-03`,
-        endDate: `${year}-12-24`,
-        traditionId,
+    const tradition = await this.findTraditionByAbbreviation(traditionId);
+    if (!tradition) {
+      return [];
+    }
+
+    const liturgicalYearRepo = this.getLiturgicalYearRepository();
+    const liturgicalYear = await liturgicalYearRepo.findOne({
+      where: { 
         year,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        tradition: { id: tradition.id },
       },
-      {
-        id: 'christmas',
-        name: 'Christmas',
-        color: 'white',
-        startDate: `${year}-12-25`,
-        endDate: `${year + 1}-01-06`,
-        traditionId,
-        year,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 'epiphany',
-        name: 'Epiphany',
-        color: 'green',
-        startDate: `${year + 1}-01-07`,
-        endDate: `${year + 1}-02-13`,
-        traditionId,
-        year,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
+      relations: ['seasons'],
+    });
+
+    if (!liturgicalYear || !liturgicalYear.seasons) {
+      return [];
+    }
+
+    return liturgicalYear.seasons.map(season => ({
+      id: season.id,
+      name: season.name,
+      color: season.color,
+      startDate: typeof season.startDate === 'string' ? season.startDate : season.startDate.toISOString().split('T')[0],
+      endDate: typeof season.endDate === 'string' ? season.endDate : season.endDate.toISOString().split('T')[0],
+      traditionId,
+      year,
+      createdAt: season.createdAt,
+      updatedAt: season.updatedAt,
+    }));
   }
 
   public async getSpecialDaysByYear(year: number, traditionId: string): Promise<SpecialDay[]> {
-    // TODO: Implement database query
-    return [
-      {
-        id: 'christmas',
-        name: 'Christmas Day',
-        date: `${year}-12-25`,
-        type: 'feast',
-        traditionId,
+    const tradition = await this.findTraditionByAbbreviation(traditionId);
+    if (!tradition) {
+      return [];
+    }
+
+    const specialDayRepo = this.getSpecialDayRepository();
+    const specialDays = await specialDayRepo.find({
+      where: { 
         year,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        tradition: { id: tradition.id },
       },
-      {
-        id: 'epiphany',
-        name: 'Epiphany',
-        date: `${year + 1}-01-06`,
-        type: 'feast',
-        traditionId,
-        year,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
+      order: { date: 'ASC' },
+    });
+
+    return specialDays.map(day => ({
+      id: day.id,
+      name: day.name,
+      date: day.date.toISOString().split('T')[0],
+      type: day.type as 'feast' | 'fast' | 'commemoration' | 'other',
+      traditionId,
+      year,
+      createdAt: day.createdAt,
+      updatedAt: day.updatedAt,
+    }));
   }
 
   public async getCurrent(traditionId: string): Promise<CurrentCalendarInfo> {
-    // TODO: Implement database query
     const today = new Date();
     const currentYear = today.getFullYear();
     const todayStr = today.toISOString().split('T')[0];
+    
+    const tradition = await this.findTraditionByAbbreviation(traditionId);
+    if (!tradition) {
+      return {
+        currentSeason: null,
+        currentYear,
+        today: todayStr,
+        upcomingSpecialDays: [],
+      };
+    }
 
-    const seasons = await this.getSeasonsByYear(currentYear, traditionId);
-    const specialDays = await this.getSpecialDaysByYear(currentYear, traditionId);
+    // Find current liturgical year - check both current year and previous year
+    // since liturgical years span calendar years
+    const liturgicalYearRepo = this.getLiturgicalYearRepository();
+    const liturgicalYears = await liturgicalYearRepo.find({
+      where: [
+        { year: currentYear, tradition: { id: tradition.id } },
+        { year: currentYear - 1, tradition: { id: tradition.id } },
+      ],
+      relations: ['seasons'],
+    });
+
+    // Find which liturgical year contains today's date
+    let currentLiturgicalYear = null;
+    let allSeasons: Season[] = [];
+    
+    for (const liturgicalYear of liturgicalYears) {
+      if (liturgicalYear.seasons) {
+        allSeasons = allSeasons.concat(liturgicalYear.seasons);
+        // Check if today falls within this liturgical year's date range
+        if (liturgicalYear.startDate && liturgicalYear.endDate) {
+          // Handle both string and Date formats
+          const startDate = typeof liturgicalYear.startDate === 'string' ? liturgicalYear.startDate : liturgicalYear.startDate.toISOString().split('T')[0];
+          const endDate = typeof liturgicalYear.endDate === 'string' ? liturgicalYear.endDate : liturgicalYear.endDate.toISOString().split('T')[0];
+          if (todayStr >= startDate && todayStr <= endDate) {
+            currentLiturgicalYear = liturgicalYear;
+          }
+        }
+      }
+    }
 
     // Find current season
-    const currentSeason = seasons.find(season => 
-      todayStr >= season.startDate && todayStr <= season.endDate,
-    );
+    const currentSeason = allSeasons.find(season => {
+      // Handle both string and Date formats for season dates
+      const startDate = typeof season.startDate === 'string' ? season.startDate : season.startDate.toISOString().split('T')[0];
+      const endDate = typeof season.endDate === 'string' ? season.endDate : season.endDate.toISOString().split('T')[0];
+      return todayStr >= startDate && todayStr <= endDate;
+    });
+
+    // Get special days from multiple years (current and next year for cross-year events)
+    const specialDayRepo = this.getSpecialDayRepository();
+    const specialDays = await specialDayRepo.find({
+      where: [
+        { year: currentYear, tradition: { id: tradition.id } },
+        { year: currentYear + 1, tradition: { id: tradition.id } },
+      ],
+      order: { date: 'ASC' },
+    });
 
     // Find upcoming special days (next 30 days)
     const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -106,12 +175,22 @@ export class CalendarService {
       })
       .map(day => ({
         name: day.name,
-        date: day.date,
+        date: day.date.toISOString().split('T')[0],
         daysUntil: Math.ceil((new Date(day.date).getTime() - today.getTime()) / (24 * 60 * 60 * 1000)),
       }));
 
     return {
-      currentSeason: currentSeason || null,
+      currentSeason: currentSeason ? {
+        id: currentSeason.id,
+        name: currentSeason.name,
+        color: currentSeason.color,
+        startDate: typeof currentSeason.startDate === 'string' ? currentSeason.startDate : currentSeason.startDate.toISOString().split('T')[0],
+        endDate: typeof currentSeason.endDate === 'string' ? currentSeason.endDate : currentSeason.endDate.toISOString().split('T')[0],
+        traditionId,
+        year: currentLiturgicalYear?.year || currentYear,
+        createdAt: currentSeason.createdAt,
+        updatedAt: currentSeason.updatedAt,
+      } : null,
       currentYear,
       today: todayStr,
       upcomingSpecialDays,

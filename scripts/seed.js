@@ -77,15 +77,17 @@ async function seed() {
     // Create Liturgical Years
     const years = [
       {
+        name: 'Year A (2024-2025)',
         year: 2024,
-        yearCycle: 'A',
+        cycle: 'A',
         tradition: rclTradition,
         startDate: new Date('2024-12-01'),
         endDate: new Date('2025-11-29'),
       },
       {
+        name: 'Year B (2025-2026)',
         year: 2025,
-        yearCycle: 'B',
+        cycle: 'B',
         tradition: rclTradition,
         startDate: new Date('2025-11-30'),
         endDate: new Date('2026-11-28'),
@@ -114,69 +116,67 @@ async function seed() {
       } 
     });
 
-    // Create Seasons
+    // Create Seasons - Complete liturgical year 2024-2025 (Year A)
     const seasons = [
       { 
         name: 'Advent', 
-        startDate: new Date('2024-12-01'),
+        startDate: new Date('2024-12-01'),  // First Sunday of Advent 2024
         endDate: new Date('2024-12-24'),
-        color: 'Purple',
-        tradition: rclTradition,
+        color: 'purple',
         liturgicalYear: yearA
       },
       { 
         name: 'Christmas', 
         startDate: new Date('2024-12-25'),
         endDate: new Date('2025-01-05'),
-        color: 'White',
-        tradition: rclTradition,
+        color: 'white',
         liturgicalYear: yearA
       },
       { 
         name: 'Epiphany', 
         startDate: new Date('2025-01-06'),
-        endDate: new Date('2025-03-04'),
-        color: 'Green',
-        tradition: rclTradition,
+        endDate: new Date('2025-03-04'),  // Day before Ash Wednesday
+        color: 'green',
         liturgicalYear: yearA
       },
       { 
         name: 'Lent', 
-        startDate: new Date('2025-03-05'),
-        endDate: new Date('2025-04-12'),
-        color: 'Purple',
-        tradition: rclTradition,
+        startDate: new Date('2025-03-05'),  // Ash Wednesday 2025
+        endDate: new Date('2025-04-19'),    // Holy Saturday
+        color: 'purple',
         liturgicalYear: yearA
       },
       { 
         name: 'Easter', 
-        startDate: new Date('2025-04-20'),
-        endDate: new Date('2025-06-07'),
-        color: 'White',
-        tradition: rclTradition,
+        startDate: new Date('2025-04-20'),  // Easter Sunday 2025
+        endDate: new Date('2025-06-07'),    // Day before Pentecost
+        color: 'white',
         liturgicalYear: yearA
       },
       { 
-        name: 'Ordinary Time', 
-        startDate: new Date('2025-06-08'),
-        endDate: new Date('2025-11-29'),
-        color: 'Green',
-        tradition: rclTradition,
+        name: 'Pentecost', 
+        startDate: new Date('2025-06-08'),  // Pentecost Sunday
+        endDate: new Date('2025-06-08'),    // Single day
+        color: 'red',
+        liturgicalYear: yearA
+      },
+      { 
+        name: 'Ordinary Time (After Pentecost)', 
+        startDate: new Date('2025-06-09'),  // Day after Pentecost
+        endDate: new Date('2025-11-29'),    // Day before next Advent
+        color: 'green',
         liturgicalYear: yearA
       },
     ];
 
     console.log('Creating seasons...');
+    // First, delete existing seasons for this liturgical year to ensure fresh data
+    await seasonRepo.delete({ liturgicalYear: { id: yearA.id } });
+    
+    // Now create all seasons
     for (const season of seasons) {
-      const exists = await seasonRepo.findOne({ 
-        where: { 
-          name: season.name,
-          liturgicalYear: { id: yearA.id }
-        } 
-      });
-      if (!exists) {
-        await seasonRepo.save(season);
-      }
+      await seasonRepo.save(season);
+      console.log(`  ✓ Created season: ${season.name} (${season.startDate.toISOString().split('T')[0]} - ${season.endDate.toISOString().split('T')[0]})`);
     }
     console.log('✅ Seasons created');
 
@@ -186,57 +186,49 @@ async function seed() {
         name: 'Christmas Day',
         date: new Date('2024-12-25'),
         type: 'feast',
-        color: 'White',
+        liturgicalColor: 'white',
         tradition: rclTradition,
         description: 'The Nativity of Our Lord Jesus Christ',
-        readings: JSON.stringify({
-          firstReading: 'Isaiah 52:7-10',
-          psalm: 'Psalm 98',
-          secondReading: 'Hebrews 1:1-4',
-          gospel: 'John 1:1-14'
-        })
+        isFeastDay: true,
+        isMoveable: false,
+        rank: 'solemnity',
+        year: 2024
       },
       {
         name: 'Epiphany',
         date: new Date('2025-01-06'),
         type: 'feast',
-        color: 'White',
+        liturgicalColor: 'white',
         tradition: rclTradition,
         description: 'The Manifestation of Christ to the Gentiles',
-        readings: JSON.stringify({
-          firstReading: 'Isaiah 60:1-6',
-          psalm: 'Psalm 72:1-7, 10-14',
-          secondReading: 'Ephesians 3:1-12',
-          gospel: 'Matthew 2:1-12'
-        })
+        isFeastDay: true,
+        isMoveable: false,
+        rank: 'feast',
+        year: 2025
       },
       {
         name: 'Good Friday',
         date: new Date('2025-04-18'),
         type: 'fast',
-        color: 'Red',
+        liturgicalColor: 'red',
         tradition: rclTradition,
         description: 'Commemoration of the Crucifixion',
-        readings: JSON.stringify({
-          firstReading: 'Isaiah 52:13-53:12',
-          psalm: 'Psalm 22',
-          secondReading: 'Hebrews 10:16-25',
-          gospel: 'John 18:1-19:42'
-        })
+        isFeastDay: false,
+        isMoveable: true,
+        rank: 'solemnity',
+        year: 2025
       },
       {
         name: 'Easter Sunday',
         date: new Date('2025-04-20'),
         type: 'feast',
-        color: 'White',
+        liturgicalColor: 'white',
         tradition: rclTradition,
         description: 'The Resurrection of Our Lord',
-        readings: JSON.stringify({
-          firstReading: 'Acts 10:34-43',
-          psalm: 'Psalm 118:1-2, 14-24',
-          secondReading: '1 Corinthians 15:1-11',
-          gospel: 'Mark 16:1-8'
-        })
+        isFeastDay: true,
+        isMoveable: true,
+        rank: 'solemnity',
+        year: 2025
       },
     ];
 
@@ -263,65 +255,119 @@ async function seed() {
       } 
     });
 
-    // Create sample Readings
+    // Create sample Readings for Advent
     const sampleReadings = [
+      // First Sunday of Advent - First Reading
       {
         date: new Date('2024-12-01'),
-        sundayName: 'First Sunday of Advent',
-        yearCycle: 'A',
-        weekNumber: 1,
-        dayOfWeek: 0,
-        firstReading: 'Isaiah 2:1-5',
-        psalm: 'Psalm 122',
-        secondReading: 'Romans 13:11-14',
-        gospel: 'Matthew 24:36-44',
+        readingType: 'first',
+        scriptureReference: 'Isaiah 2:1-5',
+        readingOffice: 'sunday',
+        cycleYear: 'A',
         tradition: rclTradition,
         season: adventSeason,
-        notes: 'Beginning of the liturgical year',
-        liturgicalColor: 'Purple',
+        notes: 'First Sunday of Advent - Year A',
+        readingOrder: 1,
+      },
+      // First Sunday of Advent - Psalm
+      {
+        date: new Date('2024-12-01'),
+        readingType: 'psalm',
+        scriptureReference: 'Psalm 122',
+        readingOffice: 'sunday',
+        cycleYear: 'A',
+        tradition: rclTradition,
+        season: adventSeason,
+        readingOrder: 2,
+      },
+      // First Sunday of Advent - Second Reading
+      {
+        date: new Date('2024-12-01'),
+        readingType: 'second',
+        scriptureReference: 'Romans 13:11-14',
+        readingOffice: 'sunday',
+        cycleYear: 'A',
+        tradition: rclTradition,
+        season: adventSeason,
+        readingOrder: 3,
+      },
+      // First Sunday of Advent - Gospel
+      {
+        date: new Date('2024-12-01'),
+        readingType: 'gospel',
+        scriptureReference: 'Matthew 24:36-44',
+        readingOffice: 'sunday',
+        cycleYear: 'A',
+        tradition: rclTradition,
+        season: adventSeason,
+        readingOrder: 4,
+      },
+      // Daily Office readings for today (August 31, 2025)
+      {
+        date: new Date('2025-08-31'),
+        readingType: 'old_testament',
+        scriptureReference: '1 Kings 8:22-30, 41-43',
+        readingOffice: 'morning',
+        cycleYear: 'B',
+        tradition: rclTradition,
+        season: adventSeason,
+        readingOrder: 1,
+        notes: 'Daily Office - Morning Prayer',
       },
       {
-        date: new Date('2024-12-08'),
-        sundayName: 'Second Sunday of Advent',
-        yearCycle: 'A',
-        weekNumber: 2,
-        dayOfWeek: 0,
-        firstReading: 'Isaiah 11:1-10',
-        psalm: 'Psalm 72:1-7, 18-19',
-        secondReading: 'Romans 15:4-13',
-        gospel: 'Matthew 3:1-12',
+        date: new Date('2025-08-31'),
+        readingType: 'morning_psalm',
+        scriptureReference: 'Psalm 84',
+        readingOffice: 'morning',
+        cycleYear: 'B',
         tradition: rclTradition,
         season: adventSeason,
-        liturgicalColor: 'Purple',
+        readingOrder: 2,
+        notes: 'Daily Office - Morning Prayer',
       },
       {
-        date: new Date('2024-12-15'),
-        sundayName: 'Third Sunday of Advent',
-        yearCycle: 'A',
-        weekNumber: 3,
-        dayOfWeek: 0,
-        firstReading: 'Isaiah 35:1-10',
-        psalm: 'Psalm 146:5-10',
-        secondReading: 'James 5:7-10',
-        gospel: 'Matthew 11:2-11',
+        date: new Date('2025-08-31'),
+        readingType: 'new_testament',
+        scriptureReference: 'Acts 7:44-8:1a',
+        readingOffice: 'morning',
+        cycleYear: 'B',
         tradition: rclTradition,
         season: adventSeason,
-        liturgicalColor: 'Rose',
-        notes: 'Gaudete Sunday - Rose vestments may be worn',
+        readingOrder: 3,
+        notes: 'Daily Office - Morning Prayer',
       },
       {
-        date: new Date('2024-12-22'),
-        sundayName: 'Fourth Sunday of Advent',
-        yearCycle: 'A',
-        weekNumber: 4,
-        dayOfWeek: 0,
-        firstReading: 'Isaiah 7:10-16',
-        psalm: 'Psalm 80:1-7, 17-19',
-        secondReading: 'Romans 1:1-7',
-        gospel: 'Matthew 1:18-25',
+        date: new Date('2025-08-31'),
+        readingType: 'old_testament',
+        scriptureReference: '1 Kings 8:31-40',
+        readingOffice: 'evening',
+        cycleYear: 'B',
         tradition: rclTradition,
         season: adventSeason,
-        liturgicalColor: 'Purple',
+        readingOrder: 1,
+        notes: 'Daily Office - Evening Prayer',
+      },
+      {
+        date: new Date('2025-08-31'),
+        readingType: 'evening_psalm',
+        scriptureReference: 'Psalm 91',
+        readingOffice: 'evening',
+        cycleYear: 'B',
+        tradition: rclTradition,
+        season: adventSeason,
+        readingOrder: 2,
+        notes: 'Daily Office - Evening Prayer',
+      },
+      {
+        date: new Date('2025-08-31'),
+        readingType: 'new_testament',
+        scriptureReference: 'Romans 8:12-25',
+        readingOffice: 'evening',
+        cycleYear: 'B',
+        tradition: rclTradition,
+        season: adventSeason,
+        readingOrder: 3,
+        notes: 'Daily Office - Evening Prayer',
       },
     ];
 
@@ -330,6 +376,8 @@ async function seed() {
       const exists = await readingRepo.findOne({ 
         where: { 
           date: reading.date,
+          readingType: reading.readingType,
+          readingOffice: reading.readingOffice,
           tradition: { id: rclTradition.id }
         } 
       });
