@@ -1,5 +1,9 @@
 import { LiturgicalCalendar, LiturgicalSeason, SpecialDay, CurrentCalendarInfo } from '../types/lectionary.types';
 export declare class CalendarService {
+    private getTraditionRepository;
+    private getSpecialDayRepository;
+    private getLiturgicalYearRepository;
+    private findTraditionByAbbreviation;
     getByYear(year: number, traditionId: string): Promise<LiturgicalCalendar | null>;
     getSeasonsByYear(year: number, traditionId: string): Promise<LiturgicalSeason[]>;
     getSpecialDaysByYear(year: number, traditionId: string): Promise<SpecialDay[]>;
