@@ -249,8 +249,8 @@ const options = {
         ],
     },
     apis: process.env.NODE_ENV === 'production' ? [
-        './dist/routes/*.js',
-        './dist/controllers/*.js',
+        `${__dirname}/../routes/*.js`,
+        `${__dirname}/../controllers/*.js`,
     ] : [
         './src/routes/*.ts',
         './src/controllers/*.ts',
