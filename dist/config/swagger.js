@@ -248,7 +248,10 @@ const options = {
             },
         ],
     },
-    apis: [
+    apis: process.env.NODE_ENV === 'production' ? [
+        './dist/routes/*.js',
+        './dist/controllers/*.js',
+    ] : [
         './src/routes/*.ts',
         './src/controllers/*.ts',
     ],
