@@ -303,45 +303,6 @@ async function clearExistingData(tradition: Tradition): Promise<void> {
 }
 
 /**
- * Ensure all liturgical seasons exist for a given year
- */
-async function createAllLiturgicalSeasons(
-  liturgicalYear: number, 
-  litYear: LiturgicalYear, 
-  seasonRepo: any
-): Promise<void> {
-  // Generate complete liturgical calendar with all seasons
-  const calendarInfo = LiturgicalCalendar.generateLiturgicalYear(liturgicalYear);
-  
-  console.log(`  Ensuring all ${calendarInfo.seasons.length} liturgical seasons exist...`);
-  
-  for (const seasonInfo of calendarInfo.seasons) {
-    // Check if season already exists
-    let existingSeason = await seasonRepo.findOne({
-      where: {
-        name: seasonInfo.name,
-        liturgicalYearId: litYear.id,
-      },
-    });
-    
-    // Create season if it doesn't exist
-    if (!existingSeason) {
-      const season = seasonRepo.create({
-        name: seasonInfo.name,
-        startDate: seasonInfo.startDate,
-        endDate: seasonInfo.endDate,
-        color: seasonInfo.color as LiturgicalColor,
-        liturgicalYearId: litYear.id,
-      });
-      await seasonRepo.save(season);
-      console.log(`    ✓ Created season: ${seasonInfo.name} (${seasonInfo.startDate.toISOString().split('T')[0]} - ${seasonInfo.endDate.toISOString().split('T')[0]})`);
-    } else {
-      console.log(`    - Season already exists: ${seasonInfo.name}`);
-    }
-  }
-}
-
-/**
  * Import readings for a specific liturgical year
  */
 async function importLiturgicalYear(
@@ -382,9 +343,6 @@ async function importLiturgicalYear(
     await yearRepo.save(litYear);
     console.log(`Created liturgical year ${liturgicalYear} (${cycle})`);
   }
-  
-  // Ensure ALL liturgical seasons exist (not just ones with readings data)
-  await createAllLiturgicalSeasons(liturgicalYear, litYear, seasonRepo);
   
   // Process each season
   for (const [seasonKey, seasonData] of Object.entries(yearData.seasons)) {
