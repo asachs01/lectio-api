@@ -174,41 +174,58 @@ function calculateLiturgicalDate(datePattern: string, liturgicalYear: number, cy
     return new Date(easter.getTime() + 56 * 24 * 60 * 60 * 1000);
   }
   
-  // Proper Sundays (counted from Pentecost)
-  // Proper 4 is the Sunday closest to June 1
-  // We'll calculate based on weeks after Pentecost
-  const pentecost = new Date(easter.getTime() + 49 * 24 * 60 * 60 * 1000);
-  const properMap: { [key: string]: number } = {
-    proper_4: 2,   // 2 weeks after Pentecost
-    proper_5: 3,
-    proper_6: 4,
-    proper_7: 5,
-    proper_8: 6,
-    proper_9: 7,
-    proper_10: 8,
-    proper_11: 9,
-    proper_12: 10,
-    proper_13: 11,
-    proper_14: 12,
-    proper_15: 13,
-    proper_16: 14,
-    proper_17: 15,
-    proper_18: 16,
-    proper_19: 17,
-    proper_20: 18,
-    proper_21: 19,
-    proper_22: 20,
-    proper_23: 21,
-    proper_24: 22,
-    proper_25: 23,
-    proper_26: 24,
-    proper_27: 25,
-    proper_28: 26,
-    christ_king: 27, // Last Sunday before Advent
+  // Proper Sundays using correct RCL system (Sunday closest to specific dates)
+  const properDates: { [key: string]: [number, number] } = {
+    proper_4: [5, 1],    // June 1
+    proper_5: [5, 8],    // June 8  
+    proper_6: [5, 15],   // June 15
+    proper_7: [5, 22],   // June 22
+    proper_8: [5, 29],   // June 29
+    proper_9: [6, 6],    // July 6
+    proper_10: [6, 13],  // July 13
+    proper_11: [6, 20],  // July 20
+    proper_12: [6, 27],  // July 27
+    proper_13: [7, 3],   // August 3
+    proper_14: [7, 10],  // August 10
+    proper_15: [7, 17],  // August 17
+    proper_16: [7, 24],  // August 24
+    proper_17: [7, 31],  // August 31
+    proper_18: [8, 7],   // September 7
+    proper_19: [8, 14],  // September 14
+    proper_20: [8, 21],  // September 21
+    proper_21: [8, 28],  // September 28
+    proper_22: [9, 5],   // October 5
+    proper_23: [9, 12],  // October 12
+    proper_24: [9, 19],  // October 19
+    proper_25: [9, 26],  // October 26
+    proper_26: [10, 2],  // November 2
+    proper_27: [10, 9],  // November 9
+    proper_28: [10, 16], // November 16
   };
   
-  if (properMap[datePattern] !== undefined) {
-    return new Date(pentecost.getTime() + properMap[datePattern] * 7 * 24 * 60 * 60 * 1000);
+  if (properDates[datePattern] !== undefined) {
+    const [month, day] = properDates[datePattern];
+    const baseDate = new Date(easterYear, month, day);
+    
+    // Find the Sunday closest to this date
+    const dayOfWeek = baseDate.getDay(); // 0 = Sunday
+    let daysToSunday = 0;
+    
+    if (dayOfWeek <= 3) {
+      // If it's Wed or earlier, go to previous Sunday
+      daysToSunday = -dayOfWeek;
+    } else {
+      // If it's Thu or later, go to next Sunday
+      daysToSunday = 7 - dayOfWeek;
+    }
+    
+    return new Date(baseDate.getTime() + daysToSunday * 24 * 60 * 60 * 1000);
+  }
+  
+  // Christ the King is the last Sunday before Advent
+  if (datePattern === 'christ_king') {
+    const advent1 = LiturgicalCalendar.calculateAdvent1(easterYear);
+    return new Date(advent1.getTime() - 7 * 24 * 60 * 60 * 1000);
   }
   
   // Default to a Sunday in the middle of the year if pattern not recognized
