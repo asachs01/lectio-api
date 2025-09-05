@@ -17,4 +17,10 @@ node dist/scripts/import-rcl-with-dates.js
 echo "Importing Daily Lectionary data..."
 node dist/scripts/import-daily-lectionary.js
 
+# Fix missing liturgical seasons
+echo "Fixing missing liturgical seasons..."
+node dist/scripts/add-missing-seasons-migration.js || {
+  echo "Season fix might have already been applied"
+}
+
 echo "Production database seed completed!"
