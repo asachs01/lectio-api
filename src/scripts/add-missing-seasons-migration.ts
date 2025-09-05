@@ -72,7 +72,8 @@ async function addMissingSeasons(): Promise<void> {
       console.log(`  Existing seasons: ${existingSeasons.map((s: { name: string }) => s.name).join(', ')}`);
 
       // Generate complete liturgical calendar for this year
-      const calendarInfo = LiturgicalCalendar.generateLiturgicalYear(litYear.year - 1); // Adjust for liturgical year calculation
+      // liturgical year 2025 means the year starting in Advent 2024, which is what we want
+      const calendarInfo = LiturgicalCalendar.generateLiturgicalYear(litYear.year);
       
       console.log(`  Expected seasons: ${calendarInfo.seasons.map(s => s.name).join(', ')}`);
 
