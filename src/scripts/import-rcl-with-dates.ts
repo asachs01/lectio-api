@@ -508,24 +508,25 @@ async function importRCLData(): Promise<void> {
     
     console.log('Loaded RCL data files');
     
-    // Import 3 years of data (2024-2026)
+    // Import 3 years of data (2024-2027)
+    // RCL follows a 3-year cycle: A, B, C
+    // Year C: 2024-2025 (starts Advent 2024)
     // Year A: 2025-2026 (starts Advent 2025)
-    // Year B: 2024-2025 (starts Advent 2024)
-    // Year C: 2026-2027 (starts Advent 2026)
+    // Year B: 2026-2027 (starts Advent 2026)
     
     let totalReadings = 0;
     
-    // Import Year B (current - 2024-2025)
-    console.log('\nImporting Year B (2024-2025)...');
-    totalReadings += await importLiturgicalYear(yearBData, 2024, tradition);
+    // Import Year C (current - 2024-2025)
+    console.log('\nImporting Year C (2024-2025)...');
+    totalReadings += await importLiturgicalYear(yearCData, 2024, tradition);
     
-    // Import Year C (2025-2026)
-    console.log('\nImporting Year C (2025-2026)...');
-    totalReadings += await importLiturgicalYear(yearCData, 2025, tradition);
+    // Import Year A (2025-2026)
+    console.log('\nImporting Year A (2025-2026)...');
+    totalReadings += await importLiturgicalYear(yearAData, 2025, tradition);
     
-    // Import Year A (2026-2027)
-    console.log('\nImporting Year A (2026-2027)...');
-    totalReadings += await importLiturgicalYear(yearAData, 2026, tradition);
+    // Import Year B (2026-2027)
+    console.log('\nImporting Year B (2026-2027)...');
+    totalReadings += await importLiturgicalYear(yearBData, 2026, tradition);
     
     console.log(`\n✅ Total readings imported across all years: ${totalReadings}`);
     
@@ -545,7 +546,7 @@ async function importRCLData(): Promise<void> {
     console.log('   Years Covered: 2024-2027');
     
     // Test a specific date
-    const testDate = new Date('2025-08-25'); // Proper 16, Year C
+    const testDate = new Date('2025-09-07'); // Proper 15, Year C (in liturgical year 2024-2025)
     const testReadings = await readingRepo.find({
       where: {
         date: testDate,
