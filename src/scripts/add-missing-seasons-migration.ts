@@ -119,6 +119,33 @@ async function addMissingSeasons(): Promise<void> {
 
     console.log('\n🎉 Missing seasons migration completed successfully!');
 
+    // CRITICAL: Fix RCL Proper readings for 2025
+    console.log('\n🔧 Starting RCL Proper readings fix for 2025...');
+    
+    // Delete wrong RCL readings for June-November 2025
+    console.log('🗑️ Deleting incorrect RCL readings for June-November 2025...');
+    const deleteResult = await AppDataSource.query(`
+      DELETE FROM readings 
+      WHERE tradition_id = $1 
+      AND date >= '2025-06-01' 
+      AND date <= '2025-11-30'
+    `, [traditionId]);
+
+    console.log(`✅ Deleted readings for 2025 summer/fall period (${deleteResult.rowCount || 0} rows affected)`);
+
+    // Verify September 7, 2025 is cleared
+    const sep7Check = await AppDataSource.query(`
+      SELECT COUNT(*) as count FROM readings 
+      WHERE tradition_id = $1 AND date = '2025-09-07'
+    `, [traditionId]);
+
+    if (parseInt(sep7Check[0].count) === 0) {
+      console.log('✅ September 7, 2025 readings successfully cleared for re-import');
+      console.log('🔄 RCL Proper fix preparation completed - readings will be re-imported with correct Proper calculations');
+    } else {
+      console.log('⚠️ September 7, 2025 readings still exist - manual verification needed');
+    }
+
     // Verify the fix by checking August 31, 2025
     console.log('\n🔍 Verifying fix for August 31, 2025...');
     const testResult = await AppDataSource.query(`
