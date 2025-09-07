@@ -41,18 +41,7 @@ services:
       - key: DB_SSL
         value: "true"
         scope: RUN_TIME
-      - key: REDIS_HOST
-        value: ${redis.HOSTNAME}
-        scope: RUN_TIME
-      - key: REDIS_PORT
-        value: ${redis.PORT}
-        scope: RUN_TIME
-      - key: REDIS_PASSWORD
-        value: ${redis.PASSWORD}
-        scope: RUN_TIME
-        type: SECRET
     run_command: npm start
-    build_command: npm run build
 
 jobs:
   # Migration job - runs BEFORE deployment to apply database fixes
@@ -128,9 +117,6 @@ jobs:
 databases:
   - name: lectio-db
     engine: PG
-    production: true
-    version: "16"
-  - name: redis
-    engine: REDIS
-    production: false
-    version: "7"
+    version: "15"
+    size: db-s-dev-database
+    num_nodes: 1
