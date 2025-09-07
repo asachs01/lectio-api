@@ -120,7 +120,7 @@ async function addMissingSeasons(): Promise<void> {
     console.log('\n🎉 Missing seasons migration completed successfully!');
 
     // CRITICAL: Fix RCL Proper readings for 2025
-    console.log('\n🔧 Starting RCL Proper readings fix for 2025...');
+    console.log('\n🔧 Starting RCL Proper readings fix for 2025 (FORCED RUN)...');
     
     // Delete wrong RCL readings for June-November 2025
     console.log('🗑️ Deleting incorrect RCL readings for June-November 2025...');
