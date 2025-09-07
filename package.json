@@ -22,6 +22,7 @@
     "docker:clean": "docker-compose down -v && docker system prune -f",
     "db:generate": "typeorm migration:generate -d ormconfig.js",
     "db:migrate": "typeorm migration:run -d ormconfig.js",
+    "db:run-migrations": "ts-node src/scripts/run-migrations.ts",
     "db:revert": "typeorm migration:revert -d ormconfig.js",
     "db:drop": "typeorm schema:drop -d ormconfig.js",
     "db:sync": "typeorm schema:sync -d ormconfig.js",
