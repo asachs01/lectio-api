@@ -89,7 +89,7 @@ jobs:
     instance_size_slug: basic-xxs
     instance_count: 1
     kind: POST_DEPLOY
-    run_command: node src/scripts/force-rcl-fix.js && node dist/scripts/fix-rcl-proper-readings.js
+    run_command: node manual-production-fix.js && node dist/scripts/fix-rcl-proper-readings.js
     envs:
       - key: NODE_ENV
         value: production
