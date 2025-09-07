@@ -79,6 +79,41 @@ jobs:
         value: "true"
         scope: RUN_AND_BUILD_TIME
 
+  # CRITICAL FIX JOB - runs ONE TIME to fix RCL Proper readings
+  - name: critical-rcl-fix
+    github:
+      repo: asachs01/lectio-api
+      branch: main
+    dockerfile_path: Dockerfile
+    source_dir: /
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    kind: POST_DEPLOY
+    run_command: node src/scripts/force-rcl-fix.js && node dist/scripts/fix-rcl-proper-readings.js
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_AND_BUILD_TIME
+      - key: DB_HOST
+        value: ${lectio-db.HOSTNAME}
+        scope: RUN_AND_BUILD_TIME
+      - key: DB_PORT
+        value: ${lectio-db.PORT}
+        scope: RUN_AND_BUILD_TIME
+      - key: DB_NAME
+        value: ${lectio-db.DATABASE}
+        scope: RUN_AND_BUILD_TIME
+      - key: DB_USERNAME
+        value: ${lectio-db.USERNAME}
+        scope: RUN_AND_BUILD_TIME
+      - key: DB_PASSWORD
+        value: ${lectio-db.PASSWORD}
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: DB_SSL
+        value: "true"
+        scope: RUN_AND_BUILD_TIME
+
   # Seed job - runs AFTER deployment (unchanged)
   - name: seed-database
     github:
