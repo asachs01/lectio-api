@@ -44,41 +44,6 @@ services:
     run_command: npm start
 
 jobs:
-  # RCL Proper Fix job - runs BEFORE deployment to fix September 2025 readings
-  - name: fix-rcl-proper
-    github:
-      repo: asachs01/lectio-api
-      branch: main
-    dockerfile_path: Dockerfile
-    source_dir: /
-    instance_size_slug: basic-xxs
-    instance_count: 1
-    kind: PRE_DEPLOY
-    run_command: npm run db:fix-rcl-proper
-    envs:
-      - key: NODE_ENV
-        value: production
-        scope: RUN_AND_BUILD_TIME
-      - key: DB_HOST
-        value: ${lectio-db.HOSTNAME}
-        scope: RUN_AND_BUILD_TIME
-      - key: DB_PORT
-        value: ${lectio-db.PORT}
-        scope: RUN_AND_BUILD_TIME
-      - key: DB_NAME
-        value: ${lectio-db.DATABASE}
-        scope: RUN_AND_BUILD_TIME
-      - key: DB_USERNAME
-        value: ${lectio-db.USERNAME}
-        scope: RUN_AND_BUILD_TIME
-      - key: DB_PASSWORD
-        value: ${lectio-db.PASSWORD}
-        scope: RUN_AND_BUILD_TIME
-        type: SECRET
-      - key: DB_SSL
-        value: "true"
-        scope: RUN_AND_BUILD_TIME
-
   # Migration job - runs BEFORE deployment to apply database fixes
   - name: run-migrations
     github:
