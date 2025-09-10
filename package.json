@@ -28,7 +28,7 @@
     "db:sync": "typeorm schema:sync -d ormconfig.js",
     "db:seed": "ts-node src/scripts/import-rcl-with-dates.ts",
     "db:seed:prod": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/add-missing-seasons-migration.js && node dist/scripts/fix-rcl-proper-readings.js",
-    "db:seed-production": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/add-missing-seasons-migration.js && node src/scripts/force-rcl-fix.js && node dist/scripts/fix-rcl-proper-readings.js",
+    "db:seed-production-alt": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/add-missing-seasons-migration.js && node dist/scripts/fix-rcl-proper-readings.js",
     "db:fix-seasons": "node dist/scripts/add-missing-seasons-migration.js",
     "db:fix-rcl-proper": "node src/scripts/production-fix-runner.js",
     "entities:validate": "ts-node src/scripts/validate-entities.ts",
