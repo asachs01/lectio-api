@@ -2,7 +2,7 @@ import { DailyReading, ReadingType } from '../types/lectionary.types';
 import { DatabaseService } from './database.service';
 import { Reading, ReadingOffice } from '../models/reading.entity';
 import { Tradition } from '../models/tradition.entity';
-import { Repository, In, Raw } from 'typeorm';
+import { Repository } from 'typeorm';
 import { logger } from '../utils/logger';
 import { LiturgicalCalendarService } from './liturgical-calendar.service';
 
@@ -84,17 +84,18 @@ export class ReadingsService {
       const properNumber = this.calendarService.getProperNumber(dateObj, year);
 
       // Query the database for readings on this date using tradition UUID
-      // Explicitly cast the date parameter to ensure PostgreSQL date comparison works
-      const readings = await repository.find({
-        where: {
-          date: Raw(alias => `${alias} = :date::date`, { date }),
-          traditionId: traditionUuid,
-        },
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
-        order: {
-          readingOrder: 'ASC',
-        },
-      });
+      // Use QueryBuilder for better control over date comparison
+      const readings = await repository
+        .createQueryBuilder('reading')
+        .leftJoinAndSelect('reading.tradition', 'tradition')
+        .leftJoinAndSelect('reading.season', 'season')
+        .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+        .leftJoinAndSelect('reading.specialDay', 'specialDay')
+        .leftJoinAndSelect('reading.scripture', 'scripture')
+        .where('reading.traditionId = :traditionUuid', { traditionUuid })
+        .andWhere('reading.date = :date::date', { date })
+        .orderBy('reading.readingOrder', 'ASC')
+        .getMany();
 
       if (!readings || readings.length === 0) {
         logger.warn(`No readings found for date ${date} and tradition ${traditionIdentifier} (UUID: ${traditionUuid})`);
@@ -205,30 +206,31 @@ export class ReadingsService {
         return { readings: [], total: 0 };
       }
 
-      // Get count for pagination
-      // Explicitly cast date parameters to ensure PostgreSQL date comparison works
-      const total = await repository.count({
-        where: {
-          date: Raw(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
-          traditionId: traditionUuid,
-        },
-      });
+      // Get count for pagination using QueryBuilder
+      const total = await repository
+        .createQueryBuilder('reading')
+        .where('reading.traditionId = :traditionUuid', { traditionUuid })
+        .andWhere('reading.date >= :startDate::date', { startDate })
+        .andWhere('reading.date <= :endDate::date', { endDate })
+        .getCount();
 
-      // Get paginated readings
+      // Get paginated readings using QueryBuilder
       const skip = (page - 1) * limit;
-      const readings = await repository.find({
-        where: {
-          date: Raw(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
-          traditionId: traditionUuid,
-        },
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
-        order: {
-          date: 'ASC',
-          readingOrder: 'ASC',
-        },
-        skip,
-        take: limit,
-      });
+      const readings = await repository
+        .createQueryBuilder('reading')
+        .leftJoinAndSelect('reading.tradition', 'tradition')
+        .leftJoinAndSelect('reading.season', 'season')
+        .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+        .leftJoinAndSelect('reading.specialDay', 'specialDay')
+        .leftJoinAndSelect('reading.scripture', 'scripture')
+        .where('reading.traditionId = :traditionUuid', { traditionUuid })
+        .andWhere('reading.date >= :startDate::date', { startDate })
+        .andWhere('reading.date <= :endDate::date', { endDate })
+        .orderBy('reading.date', 'ASC')
+        .addOrderBy('reading.readingOrder', 'ASC')
+        .skip(skip)
+        .take(limit)
+        .getMany();
 
       // Group readings by date
       const readingsByDate = new Map<string, Reading[]>();
@@ -393,23 +395,18 @@ export class ReadingsService {
     try {
       const repository = this.ensureRepository();
 
-      // Import necessary operators
-      const { Not, IsNull } = await import('typeorm');
-
-      // Get daily office readings using Raw for proper date comparison
-      // Explicitly cast date parameter to ensure PostgreSQL date comparison works
-      const readings = await repository.find({
-        where: {
-          date: Raw(alias => `${alias} = :date::date`, { date }),
-          traditionId: Not(IsNull()),
-          readingOffice: In([ReadingOffice.MORNING, ReadingOffice.EVENING]),
-        },
-        relations: ['tradition'],
-        order: {
-          readingOffice: 'ASC',
-          readingOrder: 'ASC',
-        },
-      });
+      // Get daily office readings using QueryBuilder for proper date comparison
+      const readings = await repository
+        .createQueryBuilder('reading')
+        .leftJoinAndSelect('reading.tradition', 'tradition')
+        .where('reading.date = :date::date', { date })
+        .andWhere('reading.traditionId IS NOT NULL')
+        .andWhere('reading.readingOffice IN (:...offices)', {
+          offices: [ReadingOffice.MORNING, ReadingOffice.EVENING],
+        })
+        .orderBy('reading.readingOffice', 'ASC')
+        .addOrderBy('reading.readingOrder', 'ASC')
+        .getMany();
 
       if (!readings || readings.length === 0) {
         return null;

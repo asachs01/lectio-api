@@ -1,43 +1,9 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReadingsService = void 0;
 const database_service_1 = require("./database.service");
 const reading_entity_1 = require("../models/reading.entity");
 const tradition_entity_1 = require("../models/tradition.entity");
-const typeorm_1 = require("typeorm");
 const logger_1 = require("../utils/logger");
 const liturgical_calendar_service_1 = require("./liturgical-calendar.service");
 class ReadingsService {
@@ -104,17 +70,18 @@ class ReadingsService {
             const season = this.calendarService.getSeasonForDate(dateObj, year);
             const properNumber = this.calendarService.getProperNumber(dateObj, year);
             // Query the database for readings on this date using tradition UUID
-            // Explicitly cast the date parameter to ensure PostgreSQL date comparison works
-            const readings = await repository.find({
-                where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} = :date::date`, { date }),
-                    traditionId: traditionUuid,
-                },
-                relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
-                order: {
-                    readingOrder: 'ASC',
-                },
-            });
+            // Use QueryBuilder for better control over date comparison
+            const readings = await repository
+                .createQueryBuilder('reading')
+                .leftJoinAndSelect('reading.tradition', 'tradition')
+                .leftJoinAndSelect('reading.season', 'season')
+                .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+                .leftJoinAndSelect('reading.specialDay', 'specialDay')
+                .leftJoinAndSelect('reading.scripture', 'scripture')
+                .where('reading.traditionId = :traditionUuid', { traditionUuid })
+                .andWhere('reading.date = :date::date', { date })
+                .orderBy('reading.readingOrder', 'ASC')
+                .getMany();
             if (!readings || readings.length === 0) {
                 logger_1.logger.warn(`No readings found for date ${date} and tradition ${traditionIdentifier} (UUID: ${traditionUuid})`);
                 // Try to find readings by liturgical cycle and proper/season
@@ -189,29 +156,30 @@ class ReadingsService {
                 logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
                 return { readings: [], total: 0 };
             }
-            // Get count for pagination
-            // Explicitly cast date parameters to ensure PostgreSQL date comparison works
-            const total = await repository.count({
-                where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
-                    traditionId: traditionUuid,
-                },
-            });
-            // Get paginated readings
+            // Get count for pagination using QueryBuilder
+            const total = await repository
+                .createQueryBuilder('reading')
+                .where('reading.traditionId = :traditionUuid', { traditionUuid })
+                .andWhere('reading.date >= :startDate::date', { startDate })
+                .andWhere('reading.date <= :endDate::date', { endDate })
+                .getCount();
+            // Get paginated readings using QueryBuilder
             const skip = (page - 1) * limit;
-            const readings = await repository.find({
-                where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
-                    traditionId: traditionUuid,
-                },
-                relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
-                order: {
-                    date: 'ASC',
-                    readingOrder: 'ASC',
-                },
-                skip,
-                take: limit,
-            });
+            const readings = await repository
+                .createQueryBuilder('reading')
+                .leftJoinAndSelect('reading.tradition', 'tradition')
+                .leftJoinAndSelect('reading.season', 'season')
+                .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+                .leftJoinAndSelect('reading.specialDay', 'specialDay')
+                .leftJoinAndSelect('reading.scripture', 'scripture')
+                .where('reading.traditionId = :traditionUuid', { traditionUuid })
+                .andWhere('reading.date >= :startDate::date', { startDate })
+                .andWhere('reading.date <= :endDate::date', { endDate })
+                .orderBy('reading.date', 'ASC')
+                .addOrderBy('reading.readingOrder', 'ASC')
+                .skip(skip)
+                .take(limit)
+                .getMany();
             // Group readings by date
             const readingsByDate = new Map();
             readings.forEach(reading => {
@@ -348,22 +316,18 @@ class ReadingsService {
     async getDailyOfficeReadings(date) {
         try {
             const repository = this.ensureRepository();
-            // Import necessary operators
-            const { Not, IsNull } = await Promise.resolve().then(() => __importStar(require('typeorm')));
-            // Get daily office readings using Raw for proper date comparison
-            // Explicitly cast date parameter to ensure PostgreSQL date comparison works
-            const readings = await repository.find({
-                where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} = :date::date`, { date }),
-                    traditionId: Not(IsNull()),
-                    readingOffice: (0, typeorm_1.In)([reading_entity_1.ReadingOffice.MORNING, reading_entity_1.ReadingOffice.EVENING]),
-                },
-                relations: ['tradition'],
-                order: {
-                    readingOffice: 'ASC',
-                    readingOrder: 'ASC',
-                },
-            });
+            // Get daily office readings using QueryBuilder for proper date comparison
+            const readings = await repository
+                .createQueryBuilder('reading')
+                .leftJoinAndSelect('reading.tradition', 'tradition')
+                .where('reading.date = :date::date', { date })
+                .andWhere('reading.traditionId IS NOT NULL')
+                .andWhere('reading.readingOffice IN (:...offices)', {
+                offices: [reading_entity_1.ReadingOffice.MORNING, reading_entity_1.ReadingOffice.EVENING],
+            })
+                .orderBy('reading.readingOffice', 'ASC')
+                .addOrderBy('reading.readingOrder', 'ASC')
+                .getMany();
             if (!readings || readings.length === 0) {
                 return null;
             }
