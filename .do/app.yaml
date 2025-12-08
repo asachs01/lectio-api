@@ -1,5 +1,8 @@
 name: lectio-api
 region: nyc
+domains:
+  - domain: lectio-api.org
+    type: PRIMARY
 services:
   - name: api
     github:
@@ -11,6 +14,8 @@ services:
     http_port: 3000
     instance_count: 1
     instance_size_slug: basic-xxs
+    routes:
+      - path: /
     health_check:
       http_path: /health
       initial_delay_seconds: 30
@@ -43,7 +48,7 @@ services:
         scope: RUN_TIME
       - key: SWAGGER_ENABLED
         value: "true"
-        scope: RUN_TIME
+        scope: RUN_AND_BUILD_TIME
     run_command: npm start
 
 jobs:
