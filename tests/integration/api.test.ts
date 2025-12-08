@@ -25,19 +25,18 @@ describe('API Integration Tests', () => {
   });
 
   describe('API Root', () => {
-    it('should return API information', async () => {
+    it('should return HTML landing page', async () => {
       const response = await request(app.getApp())
         .get('/')
         .expect(200);
 
-      expect(response.body).toMatchObject({
-        name: 'Lectionary API',
-        version: expect.any(String),
-        health: expect.any(String),
-      });
-      expect(response.body).toHaveProperty('description');
-      expect(response.body).toHaveProperty('endpoints');
-      expect(response.body).toHaveProperty('supportedTraditions');
+      // Verify HTML content type
+      expect(response.headers['content-type']).toMatch(/text\/html/);
+
+      // Verify the HTML contains expected content
+      expect(response.text).toContain('Lectionary API');
+      expect(response.text).toContain('API Documentation');
+      expect(response.text).toContain('/api/docs');
     });
   });
 

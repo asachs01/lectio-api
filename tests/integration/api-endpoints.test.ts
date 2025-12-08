@@ -44,30 +44,30 @@ describe('API Endpoints Integration Tests', () => {
   });
 
   describe('Root Endpoint', () => {
-    it('GET / should return API information', async () => {
+    it('GET / should return HTML landing page', async () => {
       const response = await request(appInstance)
         .get('/')
         .expect(200);
 
-      expect(response.body).toMatchObject({
-        name: 'Lectionary API',
-        version: expect.any(String),
-        health: expect.any(String),
-      });
+      // Verify HTML content type
+      expect(response.headers['content-type']).toMatch(/text\/html/);
+
+      // Verify the HTML contains expected content
+      expect(response.text).toContain('Lectionary API');
     });
 
-    it('GET / should include documentation link when Swagger enabled', async () => {
-      // This test depends on environment configuration
+    it('GET / should include documentation link and API information', async () => {
       const response = await request(appInstance)
         .get('/')
         .expect(200);
 
-      expect(response.body).toHaveProperty('name');
-      expect(response.body).toHaveProperty('version');
-      expect(response.body).toHaveProperty('health');
-      expect(response.body).toHaveProperty('description');
-      expect(response.body).toHaveProperty('endpoints');
-      expect(response.body).toHaveProperty('supportedTraditions');
+      // Verify the landing page includes key information
+      expect(response.text).toContain('API Documentation');
+      expect(response.text).toContain('/api/docs');
+      expect(response.text).toContain('Readings');
+      expect(response.text).toContain('Traditions');
+      expect(response.text).toContain('Calendar');
+      expect(response.text).toContain('Revised Common Lectionary');
     });
   });
 
