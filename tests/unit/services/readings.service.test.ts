@@ -1,6 +1,13 @@
 import { ReadingsService } from '../../../src/services/readings.service';
 import { DailyReading, ReadingType } from '../../../src/types/lectionary.types';
 
+// Mock traditions
+const mockTraditions = [
+  { id: 'rcl-uuid', abbreviation: 'RCL', name: 'Revised Common Lectionary' },
+  { id: 'catholic-uuid', abbreviation: 'CATHOLIC', name: 'Roman Catholic Lectionary' },
+  { id: 'episcopal-uuid', abbreviation: 'EPISCOPAL', name: 'Episcopal/Anglican Lectionary' },
+];
+
 // Mock data
 const mockReadings = [
   {
@@ -11,6 +18,7 @@ const mockReadings = [
     text: 'The word that Isaiah son of Amoz saw...',
     isAlternative: false,
     seasonId: 'advent',
+    traditionId: 'rcl-uuid',
     tradition: { abbreviation: 'RCL' },
     createdAt: new Date('2023-12-03'),
     updatedAt: new Date('2023-12-03'),
@@ -23,6 +31,7 @@ const mockReadings = [
     text: 'I was glad when they said to me...',
     isAlternative: false,
     seasonId: 'advent',
+    traditionId: 'rcl-uuid',
     tradition: { abbreviation: 'RCL' },
     createdAt: new Date('2023-12-03'),
     updatedAt: new Date('2023-12-03'),
@@ -35,6 +44,7 @@ const mockReadings = [
     text: 'You know what time it is...',
     isAlternative: false,
     seasonId: 'advent',
+    traditionId: 'rcl-uuid',
     tradition: { abbreviation: 'RCL' },
     createdAt: new Date('2023-12-03'),
     updatedAt: new Date('2023-12-03'),
@@ -47,6 +57,7 @@ const mockReadings = [
     text: 'But about that day and hour no one knows...',
     isAlternative: false,
     seasonId: 'advent',
+    traditionId: 'rcl-uuid',
     tradition: { abbreviation: 'RCL' },
     createdAt: new Date('2023-12-03'),
     updatedAt: new Date('2023-12-03'),
@@ -101,7 +112,19 @@ describe('ReadingsService', () => {
     jest.clearAllMocks();
     mockFind.mockResolvedValue(mockReadings);
     mockCount.mockResolvedValue(mockReadings.length);
-    mockFindOne.mockResolvedValue(null);
+    // Mock findOne to return traditions when queried by abbreviation
+    mockFindOne.mockImplementation((options: any) => {
+      if (options?.where?.abbreviation) {
+        const abbr = options.where.abbreviation.toUpperCase();
+        const tradition = mockTraditions.find(t => t.abbreviation === abbr);
+        return Promise.resolve(tradition || null);
+      }
+      if (options?.where?.id) {
+        const tradition = mockTraditions.find(t => t.id === options.where.id);
+        return Promise.resolve(tradition || null);
+      }
+      return Promise.resolve(null);
+    });
     service = new ReadingsService();
   });
 
@@ -110,10 +133,10 @@ describe('ReadingsService', () => {
       const date = '2023-12-03';
       const traditionId = 'rcl';
 
-      // Mock the find to simulate proper query filtering
+      // Mock the find to simulate proper query filtering by traditionId (UUID)
       mockFind.mockImplementation((options: any) => {
-        // Check if the query matches what we expect
-        if (options?.where?.tradition?.abbreviation === 'RCL') {
+        // Service now queries by traditionId (UUID) not tradition.abbreviation
+        if (options?.where?.traditionId === 'rcl-uuid') {
           return Promise.resolve(mockReadings);
         }
         return Promise.resolve([]);

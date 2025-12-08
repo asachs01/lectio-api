@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReadingsService = void 0;
 const database_service_1 = require("./database.service");
 const reading_entity_1 = require("../models/reading.entity");
+const tradition_entity_1 = require("../models/tradition.entity");
 const typeorm_1 = require("typeorm");
 const logger_1 = require("../utils/logger");
 const liturgical_calendar_service_1 = require("./liturgical-calendar.service");
@@ -44,6 +45,7 @@ class ReadingsService {
         try {
             const dataSource = database_service_1.DatabaseService.getDataSource();
             this.readingRepository = dataSource.getRepository(reading_entity_1.Reading);
+            this.traditionRepository = dataSource.getRepository(tradition_entity_1.Tradition);
             this.calendarService = new liturgical_calendar_service_1.LiturgicalCalendarService();
         }
         catch (error) {
@@ -56,12 +58,43 @@ class ReadingsService {
         if (!this.readingRepository) {
             const dataSource = database_service_1.DatabaseService.getDataSource();
             this.readingRepository = dataSource.getRepository(reading_entity_1.Reading);
+            this.traditionRepository = dataSource.getRepository(tradition_entity_1.Tradition);
         }
         return this.readingRepository;
     }
-    async getByDate(date, traditionId) {
+    /**
+     * Look up tradition by abbreviation or ID and return its UUID
+     */
+    async getTraditionId(traditionIdentifier) {
+        if (!this.traditionRepository) {
+            const dataSource = database_service_1.DatabaseService.getDataSource();
+            this.traditionRepository = dataSource.getRepository(tradition_entity_1.Tradition);
+        }
+        // Try by abbreviation first (e.g., "rcl" -> "RCL")
+        let tradition = await this.traditionRepository.findOne({
+            where: { abbreviation: traditionIdentifier.toUpperCase() },
+        });
+        // If not found, try by ID
+        if (!tradition) {
+            tradition = await this.traditionRepository.findOne({
+                where: { id: traditionIdentifier },
+            });
+        }
+        if (!tradition) {
+            logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
+            return null;
+        }
+        return tradition.id;
+    }
+    async getByDate(date, traditionIdentifier) {
         try {
             const repository = this.ensureRepository();
+            // Look up the tradition UUID
+            const traditionUuid = await this.getTraditionId(traditionIdentifier);
+            if (!traditionUuid) {
+                logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
+                return null;
+            }
             // Parse date string to avoid timezone issues - ensure we're working with the date as-is
             const [yearStr, monthStr, dayStr] = date.split('-');
             const dateObj = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 12, 0, 0); // Set to noon to avoid timezone issues
@@ -70,14 +103,11 @@ class ReadingsService {
             const liturgicalInfo = this.calendarService.getLiturgicalYearInfo(year);
             const season = this.calendarService.getSeasonForDate(dateObj, year);
             const properNumber = this.calendarService.getProperNumber(dateObj, year);
-            // Query the database for readings on this date
-            // Use Raw query for date comparison to avoid timezone issues with date column
+            // Query the database for readings on this date using tradition UUID
             const readings = await repository.find({
                 where: {
                     date: (0, typeorm_1.Raw)(alias => `${alias} = :date`, { date }),
-                    tradition: {
-                        abbreviation: traditionId.toUpperCase(), // RCL not rcl
-                    },
+                    traditionId: traditionUuid,
                 },
                 relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
                 order: {
@@ -85,31 +115,29 @@ class ReadingsService {
                 },
             });
             if (!readings || readings.length === 0) {
-                logger_1.logger.warn(`No readings found for date ${date} and tradition ${traditionId}`);
+                logger_1.logger.warn(`No readings found for date ${date} and tradition ${traditionIdentifier} (UUID: ${traditionUuid})`);
                 // Try to find readings by liturgical cycle and proper/season
-                const alternateReadings = await this.findReadingsByLiturgicalContext(dateObj, traditionId, liturgicalInfo.cycle, season, properNumber);
+                const alternateReadings = await this.findReadingsByLiturgicalContext(dateObj, traditionUuid, liturgicalInfo.cycle, season, properNumber);
                 if (alternateReadings && alternateReadings.length > 0) {
-                    return this.formatDailyReading(alternateReadings, date, traditionId, season?.name || 'ordinary');
+                    return this.formatDailyReading(alternateReadings, date, traditionIdentifier, season?.name || 'ordinary');
                 }
                 // Return null - no mock data fallback
                 return null;
             }
             // Format and return the readings
-            return this.formatDailyReading(readings, date, traditionId, readings[0].seasonId || season?.name || 'ordinary');
+            return this.formatDailyReading(readings, date, traditionIdentifier, readings[0].seasonId || season?.name || 'ordinary');
         }
         catch (error) {
             logger_1.logger.error(`Error fetching readings for date ${date}:`, error);
             return null;
         }
     }
-    async findReadingsByLiturgicalContext(_date, traditionId, cycle, season, properNumber) {
+    async findReadingsByLiturgicalContext(_date, traditionUuid, cycle, season, properNumber) {
         try {
             const repository = this.ensureRepository();
             // Build query conditions based on liturgical context
             const conditions = {
-                tradition: {
-                    abbreviation: traditionId.toUpperCase(),
-                },
+                traditionId: traditionUuid,
             };
             // For Ordinary Time, look for readings by proper number
             if (season?.id === 'ordinary' && properNumber) {
@@ -151,16 +179,20 @@ class ReadingsService {
             updatedAt: readings[0]?.updatedAt || new Date(),
         };
     }
-    async getByDateRange(startDate, endDate, traditionId, page, limit) {
+    async getByDateRange(startDate, endDate, traditionIdentifier, page, limit) {
         try {
             const repository = this.ensureRepository();
+            // Look up the tradition UUID
+            const traditionUuid = await this.getTraditionId(traditionIdentifier);
+            if (!traditionUuid) {
+                logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
+                return { readings: [], total: 0 };
+            }
             // Get count for pagination
             const total = await repository.count({
                 where: {
                     date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
-                    tradition: {
-                        abbreviation: traditionId.toUpperCase(),
-                    },
+                    traditionId: traditionUuid,
                 },
             });
             // Get paginated readings
@@ -168,9 +200,7 @@ class ReadingsService {
             const readings = await repository.find({
                 where: {
                     date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
-                    tradition: {
-                        abbreviation: traditionId.toUpperCase(),
-                    },
+                    traditionId: traditionUuid,
                 },
                 relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
                 order: {
@@ -195,9 +225,9 @@ class ReadingsService {
                 const year = dateObj.getFullYear();
                 const season = this.calendarService.getSeasonForDate(dateObj, year);
                 return {
-                    id: `${traditionId}-${dateStr}`,
+                    id: `${traditionIdentifier}-${dateStr}`,
                     date: dateStr,
-                    traditionId,
+                    traditionId: traditionIdentifier,
                     seasonId: dateReadings[0].seasonId || season?.name || 'ordinary',
                     readings: dateReadings.map(r => ({
                         type: r.readingType,
@@ -211,7 +241,7 @@ class ReadingsService {
             });
             // If no readings found in database, return empty result
             if (dailyReadings.length === 0) {
-                logger_1.logger.warn(`No readings found for date range ${startDate} to ${endDate} in tradition ${traditionId}`);
+                logger_1.logger.warn(`No readings found for date range ${startDate} to ${endDate} in tradition ${traditionIdentifier}`);
                 // Calculate how many days are in the range for proper response
                 // const start = new Date(startDate);
                 // const end = new Date(endDate);
@@ -234,16 +264,20 @@ class ReadingsService {
             };
         }
     }
-    async getReadingsByProper(properNumber, traditionId, cycle) {
+    async getReadingsByProper(properNumber, traditionIdentifier, cycle) {
         try {
             const repository = this.ensureRepository();
+            // Look up the tradition UUID
+            const traditionUuid = await this.getTraditionId(traditionIdentifier);
+            if (!traditionUuid) {
+                logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
+                return null;
+            }
             // Query for readings by proper number
             const readings = await repository.find({
                 where: {
                     notes: `Proper ${properNumber}`,
-                    tradition: {
-                        id: traditionId.toLowerCase(),
-                    },
+                    traditionId: traditionUuid,
                     liturgicalYear: {
                         cycle: cycle,
                     },
@@ -261,24 +295,28 @@ class ReadingsService {
             // For Proper 16, we can use a date around August 25
             // In reality, this would be calculated based on the liturgical calendar
             const date = `${year}-08-25`;
-            return this.formatDailyReading(readings, date, traditionId, 'ordinary');
+            return this.formatDailyReading(readings, date, traditionIdentifier, 'ordinary');
         }
         catch (error) {
             logger_1.logger.error(`Error fetching readings for Proper ${properNumber}:`, error);
             return null;
         }
     }
-    async getReadingsBySeason(seasonId, traditionId, cycle) {
+    async getReadingsBySeason(seasonId, traditionIdentifier, cycle) {
         try {
             const repository = this.ensureRepository();
+            // Look up the tradition UUID
+            const traditionUuid = await this.getTraditionId(traditionIdentifier);
+            if (!traditionUuid) {
+                logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
+                return [];
+            }
             const readings = await repository.find({
                 where: {
                     season: {
                         id: seasonId,
                     },
-                    tradition: {
-                        id: traditionId.toLowerCase(),
-                    },
+                    traditionId: traditionUuid,
                     liturgicalYear: {
                         cycle: cycle,
                     },
@@ -298,7 +336,7 @@ class ReadingsService {
                 }
                 readingsByDate.get(dateStr).push(reading);
             });
-            return Array.from(readingsByDate.entries()).map(([dateStr, dateReadings]) => this.formatDailyReading(dateReadings, dateStr, traditionId, seasonId));
+            return Array.from(readingsByDate.entries()).map(([dateStr, dateReadings]) => this.formatDailyReading(dateReadings, dateStr, traditionIdentifier, seasonId));
         }
         catch (error) {
             logger_1.logger.error(`Error fetching readings for season ${seasonId}:`, error);
