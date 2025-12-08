@@ -456,4 +456,75 @@ router.post('/debug-querybuilder', async (req: Request, res: Response): Promise<
   }
 });
 
+/**
+ * Debug full readings service flow
+ */
+router.post('/debug-service-flow', async (req: Request, res: Response): Promise<Response> => {
+  const { key, date, tradition } = req.body;
+
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  if (!date || !tradition) {
+    return res.status(400).json({ error: 'Date and tradition parameters required' });
+  }
+
+  try {
+    const dataSource = DatabaseService.getDataSource();
+    const traditionRepository = dataSource.getRepository('Tradition');
+    const readingRepository = dataSource.getRepository('Reading');
+
+    // Step 1: Look up tradition (mimic getTraditionId)
+    let traditionEntity = await traditionRepository.findOne({
+      where: { abbreviation: tradition.toUpperCase() },
+    });
+
+    if (!traditionEntity) {
+      traditionEntity = await traditionRepository.findOne({
+        where: { id: tradition },
+      });
+    }
+
+    if (!traditionEntity) {
+      return res.json({
+        error: 'Tradition not found',
+        step: 'getTraditionId',
+        searchedFor: tradition.toUpperCase(),
+      });
+    }
+
+    const traditionUuid = (traditionEntity as any).id;
+
+    // Step 2: Run the exact query from getByDate
+    const readings = await readingRepository
+      .createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.tradition', 'tradition')
+      .leftJoinAndSelect('reading.season', 'season')
+      .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+      .leftJoinAndSelect('reading.specialDay', 'specialDay')
+      .leftJoinAndSelect('reading.scripture', 'scripture')
+      .where('reading.traditionId = :traditionUuid', { traditionUuid })
+      .andWhere('reading.date = CAST(:date AS date)', { date })
+      .orderBy('reading.readingOrder', 'ASC')
+      .getMany();
+
+    return res.json({
+      tradition: traditionEntity,
+      traditionUuid,
+      searchDate: date,
+      readingsFound: readings.length,
+      readings: readings.slice(0, 2),
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Debug service flow failed:', error);
+    return res.status(500).json({
+      error: 'Debug failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 export { router as adminRouter };
