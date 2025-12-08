@@ -84,9 +84,10 @@ export class ReadingsService {
       const properNumber = this.calendarService.getProperNumber(dateObj, year);
 
       // Query the database for readings on this date using tradition UUID
+      // Explicitly cast the date parameter to ensure PostgreSQL date comparison works
       const readings = await repository.find({
         where: {
-          date: Raw(alias => `${alias} = :date`, { date }),
+          date: Raw(alias => `${alias} = :date::date`, { date }),
           traditionId: traditionUuid,
         },
         relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
@@ -205,9 +206,10 @@ export class ReadingsService {
       }
 
       // Get count for pagination
+      // Explicitly cast date parameters to ensure PostgreSQL date comparison works
       const total = await repository.count({
         where: {
-          date: Raw(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
+          date: Raw(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
           traditionId: traditionUuid,
         },
       });
@@ -216,7 +218,7 @@ export class ReadingsService {
       const skip = (page - 1) * limit;
       const readings = await repository.find({
         where: {
-          date: Raw(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
+          date: Raw(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
           traditionId: traditionUuid,
         },
         relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
@@ -395,9 +397,10 @@ export class ReadingsService {
       const { Not, IsNull } = await import('typeorm');
 
       // Get daily office readings using Raw for proper date comparison
+      // Explicitly cast date parameter to ensure PostgreSQL date comparison works
       const readings = await repository.find({
         where: {
-          date: Raw(alias => `${alias} = :date`, { date }),
+          date: Raw(alias => `${alias} = :date::date`, { date }),
           traditionId: Not(IsNull()),
           readingOffice: In([ReadingOffice.MORNING, ReadingOffice.EVENING]),
         },

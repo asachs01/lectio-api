@@ -104,9 +104,10 @@ class ReadingsService {
             const season = this.calendarService.getSeasonForDate(dateObj, year);
             const properNumber = this.calendarService.getProperNumber(dateObj, year);
             // Query the database for readings on this date using tradition UUID
+            // Explicitly cast the date parameter to ensure PostgreSQL date comparison works
             const readings = await repository.find({
                 where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} = :date`, { date }),
+                    date: (0, typeorm_1.Raw)(alias => `${alias} = :date::date`, { date }),
                     traditionId: traditionUuid,
                 },
                 relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
@@ -189,9 +190,10 @@ class ReadingsService {
                 return { readings: [], total: 0 };
             }
             // Get count for pagination
+            // Explicitly cast date parameters to ensure PostgreSQL date comparison works
             const total = await repository.count({
                 where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
+                    date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
                     traditionId: traditionUuid,
                 },
             });
@@ -199,7 +201,7 @@ class ReadingsService {
             const skip = (page - 1) * limit;
             const readings = await repository.find({
                 where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
+                    date: (0, typeorm_1.Raw)(alias => `${alias} >= :startDate::date AND ${alias} <= :endDate::date`, { startDate, endDate }),
                     traditionId: traditionUuid,
                 },
                 relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
@@ -349,9 +351,10 @@ class ReadingsService {
             // Import necessary operators
             const { Not, IsNull } = await Promise.resolve().then(() => __importStar(require('typeorm')));
             // Get daily office readings using Raw for proper date comparison
+            // Explicitly cast date parameter to ensure PostgreSQL date comparison works
             const readings = await repository.find({
                 where: {
-                    date: (0, typeorm_1.Raw)(alias => `${alias} = :date`, { date }),
+                    date: (0, typeorm_1.Raw)(alias => `${alias} = :date::date`, { date }),
                     traditionId: Not(IsNull()),
                     readingOffice: (0, typeorm_1.In)([reading_entity_1.ReadingOffice.MORNING, reading_entity_1.ReadingOffice.EVENING]),
                 },
