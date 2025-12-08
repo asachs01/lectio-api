@@ -142,14 +142,14 @@ describe('Liturgical Calendar Calculations', () => {
           'Epiphany',
           'Lent',
           'Easter',
-          'Ordinary Time'
+          'Ordinary Time',
         ]);
         
         // Verify seasons are in chronological order
         for (let i = 1; i < seasons.length; i++) {
           if (seasons[i].name !== 'Ordinary Time') {
             expect(seasons[i].startDate.getTime()).toBeGreaterThanOrEqual(
-              seasons[i-1].endDate.getTime()
+              seasons[i-1].endDate.getTime(),
             );
           }
         }

@@ -186,7 +186,6 @@ router.get('/today', asyncHandler((req, res) => getController().getToday(req, re
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/range', asyncHandler((req, res) => getController().getByDateRange(req, res)));
-<<<<<<< HEAD
 
 /**
  * @swagger
@@ -234,7 +233,5 @@ router.get('/range', asyncHandler((req, res) => getController().getByDateRange(r
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/daily-office', asyncHandler((req, res) => getController().getDailyOffice(req, res)));
-=======
->>>>>>> ae6b835 (docs: reorganize documentation into logical directory structure)
 
 export { router as readingsRouter };

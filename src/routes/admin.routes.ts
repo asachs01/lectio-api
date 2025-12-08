@@ -97,7 +97,7 @@ router.post('/fix-rcl-proper', async (req: Request, res: Response): Promise<Resp
     const dataSource = DatabaseService.getDataSource();
     const rclResult = await dataSource.query(
       'SELECT id FROM traditions WHERE abbreviation = $1',
-      ['RCL']
+      ['RCL'],
     );
 
     if (rclResult.length === 0) {
@@ -109,7 +109,7 @@ router.post('/fix-rcl-proper', async (req: Request, res: Response): Promise<Resp
     // Check current state
     const beforeCount = await dataSource.query(
       'SELECT COUNT(*) as count FROM readings WHERE tradition_id = $1 AND date >= $2 AND date <= $3',
-      [rclTraditionId, '2025-06-01', '2025-11-30']
+      [rclTraditionId, '2025-06-01', '2025-11-30'],
     );
 
     // Delete wrong RCL readings for June-November 2025
@@ -123,7 +123,7 @@ router.post('/fix-rcl-proper', async (req: Request, res: Response): Promise<Resp
     // Check September 7, 2025 specifically
     const sep7Check = await dataSource.query(
       'SELECT COUNT(*) as count FROM readings WHERE tradition_id = $1 AND date = $2',
-      [rclTraditionId, '2025-09-07']
+      [rclTraditionId, '2025-09-07'],
     );
 
     const response = {
@@ -136,9 +136,9 @@ router.post('/fix-rcl-proper', async (req: Request, res: Response): Promise<Resp
         readingsBeforeFix: parseInt(beforeCount[0].count),
         readingsDeleted: deleteResult.rowCount || 0,
         september7Cleared: parseInt(sep7Check[0].count) === 0,
-        nextStep: 'Run seed-database endpoint to re-import with correct calculations'
+        nextStep: 'Run seed-database endpoint to re-import with correct calculations',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     console.log('✅ RCL fix completed:', response.details);

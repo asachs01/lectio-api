@@ -1,14 +1,120 @@
 import { CalendarService } from '../../../src/services/calendar.service';
 import { LiturgicalSeason, SpecialDay } from '../../../src/types/lectionary.types';
+import { DatabaseService } from '../../../src/services/database.service';
+
+// Mock the DatabaseService
+jest.mock('../../../src/services/database.service');
+
+// Sample mock data
+const mockTradition = { id: 'tradition-1', abbreviation: 'RCL', name: 'Revised Common Lectionary' };
+const mockSeasons = [
+  {
+    id: 'advent',
+    name: 'Advent',
+    color: 'purple',
+    startDate: new Date('2023-12-03'),
+    endDate: new Date('2023-12-24'),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'christmas',
+    name: 'Christmas',
+    color: 'white',
+    startDate: new Date('2023-12-25'),
+    endDate: new Date('2024-01-06'),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'epiphany',
+    name: 'Epiphany',
+    color: 'green',
+    startDate: new Date('2024-01-07'),
+    endDate: new Date('2024-02-13'),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+const mockSpecialDays = [
+  {
+    id: 'christmas',
+    name: 'Christmas Day',
+    date: new Date('2023-12-25'),
+    type: 'feast',
+    year: 2023,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'epiphany',
+    name: 'Epiphany',
+    date: new Date('2024-01-06'),
+    type: 'feast',
+    year: 2023,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+const mockLiturgicalYear = {
+  id: 'ly-1',
+  year: 2023,
+  startDate: new Date('2023-12-03'),
+  endDate: new Date('2024-11-30'),
+  seasons: mockSeasons,
+};
 
 describe('CalendarService', () => {
   let service: CalendarService;
+  let mockTraditionRepo: any;
+  let mockSpecialDayRepo: any;
+  let mockLiturgicalYearRepo: any;
 
   beforeEach(() => {
+    // Setup mock repositories
+    mockTraditionRepo = {
+      findOne: jest.fn(),
+    };
+    mockSpecialDayRepo = {
+      find: jest.fn(),
+    };
+    mockLiturgicalYearRepo = {
+      findOne: jest.fn(),
+      find: jest.fn(),
+    };
+
+    // Setup mock data source
+    const mockDataSource = {
+      getRepository: jest.fn((entity: any) => {
+        if (entity.name === 'Tradition') {
+          return mockTraditionRepo;
+        }
+        if (entity.name === 'SpecialDay') {
+          return mockSpecialDayRepo;
+        }
+        if (entity.name === 'LiturgicalYear') {
+          return mockLiturgicalYearRepo;
+        }
+        return {};
+      }),
+    };
+
+    (DatabaseService.getDataSource as jest.Mock).mockReturnValue(mockDataSource);
+
     service = new CalendarService();
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('getByYear', () => {
+    beforeEach(() => {
+      mockTraditionRepo.findOne.mockResolvedValue(mockTradition);
+      mockLiturgicalYearRepo.findOne.mockResolvedValue(mockLiturgicalYear);
+      mockSpecialDayRepo.find.mockResolvedValue(mockSpecialDays);
+    });
+
     it('should return liturgical calendar for given year and tradition', async () => {
       const year = 2023;
       const traditionId = 'rcl';
@@ -57,6 +163,11 @@ describe('CalendarService', () => {
   });
 
   describe('getSeasonsByYear', () => {
+    beforeEach(() => {
+      mockTraditionRepo.findOne.mockResolvedValue(mockTradition);
+      mockLiturgicalYearRepo.findOne.mockResolvedValue(mockLiturgicalYear);
+    });
+
     it('should return seasons for a given year and tradition', async () => {
       const seasons = await service.getSeasonsByYear(2023, 'rcl');
 
@@ -90,11 +201,47 @@ describe('CalendarService', () => {
             traditionId: 'rcl',
             year: 2023,
           }),
-        ])
+        ]),
       );
     });
 
     it('should return seasons with correct year-based dates', async () => {
+      // Update mock for 2024
+      const mock2024Seasons = [
+        {
+          id: 'advent',
+          name: 'Advent',
+          color: 'purple',
+          startDate: new Date('2024-12-03'),
+          endDate: new Date('2024-12-24'),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'christmas',
+          name: 'Christmas',
+          color: 'white',
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2025-01-06'),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'epiphany',
+          name: 'Epiphany',
+          color: 'green',
+          startDate: new Date('2025-01-07'),
+          endDate: new Date('2025-02-13'),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+      mockLiturgicalYearRepo.findOne.mockResolvedValue({
+        ...mockLiturgicalYear,
+        year: 2024,
+        seasons: mock2024Seasons,
+      });
+
       const seasons2024 = await service.getSeasonsByYear(2024, 'episcopal');
 
       seasons2024.forEach((season: LiturgicalSeason) => {
@@ -127,7 +274,7 @@ describe('CalendarService', () => {
         expect(season).toHaveProperty('year');
         expect(season).toHaveProperty('createdAt');
         expect(season).toHaveProperty('updatedAt');
-        
+
         expect(typeof season.id).toBe('string');
         expect(typeof season.name).toBe('string');
         expect(typeof season.color).toBe('string');
@@ -160,6 +307,11 @@ describe('CalendarService', () => {
   });
 
   describe('getSpecialDaysByYear', () => {
+    beforeEach(() => {
+      mockTraditionRepo.findOne.mockResolvedValue(mockTradition);
+      mockSpecialDayRepo.find.mockResolvedValue(mockSpecialDays);
+    });
+
     it('should return special days for a given year and tradition', async () => {
       const specialDays = await service.getSpecialDaysByYear(2023, 'rcl');
 
@@ -182,11 +334,33 @@ describe('CalendarService', () => {
             traditionId: 'rcl',
             year: 2023,
           }),
-        ])
+        ]),
       );
     });
 
     it('should return special days with correct year-based dates', async () => {
+      const mock2024SpecialDays = [
+        {
+          id: 'christmas',
+          name: 'Christmas Day',
+          date: new Date('2024-12-25'),
+          type: 'feast',
+          year: 2024,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'epiphany',
+          name: 'Epiphany',
+          date: new Date('2025-01-06'),
+          type: 'feast',
+          year: 2024,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+      mockSpecialDayRepo.find.mockResolvedValue(mock2024SpecialDays);
+
       const specialDays2024 = await service.getSpecialDaysByYear(2024, 'episcopal');
 
       expect(specialDays2024).toHaveLength(2);
@@ -210,7 +384,7 @@ describe('CalendarService', () => {
         expect(day).toHaveProperty('year');
         expect(day).toHaveProperty('createdAt');
         expect(day).toHaveProperty('updatedAt');
-        
+
         expect(typeof day.id).toBe('string');
         expect(typeof day.name).toBe('string');
         expect(typeof day.date).toBe('string');
@@ -246,10 +420,14 @@ describe('CalendarService', () => {
 
     beforeEach(() => {
       originalDate = Date;
+      mockTraditionRepo.findOne.mockResolvedValue(mockTradition);
+      mockLiturgicalYearRepo.find.mockResolvedValue([mockLiturgicalYear]);
+      mockSpecialDayRepo.find.mockResolvedValue(mockSpecialDays);
     });
 
     afterEach(() => {
       global.Date = originalDate;
+      jest.restoreAllMocks();
     });
 
     it('should return current calendar information', async () => {
@@ -257,7 +435,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-12-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -279,7 +459,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-12-30T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -298,7 +480,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-06-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -312,7 +496,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-12-10T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -336,7 +522,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-12-20T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -351,7 +539,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-12-30T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -365,7 +555,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2024-03-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -379,7 +571,9 @@ describe('CalendarService', () => {
       const mockDate = new Date('2023-12-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 

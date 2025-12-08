@@ -48,7 +48,7 @@ module.exports = {
       },
     },
     {
-      files: ['tests/**/*.ts', 'tests/**/*.js'],
+      files: ['tests/**/*.ts', 'tests/**/*.js', 'src/tests/**/*.ts'],
       parserOptions: {
         project: false,
       },
