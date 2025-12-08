@@ -357,4 +357,103 @@ router.post('/query-readings-by-date', async (req: Request, res: Response): Prom
   }
 });
 
+/**
+ * Debug QueryBuilder date query
+ */
+router.post('/debug-querybuilder', async (req: Request, res: Response): Promise<Response> => {
+  const { key, date } = req.body;
+
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  if (!date) {
+    return res.status(400).json({ error: 'Date parameter required' });
+  }
+
+  try {
+    const dataSource = DatabaseService.getDataSource();
+    const readingRepository = dataSource.getRepository('Reading');
+
+    // Get RCL tradition ID
+    const tradition = await dataSource.query(
+      'SELECT id, abbreviation FROM traditions WHERE UPPER(abbreviation) = $1',
+      ['RCL'],
+    );
+
+    if (tradition.length === 0) {
+      return res.json({ error: 'RCL tradition not found' });
+    }
+
+    const traditionUuid = tradition[0].id;
+
+    // Test 1: QueryBuilder with CAST
+    const qb1 = readingRepository
+      .createQueryBuilder('reading')
+      .where('reading.traditionId = :traditionUuid', { traditionUuid })
+      .andWhere('reading.date = CAST(:date AS date)', { date });
+
+    const sql1 = qb1.getSql();
+    const result1 = await qb1.getMany();
+
+    // Test 2: QueryBuilder without any cast
+    const qb2 = readingRepository
+      .createQueryBuilder('reading')
+      .where('reading.traditionId = :traditionUuid', { traditionUuid })
+      .andWhere('reading.date = :date', { date });
+
+    const sql2 = qb2.getSql();
+    const result2 = await qb2.getMany();
+
+    // Test 3: QueryBuilder with Date object
+    const dateObj = new Date(date + 'T00:00:00.000Z');
+    const qb3 = readingRepository
+      .createQueryBuilder('reading')
+      .where('reading.traditionId = :traditionUuid', { traditionUuid })
+      .andWhere('reading.date = :dateObj', { dateObj });
+
+    const sql3 = qb3.getSql();
+    const result3 = await qb3.getMany();
+
+    // Test 4: Raw query for comparison
+    const rawResult = await dataSource.query(
+      'SELECT * FROM readings WHERE tradition_id = $1 AND date = $2::date LIMIT 5',
+      [traditionUuid, date],
+    );
+
+    return res.json({
+      tradition: tradition[0],
+      searchDate: date,
+      test1_cast: {
+        sql: sql1,
+        resultCount: result1.length,
+        results: result1.slice(0, 2),
+      },
+      test2_no_cast: {
+        sql: sql2,
+        resultCount: result2.length,
+        results: result2.slice(0, 2),
+      },
+      test3_date_object: {
+        sql: sql3,
+        dateObj: dateObj.toISOString(),
+        resultCount: result3.length,
+        results: result3.slice(0, 2),
+      },
+      test4_raw: {
+        resultCount: rawResult.length,
+        results: rawResult.slice(0, 2),
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Debug QueryBuilder failed:', error);
+    return res.status(500).json({
+      error: 'Debug failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 export { router as adminRouter };
