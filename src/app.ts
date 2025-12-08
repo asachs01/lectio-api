@@ -78,8 +78,9 @@ export class App {
       });
     });
 
-    // API documentation
-    if (process.env.SWAGGER_ENABLED === 'true') {
+    // API documentation - enabled by default in production, can be disabled with SWAGGER_ENABLED=false
+    const swaggerEnabled = process.env.SWAGGER_ENABLED !== 'false';
+    if (swaggerEnabled) {
       this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
         explorer: true,
         customCss: '.swagger-ui .topbar { display: none }',
@@ -112,8 +113,8 @@ export class App {
         description: 'A REST API providing lectionary readings and liturgical calendar data for Christian churches',
         version,
         documentation: {
-          swagger: process.env.SWAGGER_ENABLED === 'true' ? `${baseUrl}/api/docs` : null,
-          openApiSpec: process.env.SWAGGER_ENABLED === 'true' ? `${baseUrl}/api/docs.json` : null,
+          swagger: process.env.SWAGGER_ENABLED !== 'false' ? `${baseUrl}/api/docs` : null,
+          openApiSpec: process.env.SWAGGER_ENABLED !== 'false' ? `${baseUrl}/api/docs.json` : null,
         },
         endpoints: {
           apiRoot: `${baseUrl}/api/${version}`,
