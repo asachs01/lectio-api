@@ -497,13 +497,12 @@ router.post('/debug-service-flow', async (req: Request, res: Response): Promise<
     const traditionUuid = (traditionEntity as any).id;
 
     // Step 2: Run the exact query from getByDate
-    // Note: specialDay join removed due to schema mismatch in production
+    // Note: specialDay and scripture joins removed due to schema mismatch in production
     const readings = await readingRepository
       .createQueryBuilder('reading')
       .leftJoinAndSelect('reading.tradition', 'tradition')
       .leftJoinAndSelect('reading.season', 'season')
       .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
-      .leftJoinAndSelect('reading.scripture', 'scripture')
       .where('reading.traditionId = :traditionUuid', { traditionUuid })
       .andWhere('reading.date = CAST(:date AS date)', { date })
       .orderBy('reading.readingOrder', 'ASC')

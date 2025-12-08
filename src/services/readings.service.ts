@@ -86,13 +86,12 @@ export class ReadingsService {
       // Query the database for readings on this date using tradition UUID
       // Use QueryBuilder for better control over date comparison
       // Use CAST syntax instead of :: for proper parameter binding
-      // Note: specialDay join removed due to schema mismatch in production
+      // Note: specialDay and scripture joins removed due to schema mismatch in production
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
         .leftJoinAndSelect('reading.season', 'season')
         .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
-        .leftJoinAndSelect('reading.scripture', 'scripture')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
         .andWhere('reading.date = CAST(:date AS date)', { date })
         .orderBy('reading.readingOrder', 'ASC')
@@ -153,9 +152,10 @@ export class ReadingsService {
         };
       }
 
+      // Note: scripture relation removed due to schema mismatch in production
       const readings = await repository.find({
         where: conditions,
-        relations: ['tradition', 'season', 'liturgicalYear', 'scripture'],
+        relations: ['tradition', 'season', 'liturgicalYear'],
         order: {
           readingOrder: 'ASC',
         },
@@ -218,12 +218,12 @@ export class ReadingsService {
 
       // Get paginated readings using QueryBuilder
       const skip = (page - 1) * limit;
+      // Note: scripture join removed due to schema mismatch in production
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
         .leftJoinAndSelect('reading.season', 'season')
         .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
-        .leftJoinAndSelect('reading.scripture', 'scripture')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
         .andWhere('reading.date >= CAST(:startDate AS date)', { startDate })
         .andWhere('reading.date <= CAST(:endDate AS date)', { endDate })
@@ -310,6 +310,7 @@ export class ReadingsService {
       }
 
       // Query for readings by proper number
+      // Note: scripture relation removed due to schema mismatch in production
       const readings = await repository.find({
         where: {
           notes: `Proper ${properNumber}`,
@@ -318,7 +319,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear', 'scripture'],
+        relations: ['tradition', 'season', 'liturgicalYear'],
         order: {
           readingOrder: 'ASC',
         },
@@ -356,6 +357,7 @@ export class ReadingsService {
         return [];
       }
 
+      // Note: scripture relation removed due to schema mismatch in production
       const readings = await repository.find({
         where: {
           season: {
@@ -366,7 +368,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear', 'scripture'],
+        relations: ['tradition', 'season', 'liturgicalYear'],
         order: {
           date: 'ASC',
           readingOrder: 'ASC',
