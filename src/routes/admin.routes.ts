@@ -153,4 +153,73 @@ router.post('/fix-rcl-proper', async (req: Request, res: Response): Promise<Resp
   }
 });
 
+/**
+ * Diagnose and fix duplicate traditions
+ */
+router.post('/fix-duplicate-traditions', async (req: Request, res: Response): Promise<Response> => {
+  const { key, fix = false } = req.body;
+
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const dataSource = DatabaseService.getDataSource();
+
+    // Find all traditions with abbreviation 'RCL'
+    const rclTraditions = await dataSource.query(
+      'SELECT id, name, abbreviation, created_at FROM traditions WHERE UPPER(abbreviation) = $1',
+      ['RCL'],
+    );
+
+    // Count readings for each tradition
+    const traditionsWithCounts = await Promise.all(
+      rclTraditions.map(async (t: any) => {
+        const count = await dataSource.query(
+          'SELECT COUNT(*) as count FROM readings WHERE tradition_id = $1',
+          [t.id],
+        );
+        return {
+          ...t,
+          readingCount: parseInt(count[0].count),
+        };
+      }),
+    );
+
+    let fixed = false;
+    let deletedTraditionId = null;
+
+    // If fix=true and there are duplicates, delete the one without readings
+    if (fix && traditionsWithCounts.length > 1) {
+      const toDelete = traditionsWithCounts.find((t: any) => t.readingCount === 0);
+      const toKeep = traditionsWithCounts.find((t: any) => t.readingCount > 0);
+
+      if (toDelete && toKeep) {
+        await dataSource.query('DELETE FROM traditions WHERE id = $1', [toDelete.id]);
+        deletedTraditionId = toDelete.id;
+        fixed = true;
+      }
+    }
+
+    return res.json({
+      success: true,
+      traditions: traditionsWithCounts,
+      duplicateCount: traditionsWithCounts.length,
+      fixed,
+      deletedTraditionId,
+      recommendation: traditionsWithCounts.length > 1
+        ? 'Multiple RCL traditions found. Call with fix=true to delete the one without readings.'
+        : 'No duplicates found.',
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Tradition diagnosis failed:', error);
+    return res.status(500).json({
+      error: 'Diagnosis failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 export { router as adminRouter };
