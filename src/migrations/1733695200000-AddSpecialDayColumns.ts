@@ -22,6 +22,7 @@ export class AddSpecialDayColumns1733695200000 implements MigrationInterface {
       ALTER TABLE "special_days"
       ADD COLUMN IF NOT EXISTS "description" text,
       ADD COLUMN IF NOT EXISTS "rank" varchar(50),
+      ADD COLUMN IF NOT EXISTS "is_feast_day" boolean DEFAULT false,
       ADD COLUMN IF NOT EXISTS "is_moveable" boolean DEFAULT false,
       ADD COLUMN IF NOT EXISTS "liturgical_color" varchar(10),
       ADD COLUMN IF NOT EXISTS "year" integer
