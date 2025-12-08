@@ -41,6 +41,9 @@ services:
       - key: DB_SSL
         value: "true"
         scope: RUN_TIME
+      - key: SWAGGER_ENABLED
+        value: "true"
+        scope: RUN_TIME
     run_command: npm start
 
 jobs:
