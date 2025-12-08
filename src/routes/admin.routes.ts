@@ -222,4 +222,64 @@ router.post('/fix-duplicate-traditions', async (req: Request, res: Response): Pr
   }
 });
 
+/**
+ * Debug readings data
+ */
+router.post('/debug-readings', async (req: Request, res: Response): Promise<Response> => {
+  const { key } = req.body;
+
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const dataSource = DatabaseService.getDataSource();
+
+    // Get RCL tradition
+    const tradition = await dataSource.query(
+      'SELECT id, abbreviation FROM traditions WHERE UPPER(abbreviation) = $1',
+      ['RCL'],
+    );
+
+    if (tradition.length === 0) {
+      return res.json({ error: 'RCL tradition not found' });
+    }
+
+    const traditionId = tradition[0].id;
+
+    // Get reading count
+    const count = await dataSource.query(
+      'SELECT COUNT(*) as count FROM readings WHERE tradition_id = $1',
+      [traditionId],
+    );
+
+    // Get date range of readings
+    const dateRange = await dataSource.query(
+      'SELECT MIN(date) as min_date, MAX(date) as max_date FROM readings WHERE tradition_id = $1',
+      [traditionId],
+    );
+
+    // Get sample readings
+    const sampleReadings = await dataSource.query(
+      'SELECT id, date, reading_type, scripture_reference FROM readings WHERE tradition_id = $1 ORDER BY date DESC LIMIT 5',
+      [traditionId],
+    );
+
+    return res.json({
+      tradition: tradition[0],
+      readingCount: parseInt(count[0].count),
+      dateRange: dateRange[0],
+      sampleReadings,
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Debug readings failed:', error);
+    return res.status(500).json({
+      error: 'Debug failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 export { router as adminRouter };
