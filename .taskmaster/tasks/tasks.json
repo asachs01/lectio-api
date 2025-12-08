@@ -271,11 +271,22 @@
             "testStrategy": "Apply the migration to a test database, verify data integrity, and review documentation for completeness and clarity."
           }
         ]
+      },
+      {
+        "id": 45,
+        "title": "Add Catholic and Episcopal/Anglican Lectionary Data",
+        "description": "Currently the API only supports RCL (Revised Common Lectionary) data. Need to research and import lectionary data for Catholic and Episcopal/Anglican traditions, identifying any substantial differences from RCL.",
+        "details": "Research tasks:\n1. Research Catholic Lectionary (Roman Missal) - understand differences from RCL\n2. Research Episcopal/Anglican Lectionary - may be very similar to RCL but check for differences\n3. Find reliable data sources for both traditions\n\nImplementation tasks:\n1. Create import scripts for Catholic lectionary data\n2. Create import scripts for Episcopal/Anglican lectionary data\n3. Seed the database with the new tradition data\n4. Update API documentation to reflect available traditions\n5. Test all traditions work correctly with the readings endpoints",
+        "testStrategy": "1. Verify Catholic tradition returns different readings than RCL where applicable\n2. Verify Episcopal tradition returns readings\n3. Compare specific dates where traditions differ (e.g., feast days)\n4. Test /traditions endpoint lists all three traditions\n5. Test /readings/today works for each tradition",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-14T17:36:14.216Z",
-      "updated": "2025-09-02T15:34:46.729Z",
+      "updated": "2025-12-08T21:04:39.149Z",
       "description": "Tasks for master context"
     }
   }

@@ -73,7 +73,13 @@ router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)))
  *   get:
  *     operationId: getTodaysReadings
  *     summary: Get today's readings
- *     description: Retrieves all scripture readings for the current date according to the specified lectionary tradition
+ *     description: |
+ *       Retrieves all scripture readings for the current date, including both:
+ *       - **Lectionary readings** (Sunday/special day readings from RCL or other traditions)
+ *       - **Daily Office readings** (morning and evening prayer readings for every day)
+ *
+ *       On Sundays, both lectionary and daily office readings are typically available.
+ *       On weekdays, only daily office readings are available for most traditions.
  *     tags: [Readings]
  *     parameters:
  *       - in: query
@@ -84,14 +90,55 @@ router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)))
  *           default: rcl
  *     responses:
  *       200:
- *         description: Today's readings
+ *         description: Today's readings (lectionary and/or daily office)
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 date:
+ *                   type: string
+ *                   format: date
+ *                   description: Today's date in YYYY-MM-DD format
+ *                 dayOfWeek:
+ *                   type: string
+ *                   description: Day of the week (e.g., "Sunday", "Monday")
+ *                 tradition:
+ *                   type: string
+ *                   description: The lectionary tradition ID
+ *                 lectionary:
+ *                   type: object
+ *                   description: Sunday/special day readings (if available)
+ *                   properties:
+ *                     type:
+ *                       type: string
+ *                       enum: [sunday, special]
+ *                     readings:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Reading'
+ *                     seasonId:
+ *                       type: string
+ *                 dailyOffice:
+ *                   type: object
+ *                   description: Daily office readings for morning and evening prayer
+ *                   properties:
+ *                     morning:
+ *                       type: array
+ *                       nullable: true
+ *                       items:
+ *                         $ref: '#/components/schemas/Reading'
+ *                     evening:
+ *                       type: array
+ *                       nullable: true
+ *                       items:
+ *                         $ref: '#/components/schemas/Reading'
  *                 data:
  *                   $ref: '#/components/schemas/DailyReading'
+ *                   description: Backwards-compatible field (lectionary readings if available, otherwise daily office)
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       404:
  *         description: No readings found for today
  *         content:
