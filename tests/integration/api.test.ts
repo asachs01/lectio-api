@@ -31,10 +31,13 @@ describe('API Integration Tests', () => {
         .expect(200);
 
       expect(response.body).toMatchObject({
-        message: 'Lectionary API',
+        name: 'Lectionary API',
         version: expect.any(String),
-        health: '/health',
+        health: expect.any(String),
       });
+      expect(response.body).toHaveProperty('description');
+      expect(response.body).toHaveProperty('endpoints');
+      expect(response.body).toHaveProperty('supportedTraditions');
     });
   });
 

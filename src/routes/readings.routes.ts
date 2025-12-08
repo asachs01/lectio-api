@@ -4,15 +4,15 @@ import { asyncHandler } from '../middleware/error-handler';
 
 const router = Router();
 
-// Lazy initialization to ensure database is connected
-let readingsController: ReadingsController;
+// Lazy initialization - controller created on first request
+let readingsController: ReadingsController | null = null;
 
-const getController = (): ReadingsController => {
+function getController(): ReadingsController {
   if (!readingsController) {
     readingsController = new ReadingsController();
   }
   return readingsController;
-};
+}
 
 /**
  * @swagger
@@ -186,6 +186,7 @@ router.get('/today', asyncHandler((req, res) => getController().getToday(req, re
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/range', asyncHandler((req, res) => getController().getByDateRange(req, res)));
+<<<<<<< HEAD
 
 /**
  * @swagger
@@ -233,5 +234,7 @@ router.get('/range', asyncHandler((req, res) => getController().getByDateRange(r
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/daily-office', asyncHandler((req, res) => getController().getDailyOffice(req, res)));
+=======
+>>>>>>> ae6b835 (docs: reorganize documentation into logical directory structure)
 
 export { router as readingsRouter };

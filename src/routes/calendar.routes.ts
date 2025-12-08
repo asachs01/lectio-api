@@ -4,15 +4,15 @@ import { asyncHandler } from '../middleware/error-handler';
 
 const router = Router();
 
-// Lazy initialization to ensure database is connected
-let calendarController: CalendarController;
+// Lazy initialization - controller created on first request
+let calendarController: CalendarController | null = null;
 
-const getController = (): CalendarController => {
+function getController(): CalendarController {
   if (!calendarController) {
     calendarController = new CalendarController();
   }
   return calendarController;
-};
+}
 
 /**
  * @swagger

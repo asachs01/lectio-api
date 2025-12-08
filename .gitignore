@@ -24,6 +24,14 @@ node_modules/
 *.sln
 *.sw?
 
+# AI/IDE assistant folders
+.roo/
+.roomodes
+.windsurf/
+.cursor/
+.hive-mind/
+.claude-flow/
+
 # OS specific
 .DS_Store
 

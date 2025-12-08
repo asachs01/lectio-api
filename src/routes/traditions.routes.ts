@@ -4,15 +4,15 @@ import { asyncHandler } from '../middleware/error-handler';
 
 const router = Router();
 
-// Lazy initialization to ensure database is connected
-let traditionsController: TraditionsController;
+// Lazy initialization - controller created on first request
+let traditionsController: TraditionsController | null = null;
 
-const getController = (): TraditionsController => {
+function getController(): TraditionsController {
   if (!traditionsController) {
     traditionsController = new TraditionsController();
   }
   return traditionsController;
-};
+}
 
 /**
  * @swagger

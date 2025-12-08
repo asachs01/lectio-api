@@ -11,8 +11,9 @@ docs/
 ├── README.md           # This file - main documentation index
 ├── api/               # API endpoints and integration documentation
 ├── database/          # Database schema, setup, and migrations
+├── deployment/        # Deployment guides and checklists
 ├── operations/        # Operations, monitoring, and optimization
-└── guides/           # Implementation guides and tutorials
+└── guides/            # Implementation guides and tutorials
 ```
 
 ## 🔗 Quick Links
@@ -31,8 +32,16 @@ docs/
 - **[Observability](./operations/OBSERVABILITY.md)** - Monitoring, logging, and metrics setup
 - **[Query Optimization Guide](./operations/QUERY_OPTIMIZATION_GUIDE.md)** - Performance tuning and optimization strategies
 
+### Deployment Documentation
+- **[Deployment Instructions](./deployment/DEPLOYMENT_INSTRUCTIONS.md)** - Step-by-step deployment guide
+- **[Deployment Checklist](./deployment/DO_DEPLOYMENT_CHECKLIST.md)** - DigitalOcean deployment checklist
+- **[GitHub Secrets Setup](./deployment/GITHUB_SECRETS_SETUP.md)** - CI/CD secrets configuration
+- **[Deployment Status](./deployment/DEPLOYMENT_STATUS.md)** - Current deployment status
+- **[Deployment Summary](./deployment/DEPLOYMENT_SUMMARY.md)** - Deployment overview
+
 ### Guides & Tutorials
 - **[Seed Data Guide](./guides/SEED_DATA_GUIDE.md)** - Sample data structure and seeding procedures
+- **[RCL Data Import Guide](./guides/RCL_DATA_IMPORT_GUIDE.md)** - Importing Revised Common Lectionary data
 
 ## 🚀 Getting Started
 
