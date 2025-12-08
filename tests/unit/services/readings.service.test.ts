@@ -70,7 +70,25 @@ jest.mock('../../../src/services/database.service', () => {
   const mockFind = jest.fn();
   const mockCount = jest.fn();
   const mockFindOne = jest.fn();
-  
+  const mockGetMany = jest.fn();
+  const mockGetCount = jest.fn();
+
+  // Create a chainable query builder mock
+  const createMockQueryBuilder = () => {
+    const qb: any = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      addOrderBy: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getMany: mockGetMany,
+      getCount: mockGetCount,
+    };
+    return qb;
+  };
+
   return {
     DatabaseService: {
       getDataSource: jest.fn(() => ({
@@ -78,6 +96,7 @@ jest.mock('../../../src/services/database.service', () => {
           find: mockFind,
           findOne: mockFindOne,
           count: mockCount,
+          createQueryBuilder: jest.fn(() => createMockQueryBuilder()),
         })),
       })),
     },
@@ -85,6 +104,8 @@ jest.mock('../../../src/services/database.service', () => {
     __mockFind: mockFind,
     __mockCount: mockCount,
     __mockFindOne: mockFindOne,
+    __mockGetMany: mockGetMany,
+    __mockGetCount: mockGetCount,
   };
 });
 
@@ -103,13 +124,17 @@ jest.mock('../../../src/services/liturgical-calendar.service', () => ({
 
 // Import the mocks from the mocked module
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { __mockFind: mockFind, __mockCount: mockCount, __mockFindOne: mockFindOne } = require('../../../src/services/database.service');
+const { __mockFind: mockFind, __mockCount: mockCount, __mockFindOne: mockFindOne, __mockGetMany: mockGetMany, __mockGetCount: mockGetCount } = require('../../../src/services/database.service');
 
 describe('ReadingsService', () => {
   let service: ReadingsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Set up default mock responses for QueryBuilder methods
+    mockGetMany.mockResolvedValue(mockReadings);
+    mockGetCount.mockResolvedValue(mockReadings.length);
+    // Also keep the old find/count mocks for any methods that use them
     mockFind.mockResolvedValue(mockReadings);
     mockCount.mockResolvedValue(mockReadings.length);
     // Mock findOne to return traditions when queried by abbreviation
@@ -133,15 +158,7 @@ describe('ReadingsService', () => {
       const date = '2023-12-03';
       const traditionId = 'rcl';
 
-      // Mock the find to simulate proper query filtering by traditionId (UUID)
-      mockFind.mockImplementation((options: any) => {
-        // Service now queries by traditionId (UUID) not tradition.abbreviation
-        if (options?.where?.traditionId === 'rcl-uuid') {
-          return Promise.resolve(mockReadings);
-        }
-        return Promise.resolve([]);
-      });
-
+      // mockGetMany is already set to return mockReadings in beforeEach
       const reading = await service.getByDate(date, traditionId);
 
       expect(reading).not.toBeNull();
@@ -203,10 +220,10 @@ describe('ReadingsService', () => {
     });
 
     it('should handle different date formats', async () => {
-      const reading = await service.getByDate('2024-01-01', 'episcopal');
+      const reading = await service.getByDate('2024-01-01', 'rcl');
 
       expect(reading).not.toBeNull();
-      expect(reading!.id).toBe('episcopal-2024-01-01');
+      expect(reading!.id).toBe('rcl-2024-01-01');
       expect(reading!.date).toBe('2024-01-01');
     });
 
@@ -243,11 +260,9 @@ describe('ReadingsService', () => {
       const endDate = '2023-12-03';
       const traditionId = 'rcl';
 
-      // Mock count to return the proper number
-      mockCount.mockResolvedValue(4); // 4 readings per day
-      
-      // Mock find to return readings
-      mockFind.mockResolvedValue(mockReadings);
+      // Mock QueryBuilder methods for getByDateRange
+      mockGetCount.mockResolvedValue(4); // 4 readings per day
+      mockGetMany.mockResolvedValue(mockReadings);
 
       const result = await service.getByDateRange(startDate, endDate, traditionId, 1, 10);
 
@@ -266,16 +281,16 @@ describe('ReadingsService', () => {
       const traditionId = 'rcl';
 
       // Mock different results for pagination
-      mockCount.mockResolvedValue(40); // 10 days * 4 readings
-      
+      mockGetCount.mockResolvedValue(40); // 10 days * 4 readings
+
       // First page - return all mock readings
-      mockFind.mockResolvedValueOnce(mockReadings);
+      mockGetMany.mockResolvedValueOnce(mockReadings);
       const page1 = await service.getByDateRange(startDate, endDate, traditionId, 1, 5);
       expect(page1.readings).toHaveLength(1); // 1 grouped date
       expect(page1.total).toBe(10); // 40/4 = 10 days
 
       // Second page - return empty for skip > 0
-      mockFind.mockResolvedValueOnce([]);
+      mockGetMany.mockResolvedValueOnce([]);
       const page2 = await service.getByDateRange(startDate, endDate, traditionId, 2, 5);
       expect(page2.readings).toHaveLength(0);
       expect(page2.total).toBe(0);
@@ -283,9 +298,9 @@ describe('ReadingsService', () => {
 
     it('should handle single day range', async () => {
       const date = '2023-12-25';
-      mockFind.mockResolvedValueOnce(mockReadings);
-      mockCount.mockResolvedValueOnce(4);
-      
+      mockGetMany.mockResolvedValueOnce(mockReadings);
+      mockGetCount.mockResolvedValueOnce(4);
+
       const result = await service.getByDateRange(date, date, 'catholic', 1, 10);
 
       expect(result.readings).toHaveLength(1);
@@ -298,8 +313,8 @@ describe('ReadingsService', () => {
       const startDate = '2023-12-01';
       const endDate = '2023-12-02';
 
-      mockFind.mockResolvedValue(mockReadings);
-      mockCount.mockResolvedValue(4);
+      mockGetMany.mockResolvedValue(mockReadings);
+      mockGetCount.mockResolvedValue(4);
 
       const rclResult = await service.getByDateRange(startDate, endDate, 'rcl', 1, 10);
       const catholicResult = await service.getByDateRange(startDate, endDate, 'catholic', 1, 10);
@@ -321,8 +336,8 @@ describe('ReadingsService', () => {
       const endDate = '2023-12-05'; // 5 days
       const traditionId = 'rcl';
 
-      mockFind.mockResolvedValue([]); // Empty for skip > 0
-      mockCount.mockResolvedValue(20); // 5 days * 4 readings
+      mockGetMany.mockResolvedValue([]); // Empty for skip > 0
+      mockGetCount.mockResolvedValue(20); // 5 days * 4 readings
 
       const result = await service.getByDateRange(startDate, endDate, traditionId, 2, 2);
 
@@ -335,8 +350,8 @@ describe('ReadingsService', () => {
       const endDate = '2023-12-02'; // 2 days
       const traditionId = 'rcl';
 
-      mockFind.mockResolvedValue([]); // Empty for large skip
-      mockCount.mockResolvedValue(8); // 2 days * 4 readings
+      mockGetMany.mockResolvedValue([]); // Empty for large skip
+      mockGetCount.mockResolvedValue(8); // 2 days * 4 readings
 
       const result = await service.getByDateRange(startDate, endDate, traditionId, 10, 5);
 
@@ -349,8 +364,8 @@ describe('ReadingsService', () => {
       const endDate = '2023-12-02';
       const traditionId = 'episcopal';
 
-      mockFind.mockResolvedValue(mockReadings);
-      mockCount.mockResolvedValue(4);
+      mockGetMany.mockResolvedValue(mockReadings);
+      mockGetCount.mockResolvedValue(4);
 
       const result = await service.getByDateRange(startDate, endDate, traditionId, 1, 10);
 
@@ -363,7 +378,7 @@ describe('ReadingsService', () => {
         expect(reading).toHaveProperty('readings');
         expect(reading).toHaveProperty('createdAt');
         expect(reading).toHaveProperty('updatedAt');
-        
+
         expect(reading.readings).toHaveLength(4);
         expect(reading.traditionId).toBe(traditionId);
       });
@@ -373,10 +388,10 @@ describe('ReadingsService', () => {
       const startDate = '2023-12-01';
       const endDate = '2023-12-05';
       const traditionId = 'rcl';
-      
+
       // When limit is 0, mock should return empty array
-      mockFind.mockResolvedValue([]);
-      mockCount.mockResolvedValue(20);
+      mockGetMany.mockResolvedValue([]);
+      mockGetCount.mockResolvedValue(20);
 
       const result = await service.getByDateRange(startDate, endDate, traditionId, 1, 0);
 

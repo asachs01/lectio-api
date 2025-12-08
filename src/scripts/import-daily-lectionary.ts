@@ -77,20 +77,35 @@ async function importDailyLectionary() {
     
     console.log(`Loaded ${dailyReadings.length} daily readings`);
 
-    // Get or create Daily Office tradition
+    // Get or create BCP Daily Office tradition
     const traditionRepo = AppDataSource.getRepository(Tradition);
-    let dailyTradition = await traditionRepo.findOne({ where: { abbreviation: 'Daily' } });
-    
+
+    // Check for both old and new abbreviations (for migration compatibility)
+    let dailyTradition = await traditionRepo.findOne({ where: { abbreviation: 'BCP' } });
+
+    // If not found, check for legacy 'Daily' abbreviation and migrate it
+    if (!dailyTradition) {
+      dailyTradition = await traditionRepo.findOne({ where: { abbreviation: 'Daily' } });
+      if (dailyTradition) {
+        // Migrate legacy tradition to new naming
+        dailyTradition.name = 'BCP Daily Office Lectionary';
+        dailyTradition.abbreviation = 'BCP';
+        dailyTradition.description = 'Book of Common Prayer Daily Office readings (Morning and Evening Prayer). Two-year cycle used by Episcopal/Anglican churches for weekday worship.';
+        await traditionRepo.save(dailyTradition);
+        console.log('Migrated legacy Daily Office tradition to BCP Daily Office');
+      }
+    }
+
     if (!dailyTradition) {
       dailyTradition = traditionRepo.create({
-        name: 'Daily Office Lectionary',
-        abbreviation: 'Daily',
-        description: 'Two-year cycle of daily readings for Morning and Evening Prayer',
+        name: 'BCP Daily Office Lectionary',
+        abbreviation: 'BCP',
+        description: 'Book of Common Prayer Daily Office readings (Morning and Evening Prayer). Two-year cycle used by Episcopal/Anglican churches for weekday worship.',
       });
       await traditionRepo.save(dailyTradition);
-      console.log('Created Daily Office tradition');
+      console.log('Created BCP Daily Office tradition');
     } else {
-      console.log('Found existing Daily Office tradition');
+      console.log('Found existing BCP Daily Office tradition');
     }
 
     // Clear existing daily readings for this tradition

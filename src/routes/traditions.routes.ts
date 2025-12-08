@@ -20,7 +20,20 @@ function getController(): TraditionsController {
  *   get:
  *     operationId: getAllTraditions
  *     summary: Get all lectionary traditions
- *     description: Retrieves a list of all available lectionary traditions (RCL, Catholic, Episcopal, Lutheran, etc.)
+ *     description: |
+ *       Retrieves a list of all available lectionary traditions.
+ *
+ *       **Available Traditions:**
+ *
+ *       | ID | Name | Description |
+ *       |----|------|-------------|
+ *       | `rcl` | Revised Common Lectionary | Three-year Sunday lectionary used by most Protestant denominations |
+ *       | `bcp` | BCP Daily Office Lectionary | Two-year weekday lectionary from the Book of Common Prayer |
+ *       | `episcopal` | Episcopal Church Lectionary | Composite tradition: RCL for Sundays, BCP Daily Office for weekdays |
+ *
+ *       **Note:** The `episcopal` tradition is a virtual/composite tradition that combines
+ *       RCL readings for Sunday worship with BCP Daily Office readings for weekday
+ *       Morning and Evening Prayer.
  *     tags: [Traditions]
  *     responses:
  *       200:
@@ -52,15 +65,24 @@ router.get('/', asyncHandler((req, res) => getController().getAll(req, res)));
  *   get:
  *     operationId: getTraditionById
  *     summary: Get a specific lectionary tradition
- *     description: Retrieves detailed information about a specific lectionary tradition by its ID
+ *     description: |
+ *       Retrieves detailed information about a specific lectionary tradition by its ID or abbreviation.
+ *
+ *       **Valid IDs:**
+ *       - `rcl` or `RCL` - Revised Common Lectionary
+ *       - `bcp` or `BCP` - BCP Daily Office Lectionary
+ *       - `episcopal` or `ECUSA` - Episcopal Church Lectionary (composite)
+ *
+ *       IDs are case-insensitive.
  *     tags: [Traditions]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Tradition ID
+ *         description: Tradition ID or abbreviation (e.g., "rcl", "bcp", "episcopal")
  *         schema:
  *           type: string
+ *           example: rcl
  *     responses:
  *       200:
  *         description: Tradition details

@@ -6,6 +6,15 @@ import { Repository } from 'typeorm';
 import { logger } from '../utils/logger';
 import { LiturgicalCalendarService } from './liturgical-calendar.service';
 
+/**
+ * Composite traditions that map to underlying real traditions
+ * based on the day of the week
+ */
+const COMPOSITE_TRADITION_MAP: Record<string, { sunday: string; weekday: string }> = {
+  episcopal: { sunday: 'rcl', weekday: 'bcp' },
+  ecusa: { sunday: 'rcl', weekday: 'bcp' },
+};
+
 export class ReadingsService {
   private readingRepository: Repository<Reading>;
   private traditionRepository: Repository<Tradition>;
@@ -22,6 +31,25 @@ export class ReadingsService {
       // Initialize later if database not ready yet
       this.calendarService = new LiturgicalCalendarService();
     }
+  }
+
+  /**
+   * Resolve a composite tradition to its underlying tradition based on the date
+   */
+  private resolveCompositeTradition(traditionIdentifier: string, date: Date): { tradition: string; isComposite: boolean } {
+    const normalized = traditionIdentifier.toLowerCase();
+    const composite = COMPOSITE_TRADITION_MAP[normalized];
+
+    if (!composite) {
+      return { tradition: traditionIdentifier, isComposite: false };
+    }
+
+    // Sunday = 0, Saturday = 6
+    const isSunday = date.getDay() === 0;
+    return {
+      tradition: isSunday ? composite.sunday : composite.weekday,
+      isComposite: true,
+    };
   }
 
   private ensureRepository(): Repository<Reading> {
@@ -66,17 +94,21 @@ export class ReadingsService {
     try {
       const repository = this.ensureRepository();
 
-      // Look up the tradition UUID
-      const traditionUuid = await this.getTraditionId(traditionIdentifier);
-      if (!traditionUuid) {
-        logger.warn(`Tradition not found: ${traditionIdentifier}`);
-        return null;
-      }
-
       // Parse date string to avoid timezone issues - ensure we're working with the date as-is
       const [yearStr, monthStr, dayStr] = date.split('-');
       const dateObj = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 12, 0, 0); // Set to noon to avoid timezone issues
       const year = dateObj.getFullYear();
+
+      // Handle composite traditions (e.g., episcopal -> rcl for Sunday, bcp for weekday)
+      const { tradition: resolvedTradition, isComposite } = this.resolveCompositeTradition(traditionIdentifier, dateObj);
+      const originalTraditionId = traditionIdentifier.toLowerCase();
+
+      // Look up the tradition UUID for the resolved tradition
+      const traditionUuid = await this.getTraditionId(resolvedTradition);
+      if (!traditionUuid) {
+        logger.warn(`Tradition not found: ${resolvedTradition} (resolved from ${traditionIdentifier})`);
+        return null;
+      }
 
       // Get liturgical information for this date
       const liturgicalInfo = this.calendarService.getLiturgicalYearInfo(year);
@@ -98,7 +130,7 @@ export class ReadingsService {
         .getMany();
 
       if (!readings || readings.length === 0) {
-        logger.warn(`No readings found for date ${date} and tradition ${traditionIdentifier} (UUID: ${traditionUuid})`);
+        logger.warn(`No readings found for date ${date} and tradition ${resolvedTradition}${isComposite ? ` (from composite: ${originalTraditionId})` : ''} (UUID: ${traditionUuid})`);
 
         // Try to find readings by liturgical cycle and proper/season
         const alternateReadings = await this.findReadingsByLiturgicalContext(
@@ -110,7 +142,8 @@ export class ReadingsService {
         );
 
         if (alternateReadings && alternateReadings.length > 0) {
-          return this.formatDailyReading(alternateReadings, date, traditionIdentifier, season?.name || 'ordinary');
+          // Use original tradition ID so composite traditions show correctly in response
+          return this.formatDailyReading(alternateReadings, date, originalTraditionId, season?.name || 'ordinary');
         }
 
         // Return null - no mock data fallback
@@ -118,7 +151,8 @@ export class ReadingsService {
       }
 
       // Format and return the readings
-      return this.formatDailyReading(readings, date, traditionIdentifier, readings[0].seasonId || season?.name || 'ordinary');
+      // Use original tradition ID so composite traditions show correctly in response
+      return this.formatDailyReading(readings, date, originalTraditionId, readings[0].seasonId || season?.name || 'ordinary');
     } catch (error) {
       logger.error(`Error fetching readings for date ${date}:`, error);
       return null;
@@ -422,9 +456,9 @@ export class ReadingsService {
 
       // Format as DailyReading
       return {
-        id: `daily-${date}`,
+        id: `bcp-daily-${date}`,
         date,
-        traditionId: 'daily-office',
+        traditionId: 'bcp-daily-office',
         seasonId: null,
         readings: [
           ...morningReadings.map(r => ({

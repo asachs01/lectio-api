@@ -6,6 +6,23 @@ import { LiturgicalYear } from '../models/liturgical-year.entity';
 import { Repository } from 'typeorm';
 import { logger } from '../utils/logger';
 
+/**
+ * Virtual/composite traditions that don't exist as database records
+ * but are served as combinations of real traditions
+ */
+const COMPOSITE_TRADITIONS: Record<string, LectionaryTradition> = {
+  episcopal: {
+    id: 'episcopal',
+    name: 'Episcopal Church Lectionary',
+    abbreviation: 'ECUSA',
+    description: 'The Episcopal Church uses the Revised Common Lectionary (RCL) for Sunday worship and the Book of Common Prayer (BCP) Daily Office Lectionary for weekday Morning and Evening Prayer. This composite tradition provides access to both.',
+    startDate: '',
+    endDate: '',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+};
+
 export class TraditionsService {
   private traditionRepository: Repository<Tradition>;
   private seasonRepository: Repository<Season>;
@@ -39,19 +56,42 @@ export class TraditionsService {
         order: { name: 'ASC' },
       });
 
-      return traditions.map(t => this.mapTraditionToResponse(t));
+      // Map database traditions to response format
+      const dbTraditions = traditions.map(t => this.mapTraditionToResponse(t));
+
+      // Add composite/virtual traditions
+      const compositeTraditions = Object.values(COMPOSITE_TRADITIONS);
+
+      // Combine and sort by name
+      return [...dbTraditions, ...compositeTraditions].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
     } catch (error) {
       logger.error('Error fetching traditions:', error);
-      // Return empty array on error
-      return [];
+      // Return at least the composite traditions on error
+      return Object.values(COMPOSITE_TRADITIONS);
     }
   }
 
   public async getById(id: string): Promise<LectionaryTradition | null> {
     try {
+      // First, check for composite/virtual traditions
+      const normalizedId = id.toLowerCase();
+      if (COMPOSITE_TRADITIONS[normalizedId]) {
+        return COMPOSITE_TRADITIONS[normalizedId];
+      }
+
+      // Also check by abbreviation for composite traditions
+      const compositeByAbbrev = Object.values(COMPOSITE_TRADITIONS).find(
+        t => t.abbreviation.toLowerCase() === normalizedId,
+      );
+      if (compositeByAbbrev) {
+        return compositeByAbbrev;
+      }
+
       this.ensureRepositories();
 
-      // Try to find by abbreviation first (e.g., "rcl" -> "RCL")
+      // Try to find by abbreviation first (e.g., "rcl" -> "RCL", "bcp" -> "BCP")
       let tradition = await this.traditionRepository.findOne({
         where: { abbreviation: id.toUpperCase() },
       });
@@ -73,7 +113,9 @@ export class TraditionsService {
       return tradition ? this.mapTraditionToResponse(tradition) : null;
     } catch (error) {
       logger.error(`Error fetching tradition ${id}:`, error);
-      return null;
+      // Still return composite tradition if it matches, even on DB error
+      const normalizedId = id.toLowerCase();
+      return COMPOSITE_TRADITIONS[normalizedId] || null;
     }
   }
 

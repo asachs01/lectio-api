@@ -12,7 +12,8 @@ describe('TraditionsService', () => {
     it('should return all traditions', async () => {
       const traditions = await service.getAll();
 
-      expect(traditions).toHaveLength(3);
+      // 3 database traditions (rcl, catholic, bcp) + 1 composite tradition (episcopal) = 4
+      expect(traditions).toHaveLength(4);
       expect(traditions).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -28,10 +29,16 @@ describe('TraditionsService', () => {
             description: 'The official lectionary of the Roman Catholic Church',
           }),
           expect.objectContaining({
+            id: 'bcp',
+            name: 'BCP Daily Office Lectionary',
+            abbreviation: 'BCP',
+            description: 'Book of Common Prayer Daily Office readings (Morning and Evening Prayer). Two-year cycle used by Episcopal/Anglican churches for weekday worship.',
+          }),
+          expect.objectContaining({
             id: 'episcopal',
-            name: 'Episcopal/Anglican Lectionary',
-            abbreviation: 'Episcopal',
-            description: 'Lectionary used by Episcopal and Anglican churches',
+            name: 'Episcopal Church Lectionary',
+            abbreviation: 'ECUSA',
+            description: 'The Episcopal Church uses the Revised Common Lectionary (RCL) for Sunday worship and the Book of Common Prayer (BCP) Daily Office Lectionary for weekday Morning and Evening Prayer. This composite tradition provides access to both.',
           }),
         ]),
       );
@@ -91,9 +98,9 @@ describe('TraditionsService', () => {
       expect(tradition).not.toBeNull();
       expect(tradition).toMatchObject({
         id: 'episcopal',
-        name: 'Episcopal/Anglican Lectionary',
-        abbreviation: 'Episcopal',
-        description: 'Lectionary used by Episcopal and Anglican churches',
+        name: 'Episcopal Church Lectionary',
+        abbreviation: 'ECUSA',
+        description: 'The Episcopal Church uses the Revised Common Lectionary (RCL) for Sunday worship and the Book of Common Prayer (BCP) Daily Office Lectionary for weekday Morning and Evening Prayer. This composite tradition provides access to both.',
       });
     });
 
@@ -195,15 +202,15 @@ describe('TraditionsService', () => {
     it('should handle different tradition ids', async () => {
       const rclSeasons = await service.getSeasons('rcl', 2023);
       const catholicSeasons = await service.getSeasons('catholic', 2023);
-      const episcopalSeasons = await service.getSeasons('episcopal', 2023);
+      const bcpSeasons = await service.getSeasons('bcp', 2023);
 
       expect(rclSeasons).toHaveLength(3);
       expect(catholicSeasons).toHaveLength(3);
-      expect(episcopalSeasons).toHaveLength(3);
+      expect(bcpSeasons).toHaveLength(3);
 
       rclSeasons.forEach(season => expect(season.traditionId).toBe('rcl'));
       catholicSeasons.forEach(season => expect(season.traditionId).toBe('catholic'));
-      episcopalSeasons.forEach(season => expect(season.traditionId).toBe('episcopal'));
+      bcpSeasons.forEach(season => expect(season.traditionId).toBe('bcp'));
     });
 
     it('should handle future years', async () => {
