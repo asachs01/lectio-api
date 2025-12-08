@@ -86,12 +86,12 @@ export class ReadingsService {
       // Query the database for readings on this date using tradition UUID
       // Use QueryBuilder for better control over date comparison
       // Use CAST syntax instead of :: for proper parameter binding
+      // Note: specialDay join removed due to schema mismatch in production
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
         .leftJoinAndSelect('reading.season', 'season')
         .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
-        .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .leftJoinAndSelect('reading.scripture', 'scripture')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
         .andWhere('reading.date = CAST(:date AS date)', { date })
@@ -155,7 +155,7 @@ export class ReadingsService {
 
       const readings = await repository.find({
         where: conditions,
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+        relations: ['tradition', 'season', 'liturgicalYear', 'scripture'],
         order: {
           readingOrder: 'ASC',
         },
@@ -223,7 +223,6 @@ export class ReadingsService {
         .leftJoinAndSelect('reading.tradition', 'tradition')
         .leftJoinAndSelect('reading.season', 'season')
         .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
-        .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .leftJoinAndSelect('reading.scripture', 'scripture')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
         .andWhere('reading.date >= CAST(:startDate AS date)', { startDate })
@@ -319,7 +318,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+        relations: ['tradition', 'season', 'liturgicalYear', 'scripture'],
         order: {
           readingOrder: 'ASC',
         },
@@ -367,7 +366,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+        relations: ['tradition', 'season', 'liturgicalYear', 'scripture'],
         order: {
           date: 'ASC',
           readingOrder: 'ASC',
