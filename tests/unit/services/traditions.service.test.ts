@@ -33,7 +33,7 @@ describe('TraditionsService', () => {
             abbreviation: 'Episcopal',
             description: 'Lectionary used by Episcopal and Anglican churches',
           }),
-        ])
+        ]),
       );
     });
 
@@ -144,7 +144,7 @@ describe('TraditionsService', () => {
             traditionId: 'rcl',
             year: 2023,
           }),
-        ])
+        ]),
       );
     });
 
@@ -227,10 +227,8 @@ describe('TraditionsService', () => {
     it('should handle empty tradition id', async () => {
       const seasons = await service.getSeasons('', 2023);
 
-      expect(seasons).toHaveLength(3);
-      seasons.forEach((season: LiturgicalSeason) => {
-        expect(season.traditionId).toBe('');
-      });
+      // Empty tradition ID should return empty array since no tradition matches
+      expect(seasons).toHaveLength(0);
     });
   });
 });

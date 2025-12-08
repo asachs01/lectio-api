@@ -1,7 +1,7 @@
 import { DailyReading, ReadingType } from '../types/lectionary.types';
 import { DatabaseService } from './database.service';
 import { Reading, ReadingOffice } from '../models/reading.entity';
-import { Between, Repository, In } from 'typeorm';
+import { Repository, In, Raw } from 'typeorm';
 import { logger } from '../utils/logger';
 import { LiturgicalCalendarService } from './liturgical-calendar.service';
 
@@ -36,20 +36,17 @@ export class ReadingsService {
       const [yearStr, monthStr, dayStr] = date.split('-');
       const dateObj = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 12, 0, 0); // Set to noon to avoid timezone issues
       const year = dateObj.getFullYear();
-      
+
       // Get liturgical information for this date
       const liturgicalInfo = this.calendarService.getLiturgicalYearInfo(year);
       const season = this.calendarService.getSeasonForDate(dateObj, year);
       const properNumber = this.calendarService.getProperNumber(dateObj, year);
-      
+
       // Query the database for readings on this date
-      // Use date range to avoid timezone issues
-      const startOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 0, 0, 0);
-      const endOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 23, 59, 59);
-      
+      // Use Raw query for date comparison to avoid timezone issues with date column
       const readings = await repository.find({
         where: {
-          date: Between(startOfDay, endOfDay),
+          date: Raw(alias => `${alias} = :date`, { date }),
           tradition: {
             abbreviation: traditionId.toUpperCase(), // RCL not rcl
           },
@@ -62,7 +59,7 @@ export class ReadingsService {
 
       if (!readings || readings.length === 0) {
         logger.warn(`No readings found for date ${date} and tradition ${traditionId}`);
-        
+
         // Try to find readings by liturgical cycle and proper/season
         const alternateReadings = await this.findReadingsByLiturgicalContext(
           dateObj,
@@ -71,11 +68,11 @@ export class ReadingsService {
           season,
           properNumber,
         );
-        
+
         if (alternateReadings && alternateReadings.length > 0) {
           return this.formatDailyReading(alternateReadings, date, traditionId, season?.name || 'ordinary');
         }
-        
+
         // Return null - no mock data fallback
         return null;
       }
@@ -163,13 +160,13 @@ export class ReadingsService {
   ): Promise<{ readings: DailyReading[]; total: number }> {
     try {
       const repository = this.ensureRepository();
-      
+
       // Get count for pagination
       const total = await repository.count({
         where: {
-          date: Between(new Date(startDate), new Date(endDate)),
+          date: Raw(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
           tradition: {
-            id: traditionId.toLowerCase(),
+            abbreviation: traditionId.toUpperCase(),
           },
         },
       });
@@ -178,9 +175,9 @@ export class ReadingsService {
       const skip = (page - 1) * limit;
       const readings = await repository.find({
         where: {
-          date: Between(new Date(startDate), new Date(endDate)),
+          date: Raw(alias => `${alias} >= :startDate AND ${alias} <= :endDate`, { startDate, endDate }),
           tradition: {
-            id: traditionId.toLowerCase(),
+            abbreviation: traditionId.toUpperCase(),
           },
         },
         relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
@@ -344,19 +341,14 @@ export class ReadingsService {
   public async getDailyOfficeReadings(date: string): Promise<DailyReading | null> {
     try {
       const repository = this.ensureRepository();
-      
-      // Parse date string
-      const [yearStr, monthStr, dayStr] = date.split('-');
-      const startOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 0, 0, 0);
-      const endOfDay = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 23, 59, 59);
-      
+
       // Import necessary operators
       const { Not, IsNull } = await import('typeorm');
-      
-      // Get daily office readings
+
+      // Get daily office readings using Raw for proper date comparison
       const readings = await repository.find({
         where: {
-          date: Between(startOfDay, endOfDay),
+          date: Raw(alias => `${alias} = :date`, { date }),
           traditionId: Not(IsNull()),
           readingOffice: In([ReadingOffice.MORNING, ReadingOffice.EVENING]),
         },
