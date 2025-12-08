@@ -6,14 +6,14 @@ const readings_controller_1 = require("../controllers/readings.controller");
 const error_handler_1 = require("../middleware/error-handler");
 const router = (0, express_1.Router)();
 exports.readingsRouter = router;
-// Lazy initialization to ensure database is connected
-let readingsController;
-const getController = () => {
+// Lazy initialization - controller created on first request
+let readingsController = null;
+function getController() {
     if (!readingsController) {
         readingsController = new readings_controller_1.ReadingsController();
     }
     return readingsController;
-};
+}
 /**
  * @swagger
  * /api/v1/readings:

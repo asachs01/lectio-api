@@ -6,14 +6,14 @@ const traditions_controller_1 = require("../controllers/traditions.controller");
 const error_handler_1 = require("../middleware/error-handler");
 const router = (0, express_1.Router)();
 exports.traditionsRouter = router;
-// Lazy initialization to ensure database is connected
-let traditionsController;
-const getController = () => {
+// Lazy initialization - controller created on first request
+let traditionsController = null;
+function getController() {
     if (!traditionsController) {
         traditionsController = new traditions_controller_1.TraditionsController();
     }
     return traditionsController;
-};
+}
 /**
  * @swagger
  * /api/v1/traditions:

@@ -248,12 +248,14 @@ const options: swaggerJSDoc.Options = {
       },
     ],
   },
-  apis: process.env.NODE_ENV === 'production' ? [
+  // Determine API paths based on whether we're running from dist/ or src/
+  // __dirname will be dist/config when running compiled JS, or src/config when running ts-node
+  apis: __dirname.includes('dist') ? [
     `${__dirname}/../routes/*.js`,
     `${__dirname}/../controllers/*.js`,
   ] : [
-    './src/routes/*.ts',
-    './src/controllers/*.ts',
+    `${__dirname}/../routes/*.ts`,
+    `${__dirname}/../controllers/*.ts`,
   ],
 };
 

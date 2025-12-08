@@ -6,14 +6,14 @@ const calendar_controller_1 = require("../controllers/calendar.controller");
 const error_handler_1 = require("../middleware/error-handler");
 const router = (0, express_1.Router)();
 exports.calendarRouter = router;
-// Lazy initialization to ensure database is connected
-let calendarController;
-const getController = () => {
+// Lazy initialization - controller created on first request
+let calendarController = null;
+function getController() {
     if (!calendarController) {
         calendarController = new calendar_controller_1.CalendarController();
     }
     return calendarController;
-};
+}
 /**
  * @swagger
  * /api/v1/calendar/current:

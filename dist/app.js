@@ -94,13 +94,50 @@ class App {
         }
         // API routes
         this.app.use('/api', routes_1.apiRouter);
-        // Root endpoint
+        // Root endpoint - API welcome page with comprehensive documentation
         this.app.get('/', (_req, res) => {
+            const version = process.env.API_VERSION || 'v1';
+            const baseUrl = `${_req.protocol}://${_req.get('host')}`;
             res.json({
-                message: 'Lectionary API',
-                version: process.env.API_VERSION || 'v1',
-                documentation: process.env.SWAGGER_ENABLED === 'true' ? '/api/docs' : null,
-                health: '/health',
+                name: 'Lectionary API',
+                description: 'A REST API providing lectionary readings and liturgical calendar data for Christian churches',
+                version,
+                documentation: {
+                    swagger: process.env.SWAGGER_ENABLED === 'true' ? `${baseUrl}/api/docs` : null,
+                    openApiSpec: process.env.SWAGGER_ENABLED === 'true' ? `${baseUrl}/api/docs.json` : null,
+                },
+                endpoints: {
+                    apiRoot: `${baseUrl}/api/${version}`,
+                    traditions: {
+                        url: `${baseUrl}/api/${version}/traditions`,
+                        description: 'List all supported lectionary traditions (RCL, Catholic, Episcopal, Lutheran)',
+                    },
+                    readings: {
+                        url: `${baseUrl}/api/${version}/readings`,
+                        description: 'Get scripture readings by date',
+                        examples: [
+                            `${baseUrl}/api/${version}/readings?date=2025-12-25&tradition=rcl`,
+                            `${baseUrl}/api/${version}/readings/today`,
+                            `${baseUrl}/api/${version}/readings/range?start=2025-12-01&end=2025-12-31`,
+                        ],
+                    },
+                    calendar: {
+                        url: `${baseUrl}/api/${version}/calendar`,
+                        description: 'Access liturgical calendar information',
+                        examples: [
+                            `${baseUrl}/api/${version}/calendar/current`,
+                            `${baseUrl}/api/${version}/calendar/2025`,
+                            `${baseUrl}/api/${version}/calendar/2025/seasons`,
+                        ],
+                    },
+                },
+                supportedTraditions: [
+                    { id: 'rcl', name: 'Revised Common Lectionary' },
+                    { id: 'catholic', name: 'Roman Catholic Lectionary' },
+                    { id: 'episcopal', name: 'Episcopal/Anglican Lectionary' },
+                ],
+                health: `${baseUrl}/health`,
+                repository: 'https://github.com/yourusername/lectionary-api',
             });
         });
         // 404 handler
