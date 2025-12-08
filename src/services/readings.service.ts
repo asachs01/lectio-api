@@ -85,6 +85,7 @@ export class ReadingsService {
 
       // Query the database for readings on this date using tradition UUID
       // Use QueryBuilder for better control over date comparison
+      // Use CAST syntax instead of :: for proper parameter binding
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
@@ -93,7 +94,7 @@ export class ReadingsService {
         .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .leftJoinAndSelect('reading.scripture', 'scripture')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
-        .andWhere('reading.date = :date::date', { date })
+        .andWhere('reading.date = CAST(:date AS date)', { date })
         .orderBy('reading.readingOrder', 'ASC')
         .getMany();
 
@@ -207,11 +208,12 @@ export class ReadingsService {
       }
 
       // Get count for pagination using QueryBuilder
+      // Use CAST syntax instead of :: for proper parameter binding
       const total = await repository
         .createQueryBuilder('reading')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
-        .andWhere('reading.date >= :startDate::date', { startDate })
-        .andWhere('reading.date <= :endDate::date', { endDate })
+        .andWhere('reading.date >= CAST(:startDate AS date)', { startDate })
+        .andWhere('reading.date <= CAST(:endDate AS date)', { endDate })
         .getCount();
 
       // Get paginated readings using QueryBuilder
@@ -224,8 +226,8 @@ export class ReadingsService {
         .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .leftJoinAndSelect('reading.scripture', 'scripture')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
-        .andWhere('reading.date >= :startDate::date', { startDate })
-        .andWhere('reading.date <= :endDate::date', { endDate })
+        .andWhere('reading.date >= CAST(:startDate AS date)', { startDate })
+        .andWhere('reading.date <= CAST(:endDate AS date)', { endDate })
         .orderBy('reading.date', 'ASC')
         .addOrderBy('reading.readingOrder', 'ASC')
         .skip(skip)
@@ -396,10 +398,11 @@ export class ReadingsService {
       const repository = this.ensureRepository();
 
       // Get daily office readings using QueryBuilder for proper date comparison
+      // Use CAST syntax instead of :: for proper parameter binding
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
-        .where('reading.date = :date::date', { date })
+        .where('reading.date = CAST(:date AS date)', { date })
         .andWhere('reading.traditionId IS NOT NULL')
         .andWhere('reading.readingOffice IN (:...offices)', {
           offices: [ReadingOffice.MORNING, ReadingOffice.EVENING],
