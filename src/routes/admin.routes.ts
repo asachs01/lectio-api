@@ -282,4 +282,79 @@ router.post('/debug-readings', async (req: Request, res: Response): Promise<Resp
   }
 });
 
+/**
+ * Query readings by specific date using raw SQL
+ */
+router.post('/query-readings-by-date', async (req: Request, res: Response): Promise<Response> => {
+  const { key, date } = req.body;
+
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+
+  if (!date) {
+    return res.status(400).json({ error: 'Date parameter required' });
+  }
+
+  try {
+    const dataSource = DatabaseService.getDataSource();
+
+    // Get RCL tradition
+    const tradition = await dataSource.query(
+      'SELECT id, abbreviation FROM traditions WHERE UPPER(abbreviation) = $1',
+      ['RCL'],
+    );
+
+    if (tradition.length === 0) {
+      return res.json({ error: 'RCL tradition not found' });
+    }
+
+    const traditionId = tradition[0].id;
+
+    // Query readings for specific date using raw SQL
+    const readings = await dataSource.query(`
+      SELECT id, date, reading_type, scripture_reference
+      FROM readings
+      WHERE tradition_id = $1
+      AND date::text LIKE $2
+      ORDER BY date
+      LIMIT 10
+    `, [traditionId, `${date}%`]);
+
+    // Also check for exact date match
+    const exactMatch = await dataSource.query(`
+      SELECT id, date, reading_type, scripture_reference
+      FROM readings
+      WHERE tradition_id = $1
+      AND date = $2::date
+      ORDER BY reading_order
+    `, [traditionId, date]);
+
+    // Count total for December 2025
+    const dec2025Count = await dataSource.query(`
+      SELECT COUNT(*) as count
+      FROM readings
+      WHERE tradition_id = $1
+      AND date >= '2025-12-01'
+      AND date <= '2025-12-31'
+    `, [traditionId]);
+
+    return res.json({
+      tradition: tradition[0],
+      searchDate: date,
+      exactMatchReadings: exactMatch,
+      likeMatchReadings: readings,
+      december2025Count: parseInt(dec2025Count[0].count),
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Query readings by date failed:', error);
+    return res.status(500).json({
+      error: 'Query failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 export { router as adminRouter };
