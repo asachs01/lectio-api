@@ -14,7 +14,7 @@ import { Season, LiturgicalColor } from '../models/season.entity';
 import { LiturgicalYear, LiturgicalCycle } from '../models/liturgical-year.entity';
 import { Tradition } from '../models/tradition.entity';
 import { SpecialDay, SpecialDayType, SpecialDayRank } from '../models/special-day.entity';
-// import { LiturgicalCalendar } from '../utils/liturgical-calendar';
+import { LiturgicalCalendarService } from '../services/liturgical-calendar.service';
 
 interface ReadingData {
   first: string;
@@ -188,76 +188,262 @@ function loadRCLData(): RCLYearData[] {
   return rclData;
 }
 
+// Create a singleton instance of the liturgical calendar service
+const liturgicalCalendarService = new LiturgicalCalendarService();
+
 /**
- * Calculate a mock date for liturgical events (for demonstration purposes)
+ * Calculate the actual liturgical date for a given pattern and civil year
+ * Uses proper liturgical calendar calculations
+ *
+ * @param datePattern The date pattern from the JSON file (e.g., 'advent_1', 'easter_day')
+ * @param civilYear The civil year for which to calculate the date
+ * @param liturgicalCycle The liturgical cycle (A, B, C) to determine which year this belongs to
  */
-function calculateMockDate(datePattern: string, year: number = 2024): Date {
-  const baseDate = new Date(year, 0, 1); // Start of year
-  
-  // This is a simplified mock calculation - in reality you'd use proper liturgical calendar calculations
-  const mockOffsets = {
-    advent_1: -30, // Nov 30 area
-    advent_2: -23,
-    advent_3: -16,
-    advent_4: -9,
-    december_24: -7, // Dec 24
-    december_25: -6, // Dec 25
-    christmas_1: 0,   // Jan 1
-    january_6: 5,     // Jan 6
-    baptism_lord: 12,  // Mid January
-    epiphany_2: 19,
-    epiphany_3: 26,
-    transfiguration: 45, // Mid February
-    ash_wednesday: 52,   // Late February
-    lent_1: 59,
-    lent_2: 66,
-    lent_3: 73,
-    lent_4: 80,
-    lent_5: 87,
-    palm_sunday: 94,
-    easter_vigil: 101,
-    easter_day: 102,
-    easter_2: 109,
-    easter_3: 116,
-    easter_4: 123,
-    easter_5: 130,
-    easter_6: 137,
-    ascension: 141,
-    easter_7: 144,
-    pentecost: 151,
-    trinity_sunday: 158,
-    proper_4: 165,
-    proper_5: 172,
-    proper_6: 179,
-    proper_7: 186,
-    proper_8: 193,
-    proper_9: 200,
-    proper_10: 207,
-    proper_11: 214,
-    proper_12: 221,
-    proper_13: 228,
-    proper_14: 235,
-    proper_15: 242,
-    proper_16: 249, // Around August 25 for proper_16
-    proper_17: 256,
-    proper_18: 263,
-    proper_19: 270,
-    proper_20: 277,
-    proper_21: 284,
-    proper_22: 291,
-    proper_23: 298,
-    proper_24: 305,
-    proper_25: 312,
-    proper_26: 319,
-    proper_27: 326,
-    proper_28: 333,
-    christ_king: 340,
+function calculateLiturgicalDate(datePattern: string, civilYear: number, _liturgicalCycle: 'A' | 'B' | 'C'): Date {
+  // Get Easter dates for this year (many dates depend on Easter)
+  const easterDates = liturgicalCalendarService.calculateEasterDates(civilYear);
+  const easter = easterDates.easter.date;
+
+  // Helper to add days to a date
+  const addDays = (date: Date, days: number): Date => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
   };
-  
-  const offset = mockOffsets[datePattern as keyof typeof mockOffsets] || 0;
-  const resultDate = new Date(baseDate);
-  resultDate.setDate(baseDate.getDate() + offset);
-  return resultDate;
+
+  // Helper to get the Sunday on or after a given date
+  const getSundayOnOrAfter = (date: Date): Date => {
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek === 0) {
+      return date;
+    }
+    return addDays(date, 7 - dayOfWeek);
+  };
+
+  // Helper to get the nth Sunday after a given date
+  const getNthSundayAfter = (date: Date, n: number): Date => {
+    const firstSunday = getSundayOnOrAfter(addDays(date, 1));
+    return addDays(firstSunday, (n - 1) * 7);
+  };
+
+  // Calculate First Sunday of Advent (4th Sunday before Christmas, or Sunday closest to Nov 30)
+  const getFirstAdvent = (year: number): Date => {
+    // First Sunday of Advent is the Sunday that falls between Nov 27 and Dec 3 inclusive
+    // This is also the Sunday closest to November 30
+    const nov30 = new Date(year, 10, 30); // November 30
+    const dayOfWeek = nov30.getDay(); // 0 = Sunday
+
+    if (dayOfWeek === 0) {
+      // Nov 30 is a Sunday
+      return nov30;
+    } else if (dayOfWeek <= 3) {
+      // Mon-Wed: Go back to the previous Sunday
+      return addDays(nov30, -dayOfWeek);
+    } else {
+      // Thu-Sat: Go forward to the next Sunday
+      return addDays(nov30, 7 - dayOfWeek);
+    }
+  };
+
+  // Get Baptism of the Lord (Sunday after Jan 6, or Jan 7 if Jan 6 is Sunday)
+  const getBaptismOfLord = (year: number): Date => {
+    const epiphany = new Date(year, 0, 6);
+    const epiphanyDay = epiphany.getDay();
+    if (epiphanyDay === 0) {
+      return new Date(year, 0, 7);
+    }
+    return addDays(epiphany, 7 - epiphanyDay);
+  };
+
+  // Calculate Transfiguration Sunday (Last Sunday after Epiphany, before Ash Wednesday)
+  const getTransfiguration = (_year: number): Date => {
+    const ashWed = easterDates.ashWednesday.date;
+    // Go back to the Sunday before Ash Wednesday
+    const daysBack = ashWed.getDay() === 0 ? 7 : ashWed.getDay();
+    return addDays(ashWed, -daysBack);
+  };
+
+  // Calculate Christ the King (Last Sunday before Advent)
+  const getChristTheKing = (year: number): Date => {
+    const firstAdvent = getFirstAdvent(year);
+    return addDays(firstAdvent, -7);
+  };
+
+  // Calculate Propers based on weeks after Pentecost
+  // Proper 4 starts when the Sunday falls between May 29 - June 4
+  // The Propers work backward from Christ the King (Proper 29 = Christ the King)
+  const getProperDate = (properNumber: number, year: number): Date => {
+    const christKing = getChristTheKing(year);
+    // Christ the King is essentially Proper 29
+    // So Proper 28 is 1 week before, Proper 27 is 2 weeks before, etc.
+    const weeksBeforeChristKing = 29 - properNumber;
+    return addDays(christKing, -weeksBeforeChristKing * 7);
+  };
+
+  // Map date patterns to actual date calculations
+  switch (datePattern) {
+  // Advent (in the year before the majority of the liturgical year)
+  case 'advent_1':
+    return getFirstAdvent(civilYear);
+  case 'advent_2':
+    return addDays(getFirstAdvent(civilYear), 7);
+  case 'advent_3':
+    return addDays(getFirstAdvent(civilYear), 14);
+  case 'advent_4':
+    return addDays(getFirstAdvent(civilYear), 21);
+
+    // Christmas (fixed dates)
+  case 'december_24':
+    return new Date(civilYear, 11, 24);
+  case 'december_25':
+    return new Date(civilYear, 11, 25);
+  case 'christmas_1': {
+    // First Sunday after Christmas (Dec 26 - Jan 1)
+    const christmasDate = new Date(civilYear, 11, 25);
+    return getSundayOnOrAfter(addDays(christmasDate, 1));
+  }
+
+  // Epiphany
+  case 'january_6':
+    return new Date(civilYear + 1, 0, 6); // January 6 of the following year
+  case 'baptism_lord':
+    return getBaptismOfLord(civilYear + 1);
+  case 'epiphany_2':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 2);
+  case 'epiphany_3':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 3);
+  case 'epiphany_4':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 4);
+  case 'epiphany_5':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 5);
+  case 'epiphany_6':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 6);
+  case 'epiphany_7':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 7);
+  case 'epiphany_8':
+    return getNthSundayAfter(new Date(civilYear + 1, 0, 6), 8);
+  case 'transfiguration':
+    return getTransfiguration(civilYear + 1);
+
+    // Lent (based on Easter)
+  case 'ash_wednesday':
+    return easterDates.ashWednesday.date;
+  case 'lent_1':
+    return addDays(easter, -42); // 6 weeks before Easter
+  case 'lent_2':
+    return addDays(easter, -35);
+  case 'lent_3':
+    return addDays(easter, -28);
+  case 'lent_4':
+    return addDays(easter, -21);
+  case 'lent_5':
+    return addDays(easter, -14);
+  case 'palm_sunday':
+    return easterDates.palmSunday.date;
+
+    // Easter (based on Easter calculation)
+  case 'easter_vigil':
+    return easterDates.easterVigil.date;
+  case 'easter_day':
+    return easter;
+  case 'easter_2':
+    return addDays(easter, 7);
+  case 'easter_3':
+    return addDays(easter, 14);
+  case 'easter_4':
+    return addDays(easter, 21);
+  case 'easter_5':
+    return addDays(easter, 28);
+  case 'easter_6':
+    return addDays(easter, 35);
+  case 'ascension':
+    return easterDates.ascension.date;
+  case 'easter_7':
+    return addDays(easter, 42);
+  case 'pentecost':
+    return easterDates.pentecost.date;
+
+    // Ordinary Time / Propers
+  case 'trinity_sunday':
+    return easterDates.trinitySunday.date;
+  case 'proper_4':
+    return getProperDate(4, civilYear + 1);
+  case 'proper_5':
+    return getProperDate(5, civilYear + 1);
+  case 'proper_6':
+    return getProperDate(6, civilYear + 1);
+  case 'proper_7':
+    return getProperDate(7, civilYear + 1);
+  case 'proper_8':
+    return getProperDate(8, civilYear + 1);
+  case 'proper_9':
+    return getProperDate(9, civilYear + 1);
+  case 'proper_10':
+    return getProperDate(10, civilYear + 1);
+  case 'proper_11':
+    return getProperDate(11, civilYear + 1);
+  case 'proper_12':
+    return getProperDate(12, civilYear + 1);
+  case 'proper_13':
+    return getProperDate(13, civilYear + 1);
+  case 'proper_14':
+    return getProperDate(14, civilYear + 1);
+  case 'proper_15':
+    return getProperDate(15, civilYear + 1);
+  case 'proper_16':
+    return getProperDate(16, civilYear + 1);
+  case 'proper_17':
+    return getProperDate(17, civilYear + 1);
+  case 'proper_18':
+    return getProperDate(18, civilYear + 1);
+  case 'proper_19':
+    return getProperDate(19, civilYear + 1);
+  case 'proper_20':
+    return getProperDate(20, civilYear + 1);
+  case 'proper_21':
+    return getProperDate(21, civilYear + 1);
+  case 'proper_22':
+    return getProperDate(22, civilYear + 1);
+  case 'proper_23':
+    return getProperDate(23, civilYear + 1);
+  case 'proper_24':
+    return getProperDate(24, civilYear + 1);
+  case 'proper_25':
+    return getProperDate(25, civilYear + 1);
+  case 'proper_26':
+    return getProperDate(26, civilYear + 1);
+  case 'proper_27':
+    return getProperDate(27, civilYear + 1);
+  case 'proper_28':
+    return getProperDate(28, civilYear + 1);
+  case 'christ_king':
+    return getChristTheKing(civilYear + 1);
+
+  default:
+    console.warn(`Unknown date pattern: ${datePattern}, using fallback`);
+    return new Date(civilYear, 0, 1);
+  }
+}
+
+/**
+ * Get the civil year when a liturgical year cycle starts
+ * e.g., Year A starting in 2025 begins with Advent in late November 2025
+ *
+ * For reference:
+ * - Year A: 2025-2026, 2028-2029, etc. (year % 3 === 2 for Advent start year)
+ * - Year B: 2026-2027, 2029-2030, etc. (year % 3 === 0 for Advent start year)
+ * - Year C: 2024-2025, 2027-2028, etc. (year % 3 === 1 for Advent start year)
+ */
+function getCivilYearForCycle(cycle: 'A' | 'B' | 'C', targetYear: number): number {
+  // Find the most recent year where this cycle started
+  // Cycle pattern: A starts when (year % 3 === 2), B when (year % 3 === 0), C when (year % 3 === 1)
+  const targetRemainder = cycle === 'A' ? 2 : cycle === 'B' ? 0 : 1;
+
+  let year = targetYear;
+  while (year % 3 !== targetRemainder) {
+    year--;
+  }
+  return year;
 }
 
 /**
@@ -347,31 +533,69 @@ async function createLiturgicalYear(year: string, tradition: Tradition): Promise
  * Create or find liturgical season
  */
 async function createLiturgicalSeason(
-  seasonKey: string, 
-  seasonData: SeasonData, 
+  seasonKey: string,
+  seasonData: SeasonData,
   liturgicalYear: LiturgicalYear,
+  civilYear: number,
 ): Promise<Season> {
   const seasonRepo = AppDataSource.getRepository(Season);
-  
+
   const seasonName = SEASON_MAPPINGS[seasonKey as keyof typeof SEASON_MAPPINGS];
   if (!seasonName) {
     throw new Error(`Unknown season key: ${seasonKey}`);
   }
-  
+
   let season = await seasonRepo.findOne({
     where: {
       name: seasonName,
       liturgicalYearId: liturgicalYear.id,
     },
   });
-  
+
   if (!season) {
-    // Create mock start and end dates
-    const mockYear = liturgicalYear.year;
-    const startDate = calculateMockDate(seasonKey + '_start', mockYear);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 60); // Rough 2-month seasons
-    
+    // Calculate proper start and end dates based on season
+    const cycle = liturgicalYear.cycle as 'A' | 'B' | 'C';
+    let startDate: Date;
+    let endDate: Date;
+
+    // Helper to add days to a date
+    const addDays = (date: Date, days: number): Date => {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    };
+
+    switch (seasonKey) {
+    case 'advent':
+      startDate = calculateLiturgicalDate('advent_1', civilYear, cycle);
+      endDate = new Date(civilYear, 11, 24); // Christmas Eve
+      break;
+    case 'christmas':
+      startDate = new Date(civilYear, 11, 25); // Christmas Day
+      endDate = calculateLiturgicalDate('baptism_lord', civilYear, cycle);
+      break;
+    case 'epiphany':
+      startDate = addDays(calculateLiturgicalDate('baptism_lord', civilYear, cycle), 1);
+      endDate = addDays(calculateLiturgicalDate('ash_wednesday', civilYear, cycle), -1);
+      break;
+    case 'lent':
+      startDate = calculateLiturgicalDate('ash_wednesday', civilYear, cycle);
+      endDate = addDays(calculateLiturgicalDate('easter_day', civilYear, cycle), -1);
+      break;
+    case 'easter':
+      startDate = calculateLiturgicalDate('easter_day', civilYear, cycle);
+      endDate = calculateLiturgicalDate('pentecost', civilYear, cycle);
+      break;
+    case 'ordinary_time':
+      startDate = addDays(calculateLiturgicalDate('pentecost', civilYear, cycle), 1);
+      // Christ the King is the last Sunday, Advent 1 starts the next Sunday
+      endDate = addDays(calculateLiturgicalDate('christ_king', civilYear, cycle), 6);
+      break;
+    default:
+      startDate = new Date(civilYear, 0, 1);
+      endDate = new Date(civilYear, 11, 31);
+    }
+
     season = seasonRepo.create({
       name: seasonName,
       description: seasonData.name,
@@ -382,11 +606,11 @@ async function createLiturgicalSeason(
       sortOrder: getSeasonOrder(seasonKey),
     });
     await seasonRepo.save(season);
-    console.log(`Created season: ${seasonName} for Year ${liturgicalYear.cycle}`);
+    console.log(`Created season: ${seasonName} for Year ${liturgicalYear.cycle} (${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]})`);
   } else {
     console.log(`Found existing season: ${seasonName} for Year ${liturgicalYear.cycle}`);
   }
-  
+
   return season;
 }
 
@@ -397,8 +621,9 @@ async function createSpecialDay(
   sundayFeastData: SundayFeastData,
   liturgicalYear: LiturgicalYear,
   tradition: Tradition,
+  civilYear: number,
 ): Promise<SpecialDay | null> {
-  if (!sundayFeastData.name.includes('Christmas') && 
+  if (!sundayFeastData.name.includes('Christmas') &&
       !sundayFeastData.name.includes('Epiphany') &&
       !sundayFeastData.name.includes('Easter') &&
       !sundayFeastData.name.includes('Ash Wednesday') &&
@@ -407,23 +632,24 @@ async function createSpecialDay(
       !sundayFeastData.name.includes('Pentecost')) {
     return null; // Only create special days for major feasts
   }
-  
+
   const specialDayRepo = AppDataSource.getRepository(SpecialDay);
-  
-  const mockDate = calculateMockDate(sundayFeastData.date_pattern, liturgicalYear.year);
-  
+  const cycle = liturgicalYear.cycle as 'A' | 'B' | 'C';
+
+  const actualDate = calculateLiturgicalDate(sundayFeastData.date_pattern, civilYear, cycle);
+
   let specialDay = await specialDayRepo.findOne({
     where: {
       name: sundayFeastData.name,
-      date: mockDate,
+      date: actualDate,
       traditionId: tradition.id,
     },
   });
-  
+
   if (!specialDay) {
     specialDay = specialDayRepo.create({
       name: sundayFeastData.name,
-      date: mockDate,
+      date: actualDate,
       type: SpecialDayType.FEAST,
       rank: SpecialDayRank.FEAST,
       description: DATE_PATTERN_DESCRIPTIONS[sundayFeastData.date_pattern as keyof typeof DATE_PATTERN_DESCRIPTIONS] || sundayFeastData.name,
@@ -433,9 +659,9 @@ async function createSpecialDay(
       isMoveable: sundayFeastData.date_pattern.includes('easter') || sundayFeastData.date_pattern.includes('lent'),
     });
     await specialDayRepo.save(specialDay);
-    console.log(`Created special day: ${sundayFeastData.name}`);
+    console.log(`Created special day: ${sundayFeastData.name} on ${actualDate.toISOString().split('T')[0]}`);
   }
-  
+
   return specialDay;
 }
 
@@ -447,12 +673,14 @@ async function createLectionaryReading(
   season: Season,
   liturgicalYear: LiturgicalYear,
   tradition: Tradition,
+  civilYear: number,
   specialDay?: SpecialDay,
 ): Promise<void> {
   const readingRepo = AppDataSource.getRepository(Reading);
-  
-  // Mock date calculation
-  const mockDate = calculateMockDate(sundayFeastData.date_pattern, liturgicalYear.year);
+  const cycle = liturgicalYear.cycle as 'A' | 'B' | 'C';
+
+  // Calculate actual liturgical date
+  const actualDate = calculateLiturgicalDate(sundayFeastData.date_pattern, civilYear, cycle);
   
   // Parse each reading to handle alternatives
   const readings = [
@@ -464,20 +692,20 @@ async function createLectionaryReading(
   
   for (const reading of readings) {
     const parsed = parseReadingText(reading.text);
-    
+
     // Create primary reading
     const existingReading = await readingRepo.findOne({
       where: {
-        date: mockDate,
+        date: actualDate,
         readingType: reading.type,
         traditionId: tradition.id,
         isAlternative: false,
       },
     });
-    
+
     if (!existingReading) {
       const newReading = readingRepo.create({
-        date: mockDate,
+        date: actualDate,
         readingType: reading.type,
         scriptureReference: parsed.primary,
         text: null, // We don't have full text in this import
@@ -493,21 +721,21 @@ async function createLectionaryReading(
       });
       await readingRepo.save(newReading);
     }
-    
+
     // Create alternative reading if exists
     if (parsed.alternative) {
       const existingAltReading = await readingRepo.findOne({
         where: {
-          date: mockDate,
+          date: actualDate,
           readingType: reading.type,
           traditionId: tradition.id,
           isAlternative: true,
         },
       });
-      
+
       if (!existingAltReading) {
         const altReading = readingRepo.create({
-          date: mockDate,
+          date: actualDate,
           readingType: reading.type,
           scriptureReference: parsed.alternative,
           text: null,
@@ -525,8 +753,8 @@ async function createLectionaryReading(
       }
     }
   }
-  
-  console.log(`Created readings for: ${sundayFeastData.name} (${sundayFeastData.date_pattern})`);
+
+  console.log(`Created readings for: ${sundayFeastData.name} on ${actualDate.toISOString().split('T')[0]} (${sundayFeastData.date_pattern})`);
 }
 
 /**
@@ -552,39 +780,46 @@ async function importRCLData(): Promise<void> {
     // Process each year
     for (const yearData of rclData) {
       console.log(`\nProcessing RCL Year ${yearData.year}...`);
-      
+
+      // Calculate the civil year when this liturgical cycle starts
+      // For Year A starting in 2025, Advent begins in late November 2025
+      const currentYear = new Date().getFullYear();
+      const cycle = yearData.year as 'A' | 'B' | 'C';
+      const civilYear = getCivilYearForCycle(cycle, currentYear);
+      console.log(`  Civil year for Year ${cycle}: ${civilYear} (Advent ${civilYear} through Christ the King ${civilYear + 1})`);
+
       // Create liturgical year
       const liturgicalYear = await createLiturgicalYear(yearData.year, tradition);
-      
+
       // Process each season
       const seasonKeys = Object.keys(yearData.seasons).sort((a, b) => {
         return getSeasonOrder(a) - getSeasonOrder(b);
       });
-      
+
       for (const seasonKey of seasonKeys) {
         const seasonData = yearData.seasons[seasonKey];
         console.log(`\n  Processing season: ${seasonData.name}...`);
-        
-        // Create season
-        const season = await createLiturgicalSeason(seasonKey, seasonData, liturgicalYear);
-        
+
+        // Create season with proper date calculations
+        const season = await createLiturgicalSeason(seasonKey, seasonData, liturgicalYear, civilYear);
+
         // Process regular Sundays
         if (seasonData.sundays) {
           for (const sunday of seasonData.sundays) {
-            const specialDay = await createSpecialDay(sunday, liturgicalYear, tradition);
-            await createLectionaryReading(sunday, season, liturgicalYear, tradition, specialDay || undefined);
+            const specialDay = await createSpecialDay(sunday, liturgicalYear, tradition, civilYear);
+            await createLectionaryReading(sunday, season, liturgicalYear, tradition, civilYear, specialDay || undefined);
           }
         }
-        
+
         // Process feast days
         if (seasonData.feast_days) {
           for (const feastDay of seasonData.feast_days) {
-            const specialDay = await createSpecialDay(feastDay, liturgicalYear, tradition);
-            await createLectionaryReading(feastDay, season, liturgicalYear, tradition, specialDay || undefined);
+            const specialDay = await createSpecialDay(feastDay, liturgicalYear, tradition, civilYear);
+            await createLectionaryReading(feastDay, season, liturgicalYear, tradition, civilYear, specialDay || undefined);
           }
         }
       }
-      
+
       console.log(`Completed RCL Year ${yearData.year}`);
     }
     
