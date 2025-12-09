@@ -4,6 +4,10 @@ export declare class ReadingsService {
     private traditionRepository;
     private calendarService;
     constructor();
+    /**
+     * Resolve a composite tradition to its underlying tradition based on the date
+     */
+    private resolveCompositeTradition;
     private ensureRepository;
     /**
      * Look up tradition by abbreviation or ID and return its UUID

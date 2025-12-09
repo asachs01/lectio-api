@@ -6,6 +6,14 @@ const reading_entity_1 = require("../models/reading.entity");
 const tradition_entity_1 = require("../models/tradition.entity");
 const logger_1 = require("../utils/logger");
 const liturgical_calendar_service_1 = require("./liturgical-calendar.service");
+/**
+ * Composite traditions that map to underlying real traditions
+ * based on the day of the week
+ */
+const COMPOSITE_TRADITION_MAP = {
+    episcopal: { sunday: 'rcl', weekday: 'bcp' },
+    ecusa: { sunday: 'rcl', weekday: 'bcp' },
+};
 class ReadingsService {
     constructor() {
         try {
@@ -19,6 +27,22 @@ class ReadingsService {
             // Initialize later if database not ready yet
             this.calendarService = new liturgical_calendar_service_1.LiturgicalCalendarService();
         }
+    }
+    /**
+     * Resolve a composite tradition to its underlying tradition based on the date
+     */
+    resolveCompositeTradition(traditionIdentifier, date) {
+        const normalized = traditionIdentifier.toLowerCase();
+        const composite = COMPOSITE_TRADITION_MAP[normalized];
+        if (!composite) {
+            return { tradition: traditionIdentifier, isComposite: false };
+        }
+        // Sunday = 0, Saturday = 6
+        const isSunday = date.getDay() === 0;
+        return {
+            tradition: isSunday ? composite.sunday : composite.weekday,
+            isComposite: true,
+        };
     }
     ensureRepository() {
         if (!this.readingRepository) {
@@ -55,16 +79,19 @@ class ReadingsService {
     async getByDate(date, traditionIdentifier) {
         try {
             const repository = this.ensureRepository();
-            // Look up the tradition UUID
-            const traditionUuid = await this.getTraditionId(traditionIdentifier);
-            if (!traditionUuid) {
-                logger_1.logger.warn(`Tradition not found: ${traditionIdentifier}`);
-                return null;
-            }
             // Parse date string to avoid timezone issues - ensure we're working with the date as-is
             const [yearStr, monthStr, dayStr] = date.split('-');
             const dateObj = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr), 12, 0, 0); // Set to noon to avoid timezone issues
             const year = dateObj.getFullYear();
+            // Handle composite traditions (e.g., episcopal -> rcl for Sunday, bcp for weekday)
+            const { tradition: resolvedTradition, isComposite } = this.resolveCompositeTradition(traditionIdentifier, dateObj);
+            const originalTraditionId = traditionIdentifier.toLowerCase();
+            // Look up the tradition UUID for the resolved tradition
+            const traditionUuid = await this.getTraditionId(resolvedTradition);
+            if (!traditionUuid) {
+                logger_1.logger.warn(`Tradition not found: ${resolvedTradition} (resolved from ${traditionIdentifier})`);
+                return null;
+            }
             // Get liturgical information for this date
             const liturgicalInfo = this.calendarService.getLiturgicalYearInfo(year);
             const season = this.calendarService.getSeasonForDate(dateObj, year);
@@ -83,17 +110,19 @@ class ReadingsService {
                 .orderBy('reading.readingOrder', 'ASC')
                 .getMany();
             if (!readings || readings.length === 0) {
-                logger_1.logger.warn(`No readings found for date ${date} and tradition ${traditionIdentifier} (UUID: ${traditionUuid})`);
+                logger_1.logger.warn(`No readings found for date ${date} and tradition ${resolvedTradition}${isComposite ? ` (from composite: ${originalTraditionId})` : ''} (UUID: ${traditionUuid})`);
                 // Try to find readings by liturgical cycle and proper/season
                 const alternateReadings = await this.findReadingsByLiturgicalContext(dateObj, traditionUuid, liturgicalInfo.cycle, season, properNumber);
                 if (alternateReadings && alternateReadings.length > 0) {
-                    return this.formatDailyReading(alternateReadings, date, traditionIdentifier, season?.name || 'ordinary');
+                    // Use original tradition ID so composite traditions show correctly in response
+                    return this.formatDailyReading(alternateReadings, date, originalTraditionId, season?.name || 'ordinary');
                 }
                 // Return null - no mock data fallback
                 return null;
             }
             // Format and return the readings
-            return this.formatDailyReading(readings, date, traditionIdentifier, readings[0].seasonId || season?.name || 'ordinary');
+            // Use original tradition ID so composite traditions show correctly in response
+            return this.formatDailyReading(readings, date, originalTraditionId, readings[0].seasonId || season?.name || 'ordinary');
         }
         catch (error) {
             logger_1.logger.error(`Error fetching readings for date ${date}:`, error);
@@ -340,9 +369,9 @@ class ReadingsService {
             const eveningReadings = readings.filter(r => r.readingOffice === reading_entity_1.ReadingOffice.EVENING);
             // Format as DailyReading
             return {
-                id: `daily-${date}`,
+                id: `bcp-daily-${date}`,
                 date,
-                traditionId: 'daily-office',
+                traditionId: 'bcp-daily-office',
                 seasonId: null,
                 readings: [
                     ...morningReadings.map(r => ({

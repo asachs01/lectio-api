@@ -1,0 +1,883 @@
+{
+  "year": "B",
+  "description": "Roman Catholic Lectionary Year B - Gospel of Mark Focus",
+  "tradition": "RC",
+  "seasons": {
+    "advent": {
+      "name": "Advent",
+      "sundays": [
+        {
+          "id": "advent-1-b",
+          "name": "First Sunday of Advent",
+          "date_pattern": "advent_1",
+          "readings": {
+            "first": "Isaiah 63:16b-17, 19b; 64:2-7",
+            "psalm": "Psalm 80:2-3, 15-16, 18-19",
+            "second": "1 Corinthians 1:3-9",
+            "gospel": "Mark 13:33-37"
+          }
+        },
+        {
+          "id": "advent-2-b",
+          "name": "Second Sunday of Advent",
+          "date_pattern": "advent_2",
+          "readings": {
+            "first": "Isaiah 40:1-5, 9-11",
+            "psalm": "Psalm 85:9-10, 11-12, 13-14",
+            "second": "2 Peter 3:8-14",
+            "gospel": "Mark 1:1-8"
+          }
+        },
+        {
+          "id": "advent-3-b",
+          "name": "Third Sunday of Advent",
+          "date_pattern": "advent_3",
+          "readings": {
+            "first": "Isaiah 61:1-2a, 10-11",
+            "psalm": "Luke 1:46-48, 49-50, 53-54",
+            "second": "1 Thessalonians 5:16-24",
+            "gospel": "John 1:6-8, 19-28"
+          }
+        },
+        {
+          "id": "advent-4-b",
+          "name": "Fourth Sunday of Advent",
+          "date_pattern": "advent_4",
+          "readings": {
+            "first": "2 Samuel 7:1-5, 8b-12, 14a, 16",
+            "psalm": "Psalm 89:2-3, 4-5, 27, 29",
+            "second": "Romans 16:25-27",
+            "gospel": "Luke 1:26-38"
+          }
+        }
+      ]
+    },
+    "christmas": {
+      "name": "Christmas",
+      "feast_days": [
+        {
+          "id": "christmas-vigil-b",
+          "name": "Christmas Vigil Mass",
+          "date_pattern": "december_24",
+          "readings": {
+            "first": "Isaiah 62:1-5",
+            "psalm": "Psalm 89:4-5, 16-17, 27, 29",
+            "second": "Acts 13:16-17, 22-25",
+            "gospel": "Matthew 1:1-25"
+          }
+        },
+        {
+          "id": "christmas-midnight-b",
+          "name": "Christmas Mass at Midnight",
+          "date_pattern": "december_25",
+          "readings": {
+            "first": "Isaiah 9:1-6",
+            "psalm": "Psalm 96:1-2, 2-3, 11-12, 13",
+            "second": "Titus 2:11-14",
+            "gospel": "Luke 2:1-14"
+          }
+        },
+        {
+          "id": "christmas-dawn-b",
+          "name": "Christmas Mass at Dawn",
+          "date_pattern": "december_25",
+          "readings": {
+            "first": "Isaiah 62:11-12",
+            "psalm": "Psalm 97:1, 6, 11-12",
+            "second": "Titus 3:4-7",
+            "gospel": "Luke 2:15-20"
+          }
+        },
+        {
+          "id": "christmas-day-b",
+          "name": "Christmas Mass During the Day",
+          "date_pattern": "december_25",
+          "readings": {
+            "first": "Isaiah 52:7-10",
+            "psalm": "Psalm 98:1, 2-3, 3-4, 5-6",
+            "second": "Hebrews 1:1-6",
+            "gospel": "John 1:1-18"
+          }
+        },
+        {
+          "id": "holy-family-b",
+          "name": "The Holy Family of Jesus, Mary and Joseph",
+          "date_pattern": "christmas_1",
+          "readings": {
+            "first": "Genesis 15:1-6; 21:1-3",
+            "psalm": "Psalm 105:1-2, 3-4, 5-6, 8-9",
+            "second": "Hebrews 11:8, 11-12, 17-19",
+            "gospel": "Luke 2:22-40"
+          }
+        },
+        {
+          "id": "mary-mother-god-b",
+          "name": "Solemnity of Mary, the Holy Mother of God",
+          "date_pattern": "january_1",
+          "readings": {
+            "first": "Numbers 6:22-27",
+            "psalm": "Psalm 67:2-3, 5, 6, 8",
+            "second": "Galatians 4:4-7",
+            "gospel": "Luke 2:16-21"
+          }
+        }
+      ]
+    },
+    "epiphany": {
+      "name": "Epiphany",
+      "feast_days": [
+        {
+          "id": "epiphany-b",
+          "name": "The Epiphany of the Lord",
+          "date_pattern": "january_6",
+          "readings": {
+            "first": "Isaiah 60:1-6",
+            "psalm": "Psalm 72:1-2, 7-8, 10-11, 12-13",
+            "second": "Ephesians 3:2-3a, 5-6",
+            "gospel": "Matthew 2:1-12"
+          }
+        }
+      ],
+      "sundays": [
+        {
+          "id": "baptism-lord-b",
+          "name": "The Baptism of the Lord",
+          "date_pattern": "baptism_lord",
+          "readings": {
+            "first": "Isaiah 55:1-11",
+            "psalm": "Isaiah 12:2-3, 4, 5-6",
+            "second": "1 John 5:1-9",
+            "gospel": "Mark 1:7-11"
+          }
+        }
+      ]
+    },
+    "lent": {
+      "name": "Lent",
+      "feast_days": [
+        {
+          "id": "ash-wednesday-b",
+          "name": "Ash Wednesday",
+          "date_pattern": "ash_wednesday",
+          "readings": {
+            "first": "Joel 2:12-18",
+            "psalm": "Psalm 51:3-4, 5-6ab, 12-13, 14, 17",
+            "second": "2 Corinthians 5:20—6:2",
+            "gospel": "Matthew 6:1-6, 16-18"
+          }
+        }
+      ],
+      "sundays": [
+        {
+          "id": "lent-1-b",
+          "name": "First Sunday of Lent",
+          "date_pattern": "lent_1",
+          "readings": {
+            "first": "Genesis 9:8-15",
+            "psalm": "Psalm 25:4-5, 6-7, 8-9",
+            "second": "1 Peter 3:18-22",
+            "gospel": "Mark 1:12-15"
+          }
+        },
+        {
+          "id": "lent-2-b",
+          "name": "Second Sunday of Lent",
+          "date_pattern": "lent_2",
+          "readings": {
+            "first": "Genesis 22:1-2, 9a, 10-13, 15-18",
+            "psalm": "Psalm 116:10, 15, 16-17, 18-19",
+            "second": "Romans 8:31b-34",
+            "gospel": "Mark 9:2-10"
+          }
+        },
+        {
+          "id": "lent-3-b",
+          "name": "Third Sunday of Lent",
+          "date_pattern": "lent_3",
+          "readings": {
+            "first": "Exodus 20:1-17",
+            "psalm": "Psalm 19:8, 9, 10, 11",
+            "second": "1 Corinthians 1:22-25",
+            "gospel": "John 2:13-25"
+          }
+        },
+        {
+          "id": "lent-4-b",
+          "name": "Fourth Sunday of Lent",
+          "date_pattern": "lent_4",
+          "readings": {
+            "first": "2 Chronicles 36:14-16, 19-23",
+            "psalm": "Psalm 137:1-2, 3, 4-5, 6",
+            "second": "Ephesians 2:4-10",
+            "gospel": "John 3:14-21"
+          }
+        },
+        {
+          "id": "lent-5-b",
+          "name": "Fifth Sunday of Lent",
+          "date_pattern": "lent_5",
+          "readings": {
+            "first": "Jeremiah 31:31-34",
+            "psalm": "Psalm 51:3-4, 12-13, 14-15",
+            "second": "Hebrews 5:7-9",
+            "gospel": "John 12:20-33"
+          }
+        }
+      ]
+    },
+    "holy_week": {
+      "name": "Holy Week",
+      "feast_days": [
+        {
+          "id": "palm-sunday-b",
+          "name": "Palm Sunday of the Passion of the Lord",
+          "date_pattern": "palm_sunday",
+          "readings": {
+            "first": "Isaiah 50:4-7",
+            "psalm": "Psalm 22:8-9, 17-18, 19-20, 23-24",
+            "second": "Philippians 2:6-11",
+            "gospel": "Mark 14:1—15:47"
+          }
+        },
+        {
+          "id": "holy-thursday-b",
+          "name": "Holy Thursday - Mass of the Lord's Supper",
+          "date_pattern": "holy_thursday",
+          "readings": {
+            "first": "Exodus 12:1-8, 11-14",
+            "psalm": "Psalm 116:12-13, 15-16bc, 17-18",
+            "second": "1 Corinthians 11:23-26",
+            "gospel": "John 13:1-15"
+          }
+        },
+        {
+          "id": "good-friday-b",
+          "name": "Good Friday of the Passion of the Lord",
+          "date_pattern": "good_friday",
+          "readings": {
+            "first": "Isaiah 52:13—53:12",
+            "psalm": "Psalm 31:2, 6, 12-13, 15-16, 17, 25",
+            "second": "Hebrews 4:14-16; 5:7-9",
+            "gospel": "John 18:1—19:42"
+          }
+        }
+      ]
+    },
+    "easter": {
+      "name": "Easter",
+      "feast_days": [
+        {
+          "id": "easter-vigil-b",
+          "name": "Easter Vigil",
+          "date_pattern": "easter_vigil",
+          "readings": {
+            "first": "Genesis 1:1—2:2",
+            "psalm": "Psalm 104:1-2, 5-6, 10, 12, 13-14, 24, 35",
+            "second": "Romans 6:3-11",
+            "gospel": "Mark 16:1-7"
+          }
+        },
+        {
+          "id": "easter-day-b",
+          "name": "Easter Sunday",
+          "date_pattern": "easter_sunday",
+          "readings": {
+            "first": "Acts 10:34a, 37-43",
+            "psalm": "Psalm 118:1-2, 16-17, 22-23",
+            "second": "Colossians 3:1-4",
+            "gospel": "John 20:1-9"
+          }
+        }
+      ],
+      "sundays": [
+        {
+          "id": "easter-2-b",
+          "name": "Second Sunday of Easter (Divine Mercy Sunday)",
+          "date_pattern": "easter_2",
+          "readings": {
+            "first": "Acts 4:32-35",
+            "psalm": "Psalm 118:2-4, 13-15, 22-24",
+            "second": "1 John 5:1-6",
+            "gospel": "John 20:19-31"
+          }
+        },
+        {
+          "id": "easter-3-b",
+          "name": "Third Sunday of Easter",
+          "date_pattern": "easter_3",
+          "readings": {
+            "first": "Acts 3:13-15, 17-19",
+            "psalm": "Psalm 4:2, 4, 7-8, 9",
+            "second": "1 John 2:1-5a",
+            "gospel": "Luke 24:35-48"
+          }
+        },
+        {
+          "id": "easter-4-b",
+          "name": "Fourth Sunday of Easter",
+          "date_pattern": "easter_4",
+          "readings": {
+            "first": "Acts 4:8-12",
+            "psalm": "Psalm 118:1, 8-9, 21-23, 26, 28, 29",
+            "second": "1 John 3:1-2",
+            "gospel": "John 10:11-18"
+          }
+        },
+        {
+          "id": "easter-5-b",
+          "name": "Fifth Sunday of Easter",
+          "date_pattern": "easter_5",
+          "readings": {
+            "first": "Acts 9:26-31",
+            "psalm": "Psalm 22:26-27, 28, 30, 31-32",
+            "second": "1 John 3:18-24",
+            "gospel": "John 15:1-8"
+          }
+        },
+        {
+          "id": "easter-6-b",
+          "name": "Sixth Sunday of Easter",
+          "date_pattern": "easter_6",
+          "readings": {
+            "first": "Acts 10:25-26, 34-35, 44-48",
+            "psalm": "Psalm 98:1, 2-3, 3-4",
+            "second": "1 John 4:7-10",
+            "gospel": "John 15:9-17"
+          }
+        },
+        {
+          "id": "ascension-b",
+          "name": "The Ascension of the Lord",
+          "date_pattern": "ascension",
+          "readings": {
+            "first": "Acts 1:1-11",
+            "psalm": "Psalm 47:2-3, 6-7, 8-9",
+            "second": "Ephesians 4:1-13",
+            "gospel": "Mark 16:15-20"
+          }
+        },
+        {
+          "id": "easter-7-b",
+          "name": "Seventh Sunday of Easter",
+          "date_pattern": "easter_7",
+          "readings": {
+            "first": "Acts 1:15-17, 20a, 20c-26",
+            "psalm": "Psalm 103:1-2, 11-12, 19-20",
+            "second": "1 John 4:11-16",
+            "gospel": "John 17:11b-19"
+          }
+        }
+      ]
+    },
+    "pentecost": {
+      "name": "Pentecost",
+      "feast_days": [
+        {
+          "id": "pentecost-vigil-b",
+          "name": "Pentecost Vigil",
+          "date_pattern": "pentecost_vigil",
+          "readings": {
+            "first": "Genesis 11:1-9",
+            "psalm": "Psalm 104:1-2, 24, 35, 27-28, 29, 30",
+            "second": "Romans 8:22-27",
+            "gospel": "John 7:37-39"
+          }
+        },
+        {
+          "id": "pentecost-b",
+          "name": "Pentecost Sunday",
+          "date_pattern": "pentecost",
+          "readings": {
+            "first": "Acts 2:1-11",
+            "psalm": "Psalm 104:1, 24, 29-30, 31, 34",
+            "second": "Galatians 5:16-25",
+            "gospel": "John 15:26-27; 16:12-15"
+          }
+        }
+      ]
+    },
+    "ordinary_time": {
+      "name": "Ordinary Time",
+      "sundays": [
+        {
+          "id": "trinity-sunday-b",
+          "name": "The Most Holy Trinity",
+          "date_pattern": "trinity_sunday",
+          "readings": {
+            "first": "Deuteronomy 4:32-34, 39-40",
+            "psalm": "Psalm 33:4-5, 6, 9, 18-19, 20, 22",
+            "second": "Romans 8:14-17",
+            "gospel": "Matthew 28:16-20"
+          }
+        },
+        {
+          "id": "corpus-christi-b",
+          "name": "The Most Holy Body and Blood of Christ",
+          "date_pattern": "corpus_christi",
+          "readings": {
+            "first": "Exodus 24:3-8",
+            "psalm": "Psalm 116:12-13, 15-16, 17-18",
+            "second": "Hebrews 9:11-15",
+            "gospel": "Mark 14:12-16, 22-26"
+          }
+        },
+        {
+          "id": "ordinary-2-b",
+          "name": "Second Sunday in Ordinary Time",
+          "date_pattern": "ordinary_2",
+          "readings": {
+            "first": "1 Samuel 3:3b-10, 19",
+            "psalm": "Psalm 40:2, 4, 7-8, 8-9, 10",
+            "second": "1 Corinthians 6:13c-15a, 17-20",
+            "gospel": "John 1:35-42"
+          }
+        },
+        {
+          "id": "ordinary-3-b",
+          "name": "Third Sunday in Ordinary Time",
+          "date_pattern": "ordinary_3",
+          "readings": {
+            "first": "Jonah 3:1-5, 10",
+            "psalm": "Psalm 25:4-5, 6-7, 8-9",
+            "second": "1 Corinthians 7:29-31",
+            "gospel": "Mark 1:14-20"
+          }
+        },
+        {
+          "id": "ordinary-4-b",
+          "name": "Fourth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_4",
+          "readings": {
+            "first": "Deuteronomy 18:15-20",
+            "psalm": "Psalm 95:1-2, 6-7, 7-9",
+            "second": "1 Corinthians 7:32-35",
+            "gospel": "Mark 1:21-28"
+          }
+        },
+        {
+          "id": "ordinary-5-b",
+          "name": "Fifth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_5",
+          "readings": {
+            "first": "Job 7:1-4, 6-7",
+            "psalm": "Psalm 147:1-2, 3-4, 5-6",
+            "second": "1 Corinthians 9:16-19, 22-23",
+            "gospel": "Mark 1:29-39"
+          }
+        },
+        {
+          "id": "ordinary-6-b",
+          "name": "Sixth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_6",
+          "readings": {
+            "first": "Leviticus 13:1-2, 44-46",
+            "psalm": "Psalm 32:1-2, 5, 11",
+            "second": "1 Corinthians 10:31—11:1",
+            "gospel": "Mark 1:40-45"
+          }
+        },
+        {
+          "id": "ordinary-7-b",
+          "name": "Seventh Sunday in Ordinary Time",
+          "date_pattern": "ordinary_7",
+          "readings": {
+            "first": "Isaiah 43:18-19, 21-22, 24b-25",
+            "psalm": "Psalm 41:2-3, 4-5, 13-14",
+            "second": "2 Corinthians 1:18-22",
+            "gospel": "Mark 2:1-12"
+          }
+        },
+        {
+          "id": "ordinary-8-b",
+          "name": "Eighth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_8",
+          "readings": {
+            "first": "Hosea 2:16b, 17b, 21-22",
+            "psalm": "Psalm 103:1-2, 3-4, 8, 10, 12-13",
+            "second": "2 Corinthians 3:1b-6",
+            "gospel": "Mark 2:18-22"
+          }
+        },
+        {
+          "id": "ordinary-9-b",
+          "name": "Ninth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_9",
+          "readings": {
+            "first": "Deuteronomy 5:12-15",
+            "psalm": "Psalm 81:3-4, 5-6, 6-8, 10-11",
+            "second": "2 Corinthians 4:6-11",
+            "gospel": "Mark 2:23—3:6"
+          }
+        },
+        {
+          "id": "ordinary-10-b",
+          "name": "Tenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_10",
+          "readings": {
+            "first": "Genesis 3:9-15",
+            "psalm": "Psalm 130:1-2, 3-4, 5-6, 7-8",
+            "second": "2 Corinthians 4:13—5:1",
+            "gospel": "Mark 3:20-35"
+          }
+        },
+        {
+          "id": "ordinary-11-b",
+          "name": "Eleventh Sunday in Ordinary Time",
+          "date_pattern": "ordinary_11",
+          "readings": {
+            "first": "Ezekiel 17:22-24",
+            "psalm": "Psalm 92:2-3, 13-14, 15-16",
+            "second": "2 Corinthians 5:6-10",
+            "gospel": "Mark 4:26-34"
+          }
+        },
+        {
+          "id": "ordinary-12-b",
+          "name": "Twelfth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_12",
+          "readings": {
+            "first": "Job 38:1, 8-11",
+            "psalm": "Psalm 107:23-24, 25-26, 28-29, 30-31",
+            "second": "2 Corinthians 5:14-17",
+            "gospel": "Mark 4:35-41"
+          }
+        },
+        {
+          "id": "ordinary-13-b",
+          "name": "Thirteenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_13",
+          "readings": {
+            "first": "Wisdom 1:13-15; 2:23-24",
+            "psalm": "Psalm 30:2, 4, 5-6, 11, 12, 13",
+            "second": "2 Corinthians 8:7, 9, 13-15",
+            "gospel": "Mark 5:21-43"
+          }
+        },
+        {
+          "id": "ordinary-14-b",
+          "name": "Fourteenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_14",
+          "readings": {
+            "first": "Ezekiel 2:2-5",
+            "psalm": "Psalm 123:1-2, 2, 3-4",
+            "second": "2 Corinthians 12:7-10",
+            "gospel": "Mark 6:1-6"
+          }
+        },
+        {
+          "id": "ordinary-15-b",
+          "name": "Fifteenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_15",
+          "readings": {
+            "first": "Amos 7:12-15",
+            "psalm": "Psalm 85:9-10, 11-12, 13-14",
+            "second": "Ephesians 1:3-14",
+            "gospel": "Mark 6:7-13"
+          }
+        },
+        {
+          "id": "ordinary-16-b",
+          "name": "Sixteenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_16",
+          "readings": {
+            "first": "Jeremiah 23:1-6",
+            "psalm": "Psalm 23:1-3, 3-4, 5, 6",
+            "second": "Ephesians 2:13-18",
+            "gospel": "Mark 6:30-34"
+          }
+        },
+        {
+          "id": "ordinary-17-b",
+          "name": "Seventeenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_17",
+          "readings": {
+            "first": "2 Kings 4:42-44",
+            "psalm": "Psalm 145:10-11, 15-16, 17-18",
+            "second": "Ephesians 4:1-6",
+            "gospel": "John 6:1-15"
+          }
+        },
+        {
+          "id": "ordinary-18-b",
+          "name": "Eighteenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_18",
+          "readings": {
+            "first": "Exodus 16:2-4, 12-15",
+            "psalm": "Psalm 78:3-4, 23-24, 25, 54",
+            "second": "Ephesians 4:17, 20-24",
+            "gospel": "John 6:24-35"
+          }
+        },
+        {
+          "id": "ordinary-19-b",
+          "name": "Nineteenth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_19",
+          "readings": {
+            "first": "1 Kings 19:4-8",
+            "psalm": "Psalm 34:2-3, 4-5, 6-7, 8-9",
+            "second": "Ephesians 4:30—5:2",
+            "gospel": "John 6:41-51"
+          }
+        },
+        {
+          "id": "ordinary-20-b",
+          "name": "Twentieth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_20",
+          "readings": {
+            "first": "Proverbs 9:1-6",
+            "psalm": "Psalm 34:2-3, 4-5, 6-7",
+            "second": "Ephesians 5:15-20",
+            "gospel": "John 6:51-58"
+          }
+        },
+        {
+          "id": "ordinary-21-b",
+          "name": "Twenty-First Sunday in Ordinary Time",
+          "date_pattern": "ordinary_21",
+          "readings": {
+            "first": "Joshua 24:1-2a, 15-17, 18b",
+            "psalm": "Psalm 34:2-3, 16-17, 18-19, 20-21",
+            "second": "Ephesians 5:21-32",
+            "gospel": "John 6:60-69"
+          }
+        },
+        {
+          "id": "ordinary-22-b",
+          "name": "Twenty-Second Sunday in Ordinary Time",
+          "date_pattern": "ordinary_22",
+          "readings": {
+            "first": "Deuteronomy 4:1-2, 6-8",
+            "psalm": "Psalm 15:2-3, 3-4, 4-5",
+            "second": "James 1:17-18, 21b-22, 27",
+            "gospel": "Mark 7:1-8, 14-15, 21-23"
+          }
+        },
+        {
+          "id": "ordinary-23-b",
+          "name": "Twenty-Third Sunday in Ordinary Time",
+          "date_pattern": "ordinary_23",
+          "readings": {
+            "first": "Isaiah 35:4-7a",
+            "psalm": "Psalm 146:7, 8-9, 9-10",
+            "second": "James 2:1-5",
+            "gospel": "Mark 7:31-37"
+          }
+        },
+        {
+          "id": "ordinary-24-b",
+          "name": "Twenty-Fourth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_24",
+          "readings": {
+            "first": "Isaiah 50:5-9a",
+            "psalm": "Psalm 116:1-2, 3-4, 5-6, 8-9",
+            "second": "James 2:14-18",
+            "gospel": "Mark 8:27-35"
+          }
+        },
+        {
+          "id": "ordinary-25-b",
+          "name": "Twenty-Fifth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_25",
+          "readings": {
+            "first": "Wisdom 2:12, 17-20",
+            "psalm": "Psalm 54:3-4, 5, 6-8",
+            "second": "James 3:16—4:3",
+            "gospel": "Mark 9:30-37"
+          }
+        },
+        {
+          "id": "ordinary-26-b",
+          "name": "Twenty-Sixth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_26",
+          "readings": {
+            "first": "Numbers 11:25-29",
+            "psalm": "Psalm 19:8, 10, 12-13, 14",
+            "second": "James 5:1-6",
+            "gospel": "Mark 9:38-43, 45, 47-48"
+          }
+        },
+        {
+          "id": "ordinary-27-b",
+          "name": "Twenty-Seventh Sunday in Ordinary Time",
+          "date_pattern": "ordinary_27",
+          "readings": {
+            "first": "Genesis 2:18-24",
+            "psalm": "Psalm 128:1-2, 3, 4-5, 6",
+            "second": "Hebrews 2:9-11",
+            "gospel": "Mark 10:2-16"
+          }
+        },
+        {
+          "id": "ordinary-28-b",
+          "name": "Twenty-Eighth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_28",
+          "readings": {
+            "first": "Wisdom 7:7-11",
+            "psalm": "Psalm 90:12-13, 14-15, 16-17",
+            "second": "Hebrews 4:12-13",
+            "gospel": "Mark 10:17-30"
+          }
+        },
+        {
+          "id": "ordinary-29-b",
+          "name": "Twenty-Ninth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_29",
+          "readings": {
+            "first": "Isaiah 53:10-11",
+            "psalm": "Psalm 33:4-5, 18-19, 20, 22",
+            "second": "Hebrews 4:14-16",
+            "gospel": "Mark 10:35-45"
+          }
+        },
+        {
+          "id": "ordinary-30-b",
+          "name": "Thirtieth Sunday in Ordinary Time",
+          "date_pattern": "ordinary_30",
+          "readings": {
+            "first": "Jeremiah 31:7-9",
+            "psalm": "Psalm 126:1-2, 2-3, 4-5, 6",
+            "second": "Hebrews 5:1-6",
+            "gospel": "Mark 10:46-52"
+          }
+        },
+        {
+          "id": "ordinary-31-b",
+          "name": "Thirty-First Sunday in Ordinary Time",
+          "date_pattern": "ordinary_31",
+          "readings": {
+            "first": "Deuteronomy 6:2-6",
+            "psalm": "Psalm 18:2-3, 3-4, 47, 51",
+            "second": "Hebrews 7:23-28",
+            "gospel": "Mark 12:28b-34"
+          }
+        },
+        {
+          "id": "ordinary-32-b",
+          "name": "Thirty-Second Sunday in Ordinary Time",
+          "date_pattern": "ordinary_32",
+          "readings": {
+            "first": "1 Kings 17:10-16",
+            "psalm": "Psalm 146:7, 8-9, 9-10",
+            "second": "Hebrews 9:24-28",
+            "gospel": "Mark 12:38-44"
+          }
+        },
+        {
+          "id": "ordinary-33-b",
+          "name": "Thirty-Third Sunday in Ordinary Time",
+          "date_pattern": "ordinary_33",
+          "readings": {
+            "first": "Daniel 12:1-3",
+            "psalm": "Psalm 16:5, 8, 9-10, 11",
+            "second": "Hebrews 10:11-14, 18",
+            "gospel": "Mark 13:24-32"
+          }
+        },
+        {
+          "id": "christ-king-b",
+          "name": "Our Lord Jesus Christ, King of the Universe",
+          "date_pattern": "christ_king",
+          "readings": {
+            "first": "Daniel 7:13-14",
+            "psalm": "Psalm 93:1, 1-2, 5",
+            "second": "Revelation 1:5-8",
+            "gospel": "John 18:33b-37"
+          }
+        }
+      ]
+    },
+    "solemnities": {
+      "name": "Solemnities and Feasts",
+      "feast_days": [
+        {
+          "id": "presentation-lord-b",
+          "name": "The Presentation of the Lord",
+          "date_pattern": "february_2",
+          "readings": {
+            "first": "Malachi 3:1-4",
+            "psalm": "Psalm 24:7, 8, 9, 10",
+            "second": "Hebrews 2:14-18",
+            "gospel": "Luke 2:22-40"
+          }
+        },
+        {
+          "id": "annunciation-b",
+          "name": "The Annunciation of the Lord",
+          "date_pattern": "march_25",
+          "readings": {
+            "first": "Isaiah 7:10-14; 8:10",
+            "psalm": "Psalm 40:7-8a, 8b-9, 10, 11",
+            "second": "Hebrews 10:4-10",
+            "gospel": "Luke 1:26-38"
+          }
+        },
+        {
+          "id": "sacred-heart-b",
+          "name": "The Most Sacred Heart of Jesus",
+          "date_pattern": "sacred_heart",
+          "readings": {
+            "first": "Hosea 11:1, 3-4, 8c-9",
+            "psalm": "Isaiah 12:2-3, 4, 5-6",
+            "second": "Ephesians 3:8-12, 14-19",
+            "gospel": "John 19:31-37"
+          }
+        },
+        {
+          "id": "assumption-vigil-b",
+          "name": "The Assumption of the Blessed Virgin Mary - Vigil",
+          "date_pattern": "august_14",
+          "readings": {
+            "first": "1 Chronicles 15:3-4, 15-16; 16:1-2",
+            "psalm": "Psalm 132:6-7, 9-10, 13-14",
+            "second": "1 Corinthians 15:54b-57",
+            "gospel": "Luke 11:27-28"
+          }
+        },
+        {
+          "id": "assumption-b",
+          "name": "The Assumption of the Blessed Virgin Mary",
+          "date_pattern": "august_15",
+          "readings": {
+            "first": "Revelation 11:19a; 12:1-6a, 10ab",
+            "psalm": "Psalm 45:10, 11, 12, 16",
+            "second": "1 Corinthians 15:20-27",
+            "gospel": "Luke 1:39-56"
+          }
+        },
+        {
+          "id": "all-saints-b",
+          "name": "All Saints",
+          "date_pattern": "november_1",
+          "readings": {
+            "first": "Revelation 7:2-4, 9-14",
+            "psalm": "Psalm 24:1bc-2, 3-4ab, 5-6",
+            "second": "1 John 3:1-3",
+            "gospel": "Matthew 5:1-12a"
+          }
+        },
+        {
+          "id": "all-souls-b",
+          "name": "The Commemoration of All the Faithful Departed",
+          "date_pattern": "november_2",
+          "readings": {
+            "first": "Wisdom 3:1-9",
+            "psalm": "Psalm 23:1-3a, 3b-4, 5, 6",
+            "second": "Romans 5:5-11",
+            "gospel": "John 6:37-40"
+          }
+        },
+        {
+          "id": "immaculate-conception-b",
+          "name": "The Immaculate Conception of the Blessed Virgin Mary",
+          "date_pattern": "december_8",
+          "readings": {
+            "first": "Genesis 3:9-15, 20",
+            "psalm": "Psalm 98:1, 2-3ab, 3cd-4",
+            "second": "Ephesians 1:3-6, 11-12",
+            "gospel": "Luke 1:26-38"
+          }
+        }
+      ]
+    }
+  }
+}

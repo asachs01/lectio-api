@@ -233,11 +233,19 @@ router.get('/today', (0, error_handler_1.asyncHandler)((req, res) => getControll
 router.get('/range', (0, error_handler_1.asyncHandler)((req, res) => getController().getByDateRange(req, res)));
 /**
  * @swagger
- * /api/v1/readings/daily-office:
+ * /api/v1/readings/bcp-daily-office:
  *   get:
- *     operationId: getDailyOfficeReadings
- *     summary: Get daily office readings
- *     description: Retrieves morning and evening prayer readings for a specific date from the Daily Office Lectionary
+ *     operationId: getBcpDailyOfficeReadings
+ *     summary: Get BCP Daily Office readings
+ *     description: |
+ *       Retrieves morning and evening prayer readings for a specific date from the
+ *       Book of Common Prayer (BCP) Daily Office Lectionary.
+ *
+ *       This is a two-year cycle of readings used by Episcopal/Anglican churches
+ *       for weekday Morning and Evening Prayer services.
+ *
+ *       **Note:** This is the traditional Episcopal/Anglican weekday lectionary,
+ *       NOT the RCL (Revised Common Lectionary) which only has Sunday readings.
  *     tags: [Readings]
  *     parameters:
  *       - in: query
@@ -249,14 +257,39 @@ router.get('/range', (0, error_handler_1.asyncHandler)((req, res) => getControll
  *           format: date
  *     responses:
  *       200:
- *         description: Daily office readings for the specified date
+ *         description: BCP Daily Office readings for the specified date
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
  *                 data:
- *                   $ref: '#/components/schemas/DailyReading'
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "bcp-daily-2025-12-08"
+ *                     date:
+ *                       type: string
+ *                       format: date
+ *                     traditionId:
+ *                       type: string
+ *                       example: "bcp-daily-office"
+ *                     readings:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           type:
+ *                             type: string
+ *                           citation:
+ *                             type: string
+ *                           office:
+ *                             type: string
+ *                             enum: [morning, evening]
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       400:
  *         description: Invalid date format
  *         content:
@@ -264,7 +297,7 @@ router.get('/range', (0, error_handler_1.asyncHandler)((req, res) => getControll
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       404:
- *         description: No daily office readings found for the specified date
+ *         description: No BCP Daily Office readings found for the specified date
  *         content:
  *           application/json:
  *             schema:
@@ -275,6 +308,45 @@ router.get('/range', (0, error_handler_1.asyncHandler)((req, res) => getControll
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ */
+router.get('/bcp-daily-office', (0, error_handler_1.asyncHandler)((req, res) => getController().getDailyOffice(req, res)));
+/**
+ * @swagger
+ * /api/v1/readings/daily-office:
+ *   get:
+ *     operationId: getDailyOfficeReadings
+ *     summary: Get daily office readings (deprecated alias)
+ *     description: |
+ *       **Deprecated:** Use `/api/v1/readings/bcp-daily-office` instead.
+ *
+ *       This endpoint is an alias for backwards compatibility and returns the same
+ *       BCP Daily Office readings.
+ *     tags: [Readings]
+ *     deprecated: true
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         description: Date in YYYY-MM-DD format
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: BCP Daily Office readings for the specified date
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/DailyReading'
+ *       400:
+ *         description: Invalid date format
+ *       404:
+ *         description: No readings found
+ *       500:
+ *         description: Internal server error
  */
 router.get('/daily-office', (0, error_handler_1.asyncHandler)((req, res) => getController().getDailyOffice(req, res)));
 //# sourceMappingURL=readings.routes.js.map
