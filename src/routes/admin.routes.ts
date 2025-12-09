@@ -56,12 +56,19 @@ router.post('/seed-database', async (req: Request, res: Response): Promise<Respo
       execSync('node dist/scripts/import-rcl-with-dates.js', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
       results.push('RCL data imported');
     }
-    
+
     // Import Daily Lectionary data if requested
     if (type === 'all' || type === 'daily') {
       console.log('Importing Daily Lectionary data...');
       execSync('node dist/scripts/import-daily-lectionary.js', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
       results.push('Daily Lectionary data imported');
+    }
+
+    // Import Catholic Lectionary data if requested
+    if (type === 'all' || type === 'catholic') {
+      console.log('Importing Catholic Lectionary data...');
+      execSync('node dist/scripts/import-catholic-lectionary.js', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+      results.push('Catholic Lectionary data imported');
     }
     
     return res.json({ 
