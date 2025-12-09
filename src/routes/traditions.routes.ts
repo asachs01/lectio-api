@@ -30,6 +30,7 @@ function getController(): TraditionsController {
  *       | `rcl` | Revised Common Lectionary | Three-year Sunday lectionary used by most Protestant denominations |
  *       | `bcp` | BCP Daily Office Lectionary | Two-year weekday lectionary from the Book of Common Prayer |
  *       | `episcopal` | Episcopal Church Lectionary | Composite tradition: RCL for Sundays, BCP Daily Office for weekdays |
+ *       | `rc` | Roman Catholic Lectionary | Three-year Sunday lectionary based on the Order of Readings for Mass |
  *
  *       **Note:** The `episcopal` tradition is a virtual/composite tradition that combines
  *       RCL readings for Sunday worship with BCP Daily Office readings for weekday
@@ -72,6 +73,7 @@ router.get('/', asyncHandler((req, res) => getController().getAll(req, res)));
  *       - `rcl` or `RCL` - Revised Common Lectionary
  *       - `bcp` or `BCP` - BCP Daily Office Lectionary
  *       - `episcopal` or `ECUSA` - Episcopal Church Lectionary (composite)
+ *       - `rc` or `RC` - Roman Catholic Lectionary
  *
  *       IDs are case-insensitive.
  *     tags: [Traditions]
