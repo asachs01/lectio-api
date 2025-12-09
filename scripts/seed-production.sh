@@ -39,4 +39,14 @@ else
   echo "Warning: RCL Proper fix script not found, skipping..."
 fi
 
+# Import Catholic Lectionary data
+echo "Importing Catholic Lectionary data..."
+if [ -f "dist/scripts/import-catholic-lectionary.js" ]; then
+  node dist/scripts/import-catholic-lectionary.js || {
+    echo "Catholic import might have already been applied or failed"
+  }
+else
+  echo "Warning: Catholic import script not found, skipping..."
+fi
+
 echo "Production database seed completed!"
