@@ -176,6 +176,9 @@ describe('ReadingsController', () => {
 
     it('should return today\'s readings successfully', async () => {
       const mockDate = new Date('2023-12-15T10:00:00.000Z');
+      const expectedDateStr = mockDate.toISOString().split('T')[0];
+      const expectedDayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(expectedDateStr).getDay()];
+
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
           if (args.length === 0) return mockDate;
@@ -183,15 +186,23 @@ describe('ReadingsController', () => {
         }) as any);
 
       mockReadingsService.getByDate.mockResolvedValue(mockReading);
+      mockReadingsService.getDailyOfficeReadings.mockResolvedValue(null);
 
       await controller.getToday(mockRequest as Request, mockResponse as Response);
 
-      expect(mockReadingsService.getByDate).toHaveBeenCalledWith('2023-12-15', 'rcl');
-      expect(mockJson).toHaveBeenCalledWith({
-        data: mockReading,
-        date: '2023-12-15',
+      expect(mockReadingsService.getByDate).toHaveBeenCalledWith(expectedDateStr, 'rcl');
+      expect(mockJson).toHaveBeenCalledWith(expect.objectContaining({
+        date: expectedDateStr,
+        dayOfWeek: expectedDayOfWeek,
+        tradition: 'rcl',
         timestamp: expect.any(String),
-      });
+        lectionary: expect.objectContaining({
+          type: expect.any(String), // Can be 'sunday' or 'special' depending on timezone
+          readings: mockReading.readings,
+          seasonId: mockReading.seasonId,
+        }),
+        data: mockReading,
+      }));
     });
 
     it('should use specified tradition for today\'s readings', async () => {
@@ -204,6 +215,7 @@ describe('ReadingsController', () => {
         }) as any);
 
       mockReadingsService.getByDate.mockResolvedValue(mockReading);
+      mockReadingsService.getDailyOfficeReadings.mockResolvedValue(null);
 
       await controller.getToday(mockRequest as Request, mockResponse as Response);
 
@@ -219,13 +231,14 @@ describe('ReadingsController', () => {
         }) as any);
 
       mockReadingsService.getByDate.mockResolvedValue(null);
+      mockReadingsService.getDailyOfficeReadings.mockResolvedValue(null);
 
       await expect(controller.getToday(mockRequest as Request, mockResponse as Response))
         .rejects.toThrow(HttpError);
 
       const thrownError = await controller.getToday(mockRequest as Request, mockResponse as Response)
         .catch(err => err);
-      
+
       expect(thrownError.statusCode).toBe(404);
       expect(thrownError.message).toContain('No readings found for today');
     });
@@ -239,9 +252,73 @@ describe('ReadingsController', () => {
 
       const thrownError = await controller.getToday(mockRequest as Request, mockResponse as Response)
         .catch(err => err);
-      
+
       expect(thrownError.statusCode).toBe(500);
       expect(thrownError.message).toBe('Failed to fetch today\'s readings');
+    });
+
+    it('should return Sunday readings with type sunday on Sundays', async () => {
+      // Use a mid-day Sunday time that will be Sunday in most timezones
+      const mockDate = new Date('2023-12-17T12:00:00.000Z');
+      const expectedDateStr = mockDate.toISOString().split('T')[0];
+      const dayNum = new Date(expectedDateStr).getDay();
+
+      jest.spyOn(global, 'Date')
+        .mockImplementation(((...args: any[]) => {
+          if (args.length === 0) return mockDate;
+          return new (originalDate as any)(...args);
+        }) as any);
+
+      mockReadingsService.getByDate.mockResolvedValue(mockReading);
+      mockReadingsService.getDailyOfficeReadings.mockResolvedValue(null);
+
+      await controller.getToday(mockRequest as Request, mockResponse as Response);
+
+      // The type will be 'sunday' if dayNum is 0, otherwise 'special'
+      const expectedType = dayNum === 0 ? 'sunday' : 'special';
+      const expectedDayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayNum];
+
+      expect(mockJson).toHaveBeenCalledWith(expect.objectContaining({
+        dayOfWeek: expectedDayName,
+        lectionary: expect.objectContaining({
+          type: expectedType,
+        }),
+      }));
+    });
+
+    it('should include daily office readings when available', async () => {
+      const mockDate = new Date('2023-12-15T10:00:00.000Z');
+      jest.spyOn(global, 'Date')
+        .mockImplementation(((...args: any[]) => {
+          if (args.length === 0) return mockDate;
+          return new (originalDate as any)(...args);
+        }) as any);
+
+      const mockDailyOffice = {
+        id: 'bcp-daily-2023-12-15',
+        date: '2023-12-15',
+        traditionId: 'bcp-daily-office',
+        seasonId: null,
+        readings: [
+          { type: ReadingType.FIRST, citation: 'Isaiah 1:1-20', text: 'Morning reading', office: 'morning' },
+          { type: ReadingType.SECOND, citation: 'Luke 1:1-25', text: 'Evening reading', office: 'evening' },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as unknown as DailyReading;
+
+      mockReadingsService.getByDate.mockResolvedValue(null);
+      mockReadingsService.getDailyOfficeReadings.mockResolvedValue(mockDailyOffice);
+
+      await controller.getToday(mockRequest as Request, mockResponse as Response);
+
+      expect(mockJson).toHaveBeenCalledWith(expect.objectContaining({
+        dailyOffice: expect.objectContaining({
+          morning: expect.any(Array),
+          evening: expect.any(Array),
+        }),
+        data: mockDailyOffice,
+      }));
     });
   });
 
