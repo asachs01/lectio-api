@@ -2,863 +2,879 @@
   "year": "C",
   "description": "Roman Catholic Lectionary Year C - Gospel of Luke Focus",
   "tradition": "RC",
-  "translation": "NAB",
   "seasons": {
     "advent": {
+      "name": "Advent",
       "sundays": [
         {
+          "id": "advent-1-c",
           "name": "First Sunday of Advent",
-          "datePattern": "advent_1",
+          "date_pattern": "advent_1",
           "readings": {
-            "first": { "book": "Jeremiah", "chapter": 33, "startVerse": 14, "endVerse": 16 },
-            "psalm": { "book": "Psalms", "chapter": 25, "startVerse": 4, "endVerse": 14 },
-            "second": { "book": "1 Thessalonians", "chapter": 3, "startVerse": 12, "endVerse": 13, "endChapter": 4, "endVerseAlt": 2 },
-            "gospel": { "book": "Luke", "chapter": 21, "startVerse": 25, "endVerse": 36 }
+            "first": "Jeremiah 33:14-16",
+            "psalm": "Psalm 25:4-5, 8-9, 10, 14",
+            "second": "1 Thessalonians 3:12—4:2",
+            "gospel": "Luke 21:25-28, 34-36"
           }
         },
         {
+          "id": "advent-2-c",
           "name": "Second Sunday of Advent",
-          "datePattern": "advent_2",
+          "date_pattern": "advent_2",
           "readings": {
-            "first": { "book": "Baruch", "chapter": 5, "startVerse": 1, "endVerse": 9 },
-            "psalm": { "book": "Psalms", "chapter": 126, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "Philippians", "chapter": 1, "startVerse": 4, "endVerse": 11 },
-            "gospel": { "book": "Luke", "chapter": 3, "startVerse": 1, "endVerse": 6 }
+            "first": "Baruch 5:1-9",
+            "psalm": "Psalm 126:1-2, 2-3, 4-5, 6",
+            "second": "Philippians 1:4-6, 8-11",
+            "gospel": "Luke 3:1-6"
           }
         },
         {
+          "id": "advent-3-c",
           "name": "Third Sunday of Advent",
-          "datePattern": "advent_3",
+          "date_pattern": "advent_3",
           "readings": {
-            "first": { "book": "Zephaniah", "chapter": 3, "startVerse": 14, "endVerse": 18 },
-            "psalm": { "book": "Isaiah", "chapter": 12, "startVerse": 2, "endVerse": 6 },
-            "second": { "book": "Philippians", "chapter": 4, "startVerse": 4, "endVerse": 7 },
-            "gospel": { "book": "Luke", "chapter": 3, "startVerse": 10, "endVerse": 18 }
+            "first": "Zephaniah 3:14-18a",
+            "psalm": "Isaiah 12:2-3, 4, 5-6",
+            "second": "Philippians 4:4-7",
+            "gospel": "Luke 3:10-18"
           }
         },
         {
+          "id": "advent-4-c",
           "name": "Fourth Sunday of Advent",
-          "datePattern": "advent_4",
+          "date_pattern": "advent_4",
           "readings": {
-            "first": { "book": "Micah", "chapter": 5, "startVerse": 1, "endVerse": 4 },
-            "psalm": { "book": "Psalms", "chapter": 80, "startVerse": 2, "endVerse": 19 },
-            "second": { "book": "Hebrews", "chapter": 10, "startVerse": 5, "endVerse": 10 },
-            "gospel": { "book": "Luke", "chapter": 1, "startVerse": 39, "endVerse": 45 }
+            "first": "Micah 5:1-4a",
+            "psalm": "Psalm 80:2-3, 15-16, 18-19",
+            "second": "Hebrews 10:5-10",
+            "gospel": "Luke 1:39-45"
           }
         }
       ]
     },
     "christmas": {
+      "name": "Christmas",
       "feast_days": [
         {
-          "name": "Nativity of the Lord - Vigil Mass",
-          "datePattern": "december_24_vigil",
+          "id": "christmas-vigil-c",
+          "name": "Christmas Vigil Mass",
+          "date_pattern": "december_24",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 62, "startVerse": 1, "endVerse": 5 },
-            "psalm": { "book": "Psalms", "chapter": 89, "startVerse": 4, "endVerse": 29 },
-            "second": { "book": "Acts", "chapter": 13, "startVerse": 16, "endVerse": 26 },
-            "gospel": { "book": "Matthew", "chapter": 1, "startVerse": 1, "endVerse": 25 }
+            "first": "Isaiah 62:1-5",
+            "psalm": "Psalm 89:4-5, 16-17, 27, 29",
+            "second": "Acts 13:16-17, 22-25",
+            "gospel": "Matthew 1:1-25"
           }
         },
         {
-          "name": "Nativity of the Lord - Mass at Midnight",
-          "datePattern": "december_25_midnight",
+          "id": "christmas-midnight-c",
+          "name": "Christmas Mass at Midnight",
+          "date_pattern": "december_25",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 9, "startVerse": 1, "endVerse": 6 },
-            "psalm": { "book": "Psalms", "chapter": 96, "startVerse": 1, "endVerse": 13 },
-            "second": { "book": "Titus", "chapter": 2, "startVerse": 11, "endVerse": 14 },
-            "gospel": { "book": "Luke", "chapter": 2, "startVerse": 1, "endVerse": 14 }
+            "first": "Isaiah 9:1-6",
+            "psalm": "Psalm 96:1-2, 2-3, 11-12, 13",
+            "second": "Titus 2:11-14",
+            "gospel": "Luke 2:1-14"
           }
         },
         {
-          "name": "Nativity of the Lord - Mass at Dawn",
-          "datePattern": "december_25_dawn",
+          "id": "christmas-dawn-c",
+          "name": "Christmas Mass at Dawn",
+          "date_pattern": "december_25",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 62, "startVerse": 11, "endVerse": 12 },
-            "psalm": { "book": "Psalms", "chapter": 97, "startVerse": 1, "endVerse": 12 },
-            "second": { "book": "Titus", "chapter": 3, "startVerse": 4, "endVerse": 7 },
-            "gospel": { "book": "Luke", "chapter": 2, "startVerse": 15, "endVerse": 20 }
+            "first": "Isaiah 62:11-12",
+            "psalm": "Psalm 97:1, 6, 11-12",
+            "second": "Titus 3:4-7",
+            "gospel": "Luke 2:15-20"
           }
         },
         {
-          "name": "Nativity of the Lord - Mass During the Day",
-          "datePattern": "december_25_day",
+          "id": "christmas-day-c",
+          "name": "Christmas Mass During the Day",
+          "date_pattern": "december_25",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 52, "startVerse": 7, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 98, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "Hebrews", "chapter": 1, "startVerse": 1, "endVerse": 6 },
-            "gospel": { "book": "John", "chapter": 1, "startVerse": 1, "endVerse": 18 }
+            "first": "Isaiah 52:7-10",
+            "psalm": "Psalm 98:1, 2-3, 3-4, 5-6",
+            "second": "Hebrews 1:1-6",
+            "gospel": "John 1:1-18"
           }
         },
         {
-          "name": "Holy Family of Jesus, Mary and Joseph",
-          "datePattern": "holy_family",
+          "id": "holy-family-c",
+          "name": "The Holy Family of Jesus, Mary and Joseph",
+          "date_pattern": "christmas_1",
           "readings": {
-            "first": { "book": "1 Samuel", "chapter": 1, "startVerse": 20, "endVerse": 28 },
-            "psalm": { "book": "Psalms", "chapter": 84, "startVerse": 2, "endVerse": 10 },
-            "second": { "book": "1 John", "chapter": 3, "startVerse": 1, "endVerse": 24 },
-            "gospel": { "book": "Luke", "chapter": 2, "startVerse": 41, "endVerse": 52 }
+            "first": "1 Samuel 1:20-22, 24-28",
+            "psalm": "Psalm 84:2-3, 5-6, 9-10",
+            "second": "1 John 3:1-2, 21-24",
+            "gospel": "Luke 2:41-52"
           }
         },
         {
+          "id": "mary-mother-god-c",
           "name": "Solemnity of Mary, the Holy Mother of God",
-          "datePattern": "january_1",
+          "date_pattern": "january_1",
           "readings": {
-            "first": { "book": "Numbers", "chapter": 6, "startVerse": 22, "endVerse": 27 },
-            "psalm": { "book": "Psalms", "chapter": 67, "startVerse": 2, "endVerse": 8 },
-            "second": { "book": "Galatians", "chapter": 4, "startVerse": 4, "endVerse": 7 },
-            "gospel": { "book": "Luke", "chapter": 2, "startVerse": 16, "endVerse": 21 }
+            "first": "Numbers 6:22-27",
+            "psalm": "Psalm 67:2-3, 5, 6, 8",
+            "second": "Galatians 4:4-7",
+            "gospel": "Luke 2:16-21"
           }
-        },
+        }
+      ]
+    },
+    "epiphany": {
+      "name": "Epiphany",
+      "feast_days": [
         {
-          "name": "Second Sunday after the Nativity",
-          "datePattern": "christmas_2",
-          "readings": {
-            "first": { "book": "Sirach", "chapter": 24, "startVerse": 1, "endVerse": 12 },
-            "psalm": { "book": "Psalms", "chapter": 147, "startVerse": 12, "endVerse": 20 },
-            "second": { "book": "Ephesians", "chapter": 1, "startVerse": 3, "endVerse": 18 },
-            "gospel": { "book": "John", "chapter": 1, "startVerse": 1, "endVerse": 18 }
-          }
-        },
-        {
+          "id": "epiphany-c",
           "name": "The Epiphany of the Lord",
-          "datePattern": "epiphany",
+          "date_pattern": "january_6",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 60, "startVerse": 1, "endVerse": 6 },
-            "psalm": { "book": "Psalms", "chapter": 72, "startVerse": 1, "endVerse": 13 },
-            "second": { "book": "Ephesians", "chapter": 3, "startVerse": 2, "endVerse": 6 },
-            "gospel": { "book": "Matthew", "chapter": 2, "startVerse": 1, "endVerse": 12 }
+            "first": "Isaiah 60:1-6",
+            "psalm": "Psalm 72:1-2, 7-8, 10-11, 12-13",
+            "second": "Ephesians 3:2-3a, 5-6",
+            "gospel": "Matthew 2:1-12"
           }
-        },
+        }
+      ],
+      "sundays": [
         {
+          "id": "baptism-lord-c",
           "name": "The Baptism of the Lord",
-          "datePattern": "baptism_of_lord",
+          "date_pattern": "baptism_lord",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 40, "startVerse": 1, "endVerse": 11 },
-            "psalm": { "book": "Psalms", "chapter": 104, "startVerse": 1, "endVerse": 30 },
-            "second": { "book": "Titus", "chapter": 2, "startVerse": 11, "endVerse": 14, "endChapter": 3, "endVerseAlt": 7 },
-            "gospel": { "book": "Luke", "chapter": 3, "startVerse": 15, "endVerse": 22 }
+            "first": "Isaiah 40:1-5, 9-11",
+            "psalm": "Psalm 104:1b-2, 3-4, 24-25, 27-28, 29-30",
+            "second": "Titus 2:11-14; 3:4-7",
+            "gospel": "Luke 3:15-16, 21-22"
           }
         }
       ]
     },
     "lent": {
-      "sundays": [
+      "name": "Lent",
+      "feast_days": [
         {
-          "name": "First Sunday of Lent",
-          "datePattern": "lent_1",
+          "id": "ash-wednesday-c",
+          "name": "Ash Wednesday",
+          "date_pattern": "ash_wednesday",
           "readings": {
-            "first": { "book": "Deuteronomy", "chapter": 26, "startVerse": 4, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 91, "startVerse": 1, "endVerse": 16 },
-            "second": { "book": "Romans", "chapter": 10, "startVerse": 8, "endVerse": 13 },
-            "gospel": { "book": "Luke", "chapter": 4, "startVerse": 1, "endVerse": 13 }
-          }
-        },
-        {
-          "name": "Second Sunday of Lent",
-          "datePattern": "lent_2",
-          "readings": {
-            "first": { "book": "Genesis", "chapter": 15, "startVerse": 5, "endVerse": 18 },
-            "psalm": { "book": "Psalms", "chapter": 27, "startVerse": 1, "endVerse": 14 },
-            "second": { "book": "Philippians", "chapter": 3, "startVerse": 17, "endVerse": 21, "endChapter": 4, "endVerseAlt": 1 },
-            "gospel": { "book": "Luke", "chapter": 9, "startVerse": 28, "endVerse": 36 }
-          }
-        },
-        {
-          "name": "Third Sunday of Lent",
-          "datePattern": "lent_3",
-          "readings": {
-            "first": { "book": "Exodus", "chapter": 3, "startVerse": 1, "endVerse": 15 },
-            "psalm": { "book": "Psalms", "chapter": 103, "startVerse": 1, "endVerse": 11 },
-            "second": { "book": "1 Corinthians", "chapter": 10, "startVerse": 1, "endVerse": 12 },
-            "gospel": { "book": "Luke", "chapter": 13, "startVerse": 1, "endVerse": 9 }
-          }
-        },
-        {
-          "name": "Fourth Sunday of Lent",
-          "datePattern": "lent_4",
-          "readings": {
-            "first": { "book": "Joshua", "chapter": 5, "startVerse": 9, "endVerse": 12 },
-            "psalm": { "book": "Psalms", "chapter": 34, "startVerse": 2, "endVerse": 9 },
-            "second": { "book": "2 Corinthians", "chapter": 5, "startVerse": 17, "endVerse": 21 },
-            "gospel": { "book": "Luke", "chapter": 15, "startVerse": 1, "endVerse": 32 }
-          }
-        },
-        {
-          "name": "Fifth Sunday of Lent",
-          "datePattern": "lent_5",
-          "readings": {
-            "first": { "book": "Isaiah", "chapter": 43, "startVerse": 16, "endVerse": 21 },
-            "psalm": { "book": "Psalms", "chapter": 126, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "Philippians", "chapter": 3, "startVerse": 8, "endVerse": 14 },
-            "gospel": { "book": "John", "chapter": 8, "startVerse": 1, "endVerse": 11 }
+            "first": "Joel 2:12-18",
+            "psalm": "Psalm 51:3-4, 5-6ab, 12-13, 14, 17",
+            "second": "2 Corinthians 5:20—6:2",
+            "gospel": "Matthew 6:1-6, 16-18"
           }
         }
       ],
-      "feast_days": [
+      "sundays": [
         {
-          "name": "Ash Wednesday",
-          "datePattern": "ash_wednesday",
+          "id": "lent-1-c",
+          "name": "First Sunday of Lent",
+          "date_pattern": "lent_1",
           "readings": {
-            "first": { "book": "Joel", "chapter": 2, "startVerse": 12, "endVerse": 18 },
-            "psalm": { "book": "Psalms", "chapter": 51, "startVerse": 3, "endVerse": 17 },
-            "second": { "book": "2 Corinthians", "chapter": 5, "startVerse": 20, "endVerse": 21, "endChapter": 6, "endVerseAlt": 2 },
-            "gospel": { "book": "Matthew", "chapter": 6, "startVerse": 1, "endVerse": 18 }
+            "first": "Deuteronomy 26:4-10",
+            "psalm": "Psalm 91:1-2, 10-11, 12-13, 14-15",
+            "second": "Romans 10:8-13",
+            "gospel": "Luke 4:1-13"
           }
         },
         {
-          "name": "Palm Sunday of the Passion of the Lord",
-          "datePattern": "palm_sunday",
+          "id": "lent-2-c",
+          "name": "Second Sunday of Lent",
+          "date_pattern": "lent_2",
           "readings": {
-            "procession": { "book": "Luke", "chapter": 19, "startVerse": 28, "endVerse": 40 },
-            "first": { "book": "Isaiah", "chapter": 50, "startVerse": 4, "endVerse": 7 },
-            "psalm": { "book": "Psalms", "chapter": 22, "startVerse": 8, "endVerse": 24 },
-            "second": { "book": "Philippians", "chapter": 2, "startVerse": 6, "endVerse": 11 },
-            "gospel": { "book": "Luke", "chapter": 22, "startVerse": 14, "endVerse": 71, "endChapter": 23, "endVerseAlt": 56 }
+            "first": "Genesis 15:5-12, 17-18",
+            "psalm": "Psalm 27:1, 7-8, 8-9, 13-14",
+            "second": "Philippians 3:17—4:1",
+            "gospel": "Luke 9:28b-36"
+          }
+        },
+        {
+          "id": "lent-3-c",
+          "name": "Third Sunday of Lent",
+          "date_pattern": "lent_3",
+          "readings": {
+            "first": "Exodus 3:1-8a, 13-15",
+            "psalm": "Psalm 103:1-2, 3-4, 6-7, 8, 11",
+            "second": "1 Corinthians 10:1-6, 10-12",
+            "gospel": "Luke 13:1-9"
+          }
+        },
+        {
+          "id": "lent-4-c",
+          "name": "Fourth Sunday of Lent",
+          "date_pattern": "lent_4",
+          "readings": {
+            "first": "Joshua 5:9a, 10-12",
+            "psalm": "Psalm 34:2-3, 4-5, 6-7",
+            "second": "2 Corinthians 5:17-21",
+            "gospel": "Luke 15:1-3, 11-32"
+          }
+        },
+        {
+          "id": "lent-5-c",
+          "name": "Fifth Sunday of Lent",
+          "date_pattern": "lent_5",
+          "readings": {
+            "first": "Isaiah 43:16-21",
+            "psalm": "Psalm 126:1-2, 2-3, 4-5, 6",
+            "second": "Philippians 3:8-14",
+            "gospel": "John 8:1-11"
           }
         }
       ]
     },
     "holy_week": {
+      "name": "Holy Week",
       "feast_days": [
         {
+          "id": "palm-sunday-c",
+          "name": "Palm Sunday of the Passion of the Lord",
+          "date_pattern": "palm_sunday",
+          "readings": {
+            "first": "Isaiah 50:4-7",
+            "psalm": "Psalm 22:8-9, 17-18, 19-20, 23-24",
+            "second": "Philippians 2:6-11",
+            "gospel": "Luke 22:14—23:56"
+          }
+        },
+        {
+          "id": "holy-thursday-c",
           "name": "Holy Thursday - Mass of the Lord's Supper",
-          "datePattern": "holy_thursday",
+          "date_pattern": "holy_thursday",
           "readings": {
-            "first": { "book": "Exodus", "chapter": 12, "startVerse": 1, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 116, "startVerse": 12, "endVerse": 18 },
-            "second": { "book": "1 Corinthians", "chapter": 11, "startVerse": 23, "endVerse": 26 },
-            "gospel": { "book": "John", "chapter": 13, "startVerse": 1, "endVerse": 15 }
+            "first": "Exodus 12:1-8, 11-14",
+            "psalm": "Psalm 116:12-13, 15-16bc, 17-18",
+            "second": "1 Corinthians 11:23-26",
+            "gospel": "John 13:1-15"
           }
         },
         {
+          "id": "good-friday-c",
           "name": "Good Friday of the Passion of the Lord",
-          "datePattern": "good_friday",
+          "date_pattern": "good_friday",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 52, "startVerse": 13, "endVerse": 15, "endChapter": 53, "endVerseAlt": 12 },
-            "psalm": { "book": "Psalms", "chapter": 31, "startVerse": 2, "endVerse": 25 },
-            "second": { "book": "Hebrews", "chapter": 4, "startVerse": 14, "endVerse": 16, "endChapter": 5, "endVerseAlt": 9 },
-            "gospel": { "book": "John", "chapter": 18, "startVerse": 1, "endVerse": 42, "endChapter": 19, "endVerseAlt": 42 }
-          }
-        },
-        {
-          "name": "Easter Vigil in the Holy Night",
-          "datePattern": "easter_vigil",
-          "readings": {
-            "first": { "book": "Genesis", "chapter": 1, "startVerse": 1, "endVerse": 31, "endChapter": 2, "endVerseAlt": 2 },
-            "psalm1": { "book": "Psalms", "chapter": 104, "startVerse": 1, "endVerse": 30 },
-            "second": { "book": "Genesis", "chapter": 22, "startVerse": 1, "endVerse": 18 },
-            "psalm2": { "book": "Psalms", "chapter": 16, "startVerse": 5, "endVerse": 11 },
-            "third": { "book": "Exodus", "chapter": 14, "startVerse": 15, "endVerse": 31, "endChapter": 15, "endVerseAlt": 1 },
-            "canticle": { "book": "Exodus", "chapter": 15, "startVerse": 1, "endVerse": 18 },
-            "fourth": { "book": "Isaiah", "chapter": 54, "startVerse": 5, "endVerse": 14 },
-            "psalm3": { "book": "Psalms", "chapter": 30, "startVerse": 2, "endVerse": 13 },
-            "fifth": { "book": "Isaiah", "chapter": 55, "startVerse": 1, "endVerse": 11 },
-            "canticle2": { "book": "Isaiah", "chapter": 12, "startVerse": 2, "endVerse": 6 },
-            "sixth": { "book": "Baruch", "chapter": 3, "startVerse": 9, "endVerse": 38, "endChapter": 4, "endVerseAlt": 4 },
-            "psalm4": { "book": "Psalms", "chapter": 19, "startVerse": 8, "endVerse": 11 },
-            "seventh": { "book": "Ezekiel", "chapter": 36, "startVerse": 16, "endVerse": 28 },
-            "psalm5": { "book": "Psalms", "chapter": 42, "startVerse": 3, "endVerse": 5, "endChapter": 43, "endVerseAlt": 4 },
-            "epistle": { "book": "Romans", "chapter": 6, "startVerse": 3, "endVerse": 11 },
-            "psalm6": { "book": "Psalms", "chapter": 118, "startVerse": 1, "endVerse": 23 },
-            "gospel": { "book": "Luke", "chapter": 24, "startVerse": 1, "endVerse": 12 }
+            "first": "Isaiah 52:13—53:12",
+            "psalm": "Psalm 31:2, 6, 12-13, 15-16, 17, 25",
+            "second": "Hebrews 4:14-16; 5:7-9",
+            "gospel": "John 18:1—19:42"
           }
         }
       ]
     },
     "easter": {
-      "sundays": [
+      "name": "Easter",
+      "feast_days": [
         {
-          "name": "Easter Sunday of the Resurrection of the Lord",
-          "datePattern": "easter_sunday",
+          "id": "easter-vigil-c",
+          "name": "Easter Vigil",
+          "date_pattern": "easter_vigil",
           "readings": {
-            "first": { "book": "Acts", "chapter": 10, "startVerse": 34, "endVerse": 43 },
-            "psalm": { "book": "Psalms", "chapter": 118, "startVerse": 1, "endVerse": 23 },
-            "second": { "book": "Colossians", "chapter": 3, "startVerse": 1, "endVerse": 4 },
-            "sequence": "Victimae paschali laudes",
-            "gospel": { "book": "John", "chapter": 20, "startVerse": 1, "endVerse": 9 }
+            "first": "Genesis 1:1—2:2",
+            "psalm": "Psalm 104:1-2, 5-6, 10, 12, 13-14, 24, 35",
+            "second": "Romans 6:3-11",
+            "gospel": "Luke 24:1-12"
           }
         },
         {
-          "name": "Second Sunday of Easter (Divine Mercy Sunday)",
-          "datePattern": "easter_2",
+          "id": "easter-day-c",
+          "name": "Easter Sunday",
+          "date_pattern": "easter_sunday",
           "readings": {
-            "first": { "book": "Acts", "chapter": 5, "startVerse": 12, "endVerse": 16 },
-            "psalm": { "book": "Psalms", "chapter": 118, "startVerse": 2, "endVerse": 24 },
-            "second": { "book": "Revelation", "chapter": 1, "startVerse": 9, "endVerse": 19 },
-            "gospel": { "book": "John", "chapter": 20, "startVerse": 19, "endVerse": 31 }
-          }
-        },
-        {
-          "name": "Third Sunday of Easter",
-          "datePattern": "easter_3",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 5, "startVerse": 27, "endVerse": 41 },
-            "psalm": { "book": "Psalms", "chapter": 30, "startVerse": 2, "endVerse": 13 },
-            "second": { "book": "Revelation", "chapter": 5, "startVerse": 11, "endVerse": 14 },
-            "gospel": { "book": "John", "chapter": 21, "startVerse": 1, "endVerse": 19 }
-          }
-        },
-        {
-          "name": "Fourth Sunday of Easter",
-          "datePattern": "easter_4",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 13, "startVerse": 14, "endVerse": 52 },
-            "psalm": { "book": "Psalms", "chapter": 100, "startVerse": 1, "endVerse": 5 },
-            "second": { "book": "Revelation", "chapter": 7, "startVerse": 9, "endVerse": 17 },
-            "gospel": { "book": "John", "chapter": 10, "startVerse": 27, "endVerse": 30 }
-          }
-        },
-        {
-          "name": "Fifth Sunday of Easter",
-          "datePattern": "easter_5",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 14, "startVerse": 21, "endVerse": 27 },
-            "psalm": { "book": "Psalms", "chapter": 145, "startVerse": 8, "endVerse": 13 },
-            "second": { "book": "Revelation", "chapter": 21, "startVerse": 1, "endVerse": 5 },
-            "gospel": { "book": "John", "chapter": 13, "startVerse": 31, "endVerse": 35 }
-          }
-        },
-        {
-          "name": "Sixth Sunday of Easter",
-          "datePattern": "easter_6",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 15, "startVerse": 1, "endVerse": 29 },
-            "psalm": { "book": "Psalms", "chapter": 67, "startVerse": 2, "endVerse": 8 },
-            "second": { "book": "Revelation", "chapter": 21, "startVerse": 10, "endVerse": 23 },
-            "gospel": { "book": "John", "chapter": 14, "startVerse": 23, "endVerse": 29 }
-          }
-        },
-        {
-          "name": "Seventh Sunday of Easter (The Ascension of the Lord)",
-          "datePattern": "easter_7",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 1, "startVerse": 1, "endVerse": 11 },
-            "psalm": { "book": "Psalms", "chapter": 47, "startVerse": 2, "endVerse": 9 },
-            "second": { "book": "Ephesians", "chapter": 1, "startVerse": 17, "endVerse": 23 },
-            "gospel": { "book": "Luke", "chapter": 24, "startVerse": 46, "endVerse": 53 }
+            "first": "Acts 10:34a, 37-43",
+            "psalm": "Psalm 118:1-2, 16-17, 22-23",
+            "second": "Colossians 3:1-4",
+            "gospel": "John 20:1-9"
           }
         }
       ],
+      "sundays": [
+        {
+          "id": "easter-2-c",
+          "name": "Second Sunday of Easter (Divine Mercy Sunday)",
+          "date_pattern": "easter_2",
+          "readings": {
+            "first": "Acts 5:12-16",
+            "psalm": "Psalm 118:2-4, 13-15, 22-24",
+            "second": "Revelation 1:9-11a, 12-13, 17-19",
+            "gospel": "John 20:19-31"
+          }
+        },
+        {
+          "id": "easter-3-c",
+          "name": "Third Sunday of Easter",
+          "date_pattern": "easter_3",
+          "readings": {
+            "first": "Acts 5:27-32, 40b-41",
+            "psalm": "Psalm 30:2, 4, 5-6, 11-12, 13",
+            "second": "Revelation 5:11-14",
+            "gospel": "John 21:1-19"
+          }
+        },
+        {
+          "id": "easter-4-c",
+          "name": "Fourth Sunday of Easter",
+          "date_pattern": "easter_4",
+          "readings": {
+            "first": "Acts 13:14, 43-52",
+            "psalm": "Psalm 100:1-2, 3, 5",
+            "second": "Revelation 7:9, 14b-17",
+            "gospel": "John 10:27-30"
+          }
+        },
+        {
+          "id": "easter-5-c",
+          "name": "Fifth Sunday of Easter",
+          "date_pattern": "easter_5",
+          "readings": {
+            "first": "Acts 14:21-27",
+            "psalm": "Psalm 145:8-9, 10-11, 12-13",
+            "second": "Revelation 21:1-5a",
+            "gospel": "John 13:31-33a, 34-35"
+          }
+        },
+        {
+          "id": "easter-6-c",
+          "name": "Sixth Sunday of Easter",
+          "date_pattern": "easter_6",
+          "readings": {
+            "first": "Acts 15:1-2, 22-29",
+            "psalm": "Psalm 67:2-3, 5, 6, 8",
+            "second": "Revelation 21:10-14, 22-23",
+            "gospel": "John 14:23-29"
+          }
+        },
+        {
+          "id": "ascension-c",
+          "name": "The Ascension of the Lord",
+          "date_pattern": "ascension",
+          "readings": {
+            "first": "Acts 1:1-11",
+            "psalm": "Psalm 47:2-3, 6-7, 8-9",
+            "second": "Ephesians 1:17-23",
+            "gospel": "Luke 24:46-53"
+          }
+        },
+        {
+          "id": "easter-7-c",
+          "name": "Seventh Sunday of Easter",
+          "date_pattern": "easter_7",
+          "readings": {
+            "first": "Acts 7:55-60",
+            "psalm": "Psalm 97:1-2, 6-7, 9",
+            "second": "Revelation 22:12-14, 16-17, 20",
+            "gospel": "John 17:20-26"
+          }
+        }
+      ]
+    },
+    "pentecost": {
+      "name": "Pentecost",
       "feast_days": [
         {
-          "name": "The Ascension of the Lord",
-          "datePattern": "ascension",
+          "id": "pentecost-vigil-c",
+          "name": "Pentecost Vigil",
+          "date_pattern": "pentecost_vigil",
           "readings": {
-            "first": { "book": "Acts", "chapter": 1, "startVerse": 1, "endVerse": 11 },
-            "psalm": { "book": "Psalms", "chapter": 47, "startVerse": 2, "endVerse": 9 },
-            "second": { "book": "Ephesians", "chapter": 1, "startVerse": 17, "endVerse": 23 },
-            "gospel": { "book": "Luke", "chapter": 24, "startVerse": 46, "endVerse": 53 }
+            "first": "Genesis 11:1-9",
+            "psalm": "Psalm 104:1-2, 24, 35, 27-28, 29, 30",
+            "second": "Romans 8:22-27",
+            "gospel": "John 7:37-39"
           }
         },
         {
-          "name": "Pentecost Sunday - Vigil",
-          "datePattern": "pentecost_vigil",
+          "id": "pentecost-c",
+          "name": "Pentecost Sunday",
+          "date_pattern": "pentecost",
           "readings": {
-            "first": { "book": "Genesis", "chapter": 11, "startVerse": 1, "endVerse": 9 },
-            "psalm": { "book": "Psalms", "chapter": 104, "startVerse": 1, "endVerse": 35 },
-            "second": { "book": "Romans", "chapter": 8, "startVerse": 22, "endVerse": 27 },
-            "gospel": { "book": "John", "chapter": 7, "startVerse": 37, "endVerse": 39 }
-          }
-        },
-        {
-          "name": "Pentecost Sunday - Mass During the Day",
-          "datePattern": "pentecost",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 2, "startVerse": 1, "endVerse": 11 },
-            "psalm": { "book": "Psalms", "chapter": 104, "startVerse": 1, "endVerse": 35 },
-            "second": { "book": "1 Corinthians", "chapter": 12, "startVerse": 3, "endVerse": 13 },
-            "sequence": "Veni, Sancte Spiritus",
-            "gospel": { "book": "John", "chapter": 20, "startVerse": 19, "endVerse": 23 }
+            "first": "Acts 2:1-11",
+            "psalm": "Psalm 104:1, 24, 29-30, 31, 34",
+            "second": "1 Corinthians 12:3b-7, 12-13",
+            "gospel": "John 20:19-23"
           }
         }
       ]
     },
     "ordinary_time": {
+      "name": "Ordinary Time",
       "sundays": [
         {
+          "id": "trinity-sunday-c",
+          "name": "The Most Holy Trinity",
+          "date_pattern": "trinity_sunday",
+          "readings": {
+            "first": "Proverbs 8:22-31",
+            "psalm": "Psalm 8:4-5, 6-7, 8-9",
+            "second": "Romans 5:1-5",
+            "gospel": "John 16:12-15"
+          }
+        },
+        {
+          "id": "corpus-christi-c",
+          "name": "The Most Holy Body and Blood of Christ",
+          "date_pattern": "corpus_christi",
+          "readings": {
+            "first": "Genesis 14:18-20",
+            "psalm": "Psalm 110:1, 2, 3, 4",
+            "second": "1 Corinthians 11:23-26",
+            "gospel": "Luke 9:11b-17"
+          }
+        },
+        {
+          "id": "ordinary-2-c",
           "name": "Second Sunday in Ordinary Time",
-          "datePattern": "ordinary_2",
+          "date_pattern": "ordinary_2",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 62, "startVerse": 1, "endVerse": 5 },
-            "psalm": { "book": "Psalms", "chapter": 96, "startVerse": 1, "endVerse": 10 },
-            "second": { "book": "1 Corinthians", "chapter": 12, "startVerse": 4, "endVerse": 11 },
-            "gospel": { "book": "John", "chapter": 2, "startVerse": 1, "endVerse": 11 }
+            "first": "Isaiah 62:1-5",
+            "psalm": "Psalm 96:1-2, 2-3, 7-8, 9-10",
+            "second": "1 Corinthians 12:4-11",
+            "gospel": "John 2:1-11"
           }
         },
         {
+          "id": "ordinary-3-c",
           "name": "Third Sunday in Ordinary Time",
-          "datePattern": "ordinary_3",
+          "date_pattern": "ordinary_3",
           "readings": {
-            "first": { "book": "Nehemiah", "chapter": 8, "startVerse": 2, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 19, "startVerse": 8, "endVerse": 15 },
-            "second": { "book": "1 Corinthians", "chapter": 12, "startVerse": 12, "endVerse": 30 },
-            "gospel": { "book": "Luke", "chapter": 1, "startVerse": 1, "endVerse": 4, "endChapter": 4, "endVerseAlt": 21 }
+            "first": "Nehemiah 8:2-4a, 5-6, 8-10",
+            "psalm": "Psalm 19:8, 9, 10, 15",
+            "second": "1 Corinthians 12:12-30",
+            "gospel": "Luke 1:1-4; 4:14-21"
           }
         },
         {
+          "id": "ordinary-4-c",
           "name": "Fourth Sunday in Ordinary Time",
-          "datePattern": "ordinary_4",
+          "date_pattern": "ordinary_4",
           "readings": {
-            "first": { "book": "Jeremiah", "chapter": 1, "startVerse": 4, "endVerse": 19 },
-            "psalm": { "book": "Psalms", "chapter": 71, "startVerse": 1, "endVerse": 17 },
-            "second": { "book": "1 Corinthians", "chapter": 12, "startVerse": 31, "endVerse": 31, "endChapter": 13, "endVerseAlt": 13 },
-            "gospel": { "book": "Luke", "chapter": 4, "startVerse": 21, "endVerse": 30 }
+            "first": "Jeremiah 1:4-5, 17-19",
+            "psalm": "Psalm 71:1-2, 3-4, 5-6, 15-17",
+            "second": "1 Corinthians 12:31—13:13",
+            "gospel": "Luke 4:21-30"
           }
         },
         {
+          "id": "ordinary-5-c",
           "name": "Fifth Sunday in Ordinary Time",
-          "datePattern": "ordinary_5",
+          "date_pattern": "ordinary_5",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 6, "startVerse": 1, "endVerse": 8 },
-            "psalm": { "book": "Psalms", "chapter": 138, "startVerse": 1, "endVerse": 8 },
-            "second": { "book": "1 Corinthians", "chapter": 15, "startVerse": 1, "endVerse": 11 },
-            "gospel": { "book": "Luke", "chapter": 5, "startVerse": 1, "endVerse": 11 }
+            "first": "Isaiah 6:1-2a, 3-8",
+            "psalm": "Psalm 138:1-2, 2-3, 4-5, 7-8",
+            "second": "1 Corinthians 15:1-11",
+            "gospel": "Luke 5:1-11"
           }
         },
         {
+          "id": "ordinary-6-c",
           "name": "Sixth Sunday in Ordinary Time",
-          "datePattern": "ordinary_6",
+          "date_pattern": "ordinary_6",
           "readings": {
-            "first": { "book": "Jeremiah", "chapter": 17, "startVerse": 5, "endVerse": 8 },
-            "psalm": { "book": "Psalms", "chapter": 1, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "1 Corinthians", "chapter": 15, "startVerse": 12, "endVerse": 20 },
-            "gospel": { "book": "Luke", "chapter": 6, "startVerse": 17, "endVerse": 26 }
+            "first": "Jeremiah 17:5-8",
+            "psalm": "Psalm 1:1-2, 3, 4, 6",
+            "second": "1 Corinthians 15:12, 16-20",
+            "gospel": "Luke 6:17, 20-26"
           }
         },
         {
+          "id": "ordinary-7-c",
           "name": "Seventh Sunday in Ordinary Time",
-          "datePattern": "ordinary_7",
+          "date_pattern": "ordinary_7",
           "readings": {
-            "first": { "book": "1 Samuel", "chapter": 26, "startVerse": 2, "endVerse": 23 },
-            "psalm": { "book": "Psalms", "chapter": 103, "startVerse": 1, "endVerse": 13 },
-            "second": { "book": "1 Corinthians", "chapter": 15, "startVerse": 45, "endVerse": 49 },
-            "gospel": { "book": "Luke", "chapter": 6, "startVerse": 27, "endVerse": 38 }
+            "first": "1 Samuel 26:2, 7-9, 12-13, 22-23",
+            "psalm": "Psalm 103:1-2, 3-4, 8, 10, 12-13",
+            "second": "1 Corinthians 15:45-49",
+            "gospel": "Luke 6:27-38"
           }
         },
         {
+          "id": "ordinary-8-c",
           "name": "Eighth Sunday in Ordinary Time",
-          "datePattern": "ordinary_8",
+          "date_pattern": "ordinary_8",
           "readings": {
-            "first": { "book": "Sirach", "chapter": 27, "startVerse": 4, "endVerse": 7 },
-            "psalm": { "book": "Psalms", "chapter": 92, "startVerse": 2, "endVerse": 16 },
-            "second": { "book": "1 Corinthians", "chapter": 15, "startVerse": 54, "endVerse": 58 },
-            "gospel": { "book": "Luke", "chapter": 6, "startVerse": 39, "endVerse": 45 }
+            "first": "Sirach 27:4-7",
+            "psalm": "Psalm 92:2-3, 13-14, 15-16",
+            "second": "1 Corinthians 15:54-58",
+            "gospel": "Luke 6:39-45"
           }
         },
         {
+          "id": "ordinary-9-c",
           "name": "Ninth Sunday in Ordinary Time",
-          "datePattern": "ordinary_9",
+          "date_pattern": "ordinary_9",
           "readings": {
-            "first": { "book": "1 Kings", "chapter": 8, "startVerse": 41, "endVerse": 43 },
-            "psalm": { "book": "Psalms", "chapter": 117, "startVerse": 1, "endVerse": 2 },
-            "second": { "book": "Galatians", "chapter": 1, "startVerse": 1, "endVerse": 10 },
-            "gospel": { "book": "Luke", "chapter": 7, "startVerse": 1, "endVerse": 10 }
+            "first": "1 Kings 8:41-43",
+            "psalm": "Psalm 117:1, 2",
+            "second": "Galatians 1:1-2, 6-10",
+            "gospel": "Luke 7:1-10"
           }
         },
         {
+          "id": "ordinary-10-c",
           "name": "Tenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_10",
+          "date_pattern": "ordinary_10",
           "readings": {
-            "first": { "book": "1 Kings", "chapter": 17, "startVerse": 17, "endVerse": 24 },
-            "psalm": { "book": "Psalms", "chapter": 30, "startVerse": 2, "endVerse": 13 },
-            "second": { "book": "Galatians", "chapter": 1, "startVerse": 11, "endVerse": 19 },
-            "gospel": { "book": "Luke", "chapter": 7, "startVerse": 11, "endVerse": 17 }
+            "first": "1 Kings 17:17-24",
+            "psalm": "Psalm 30:2, 4, 5-6, 11, 12, 13",
+            "second": "Galatians 1:11-19",
+            "gospel": "Luke 7:11-17"
           }
         },
         {
+          "id": "ordinary-11-c",
           "name": "Eleventh Sunday in Ordinary Time",
-          "datePattern": "ordinary_11",
+          "date_pattern": "ordinary_11",
           "readings": {
-            "first": { "book": "2 Samuel", "chapter": 12, "startVerse": 7, "endVerse": 13 },
-            "psalm": { "book": "Psalms", "chapter": 32, "startVerse": 1, "endVerse": 11 },
-            "second": { "book": "Galatians", "chapter": 2, "startVerse": 16, "endVerse": 21 },
-            "gospel": { "book": "Luke", "chapter": 7, "startVerse": 36, "endVerse": 50, "endChapter": 8, "endVerseAlt": 3 }
+            "first": "2 Samuel 12:7-10, 13",
+            "psalm": "Psalm 32:1-2, 5, 7, 11",
+            "second": "Galatians 2:16, 19-21",
+            "gospel": "Luke 7:36—8:3"
           }
         },
         {
+          "id": "ordinary-12-c",
           "name": "Twelfth Sunday in Ordinary Time",
-          "datePattern": "ordinary_12",
+          "date_pattern": "ordinary_12",
           "readings": {
-            "first": { "book": "Zechariah", "chapter": 12, "startVerse": 10, "endVerse": 11, "endChapter": 13, "endVerseAlt": 1 },
-            "psalm": { "book": "Psalms", "chapter": 63, "startVerse": 2, "endVerse": 9 },
-            "second": { "book": "Galatians", "chapter": 3, "startVerse": 26, "endVerse": 29 },
-            "gospel": { "book": "Luke", "chapter": 9, "startVerse": 18, "endVerse": 24 }
+            "first": "Zechariah 12:10-11; 13:1",
+            "psalm": "Psalm 63:2, 3-4, 5-6, 8-9",
+            "second": "Galatians 3:26-29",
+            "gospel": "Luke 9:18-24"
           }
         },
         {
+          "id": "ordinary-13-c",
           "name": "Thirteenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_13",
+          "date_pattern": "ordinary_13",
           "readings": {
-            "first": { "book": "1 Kings", "chapter": 19, "startVerse": 16, "endVerse": 21 },
-            "psalm": { "book": "Psalms", "chapter": 16, "startVerse": 1, "endVerse": 11 },
-            "second": { "book": "Galatians", "chapter": 5, "startVerse": 1, "endVerse": 18 },
-            "gospel": { "book": "Luke", "chapter": 9, "startVerse": 51, "endVerse": 62 }
+            "first": "1 Kings 19:16b, 19-21",
+            "psalm": "Psalm 16:1-2, 5, 7-8, 9-10, 11",
+            "second": "Galatians 5:1, 13-18",
+            "gospel": "Luke 9:51-62"
           }
         },
         {
+          "id": "ordinary-14-c",
           "name": "Fourteenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_14",
+          "date_pattern": "ordinary_14",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 66, "startVerse": 10, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 66, "startVerse": 1, "endVerse": 20 },
-            "second": { "book": "Galatians", "chapter": 6, "startVerse": 14, "endVerse": 18 },
-            "gospel": { "book": "Luke", "chapter": 10, "startVerse": 1, "endVerse": 20 }
+            "first": "Isaiah 66:10-14c",
+            "psalm": "Psalm 66:1-3, 4-5, 6-7, 16, 20",
+            "second": "Galatians 6:14-18",
+            "gospel": "Luke 10:1-12, 17-20"
           }
         },
         {
+          "id": "ordinary-15-c",
           "name": "Fifteenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_15",
+          "date_pattern": "ordinary_15",
           "readings": {
-            "first": { "book": "Deuteronomy", "chapter": 30, "startVerse": 10, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 69, "startVerse": 14, "endVerse": 37 },
-            "second": { "book": "Colossians", "chapter": 1, "startVerse": 15, "endVerse": 20 },
-            "gospel": { "book": "Luke", "chapter": 10, "startVerse": 25, "endVerse": 37 }
+            "first": "Deuteronomy 30:10-14",
+            "psalm": "Psalm 69:14, 17, 30-31, 33-34, 36, 37",
+            "second": "Colossians 1:15-20",
+            "gospel": "Luke 10:25-37"
           }
         },
         {
+          "id": "ordinary-16-c",
           "name": "Sixteenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_16",
+          "date_pattern": "ordinary_16",
           "readings": {
-            "first": { "book": "Genesis", "chapter": 18, "startVerse": 1, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 15, "startVerse": 2, "endVerse": 5 },
-            "second": { "book": "Colossians", "chapter": 1, "startVerse": 24, "endVerse": 28 },
-            "gospel": { "book": "Luke", "chapter": 10, "startVerse": 38, "endVerse": 42 }
+            "first": "Genesis 18:1-10a",
+            "psalm": "Psalm 15:2-3, 3-4, 5",
+            "second": "Colossians 1:24-28",
+            "gospel": "Luke 10:38-42"
           }
         },
         {
+          "id": "ordinary-17-c",
           "name": "Seventeenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_17",
+          "date_pattern": "ordinary_17",
           "readings": {
-            "first": { "book": "Genesis", "chapter": 18, "startVerse": 20, "endVerse": 32 },
-            "psalm": { "book": "Psalms", "chapter": 138, "startVerse": 1, "endVerse": 8 },
-            "second": { "book": "Colossians", "chapter": 2, "startVerse": 12, "endVerse": 14 },
-            "gospel": { "book": "Luke", "chapter": 11, "startVerse": 1, "endVerse": 13 }
+            "first": "Genesis 18:20-32",
+            "psalm": "Psalm 138:1-2, 2-3, 6-7, 7-8",
+            "second": "Colossians 2:12-14",
+            "gospel": "Luke 11:1-13"
           }
         },
         {
+          "id": "ordinary-18-c",
           "name": "Eighteenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_18",
+          "date_pattern": "ordinary_18",
           "readings": {
-            "first": { "book": "Ecclesiastes", "chapter": 1, "startVerse": 2, "endVerse": 2, "endChapter": 2, "endVerseAlt": 23 },
-            "psalm": { "book": "Psalms", "chapter": 90, "startVerse": 3, "endVerse": 17 },
-            "second": { "book": "Colossians", "chapter": 3, "startVerse": 1, "endVerse": 11 },
-            "gospel": { "book": "Luke", "chapter": 12, "startVerse": 13, "endVerse": 21 }
+            "first": "Ecclesiastes 1:2; 2:21-23",
+            "psalm": "Psalm 90:3-4, 5-6, 12-13, 14, 17",
+            "second": "Colossians 3:1-5, 9-11",
+            "gospel": "Luke 12:13-21"
           }
         },
         {
+          "id": "ordinary-19-c",
           "name": "Nineteenth Sunday in Ordinary Time",
-          "datePattern": "ordinary_19",
+          "date_pattern": "ordinary_19",
           "readings": {
-            "first": { "book": "Wisdom", "chapter": 18, "startVerse": 6, "endVerse": 9 },
-            "psalm": { "book": "Psalms", "chapter": 33, "startVerse": 1, "endVerse": 22 },
-            "second": { "book": "Hebrews", "chapter": 11, "startVerse": 1, "endVerse": 19 },
-            "gospel": { "book": "Luke", "chapter": 12, "startVerse": 32, "endVerse": 48 }
+            "first": "Wisdom 18:6-9",
+            "psalm": "Psalm 33:1, 12, 18-19, 20-22",
+            "second": "Hebrews 11:1-2, 8-19",
+            "gospel": "Luke 12:32-48"
           }
         },
         {
+          "id": "ordinary-20-c",
           "name": "Twentieth Sunday in Ordinary Time",
-          "datePattern": "ordinary_20",
+          "date_pattern": "ordinary_20",
           "readings": {
-            "first": { "book": "Jeremiah", "chapter": 38, "startVerse": 4, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 40, "startVerse": 2, "endVerse": 18 },
-            "second": { "book": "Hebrews", "chapter": 12, "startVerse": 1, "endVerse": 4 },
-            "gospel": { "book": "Luke", "chapter": 12, "startVerse": 49, "endVerse": 53 }
+            "first": "Jeremiah 38:4-6, 8-10",
+            "psalm": "Psalm 40:2, 3, 4, 18",
+            "second": "Hebrews 12:1-4",
+            "gospel": "Luke 12:49-53"
           }
         },
         {
+          "id": "ordinary-21-c",
           "name": "Twenty-First Sunday in Ordinary Time",
-          "datePattern": "ordinary_21",
+          "date_pattern": "ordinary_21",
           "readings": {
-            "first": { "book": "Isaiah", "chapter": 66, "startVerse": 18, "endVerse": 21 },
-            "psalm": { "book": "Psalms", "chapter": 117, "startVerse": 1, "endVerse": 2 },
-            "second": { "book": "Hebrews", "chapter": 12, "startVerse": 5, "endVerse": 13 },
-            "gospel": { "book": "Luke", "chapter": 13, "startVerse": 22, "endVerse": 30 }
+            "first": "Isaiah 66:18-21",
+            "psalm": "Psalm 117:1, 2",
+            "second": "Hebrews 12:5-7, 11-13",
+            "gospel": "Luke 13:22-30"
           }
         },
         {
+          "id": "ordinary-22-c",
           "name": "Twenty-Second Sunday in Ordinary Time",
-          "datePattern": "ordinary_22",
+          "date_pattern": "ordinary_22",
           "readings": {
-            "first": { "book": "Sirach", "chapter": 3, "startVerse": 17, "endVerse": 29 },
-            "psalm": { "book": "Psalms", "chapter": 68, "startVerse": 4, "endVerse": 11 },
-            "second": { "book": "Hebrews", "chapter": 12, "startVerse": 18, "endVerse": 24 },
-            "gospel": { "book": "Luke", "chapter": 14, "startVerse": 1, "endVerse": 14 }
+            "first": "Sirach 3:17-18, 20, 28-29",
+            "psalm": "Psalm 68:4-5, 6-7, 10-11",
+            "second": "Hebrews 12:18-19, 22-24a",
+            "gospel": "Luke 14:1, 7-14"
           }
         },
         {
+          "id": "ordinary-23-c",
           "name": "Twenty-Third Sunday in Ordinary Time",
-          "datePattern": "ordinary_23",
+          "date_pattern": "ordinary_23",
           "readings": {
-            "first": { "book": "Wisdom", "chapter": 9, "startVerse": 13, "endVerse": 18 },
-            "psalm": { "book": "Psalms", "chapter": 90, "startVerse": 3, "endVerse": 17 },
-            "second": { "book": "Philemon", "chapter": 1, "startVerse": 9, "endVerse": 17 },
-            "gospel": { "book": "Luke", "chapter": 14, "startVerse": 25, "endVerse": 33 }
+            "first": "Wisdom 9:13-18b",
+            "psalm": "Psalm 90:3-4, 5-6, 12-13, 14-17",
+            "second": "Philemon 9-10, 12-17",
+            "gospel": "Luke 14:25-33"
           }
         },
         {
+          "id": "ordinary-24-c",
           "name": "Twenty-Fourth Sunday in Ordinary Time",
-          "datePattern": "ordinary_24",
+          "date_pattern": "ordinary_24",
           "readings": {
-            "first": { "book": "Exodus", "chapter": 32, "startVerse": 7, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 51, "startVerse": 3, "endVerse": 19 },
-            "second": { "book": "1 Timothy", "chapter": 1, "startVerse": 12, "endVerse": 17 },
-            "gospel": { "book": "Luke", "chapter": 15, "startVerse": 1, "endVerse": 32 }
+            "first": "Exodus 32:7-11, 13-14",
+            "psalm": "Psalm 51:3-4, 12-13, 17, 19",
+            "second": "1 Timothy 1:12-17",
+            "gospel": "Luke 15:1-32"
           }
         },
         {
+          "id": "ordinary-25-c",
           "name": "Twenty-Fifth Sunday in Ordinary Time",
-          "datePattern": "ordinary_25",
+          "date_pattern": "ordinary_25",
           "readings": {
-            "first": { "book": "Amos", "chapter": 8, "startVerse": 4, "endVerse": 7 },
-            "psalm": { "book": "Psalms", "chapter": 113, "startVerse": 1, "endVerse": 8 },
-            "second": { "book": "1 Timothy", "chapter": 2, "startVerse": 1, "endVerse": 8 },
-            "gospel": { "book": "Luke", "chapter": 16, "startVerse": 1, "endVerse": 13 }
+            "first": "Amos 8:4-7",
+            "psalm": "Psalm 113:1-2, 4-6, 7-8",
+            "second": "1 Timothy 2:1-8",
+            "gospel": "Luke 16:1-13"
           }
         },
         {
+          "id": "ordinary-26-c",
           "name": "Twenty-Sixth Sunday in Ordinary Time",
-          "datePattern": "ordinary_26",
+          "date_pattern": "ordinary_26",
           "readings": {
-            "first": { "book": "Amos", "chapter": 6, "startVerse": 1, "endVerse": 7 },
-            "psalm": { "book": "Psalms", "chapter": 146, "startVerse": 7, "endVerse": 10 },
-            "second": { "book": "1 Timothy", "chapter": 6, "startVerse": 11, "endVerse": 16 },
-            "gospel": { "book": "Luke", "chapter": 16, "startVerse": 19, "endVerse": 31 }
+            "first": "Amos 6:1a, 4-7",
+            "psalm": "Psalm 146:7, 8-9, 9-10",
+            "second": "1 Timothy 6:11-16",
+            "gospel": "Luke 16:19-31"
           }
         },
         {
+          "id": "ordinary-27-c",
           "name": "Twenty-Seventh Sunday in Ordinary Time",
-          "datePattern": "ordinary_27",
+          "date_pattern": "ordinary_27",
           "readings": {
-            "first": { "book": "Habakkuk", "chapter": 1, "startVerse": 2, "endVerse": 3, "endChapter": 2, "endVerseAlt": 4 },
-            "psalm": { "book": "Psalms", "chapter": 95, "startVerse": 1, "endVerse": 9 },
-            "second": { "book": "2 Timothy", "chapter": 1, "startVerse": 6, "endVerse": 14 },
-            "gospel": { "book": "Luke", "chapter": 17, "startVerse": 5, "endVerse": 10 }
+            "first": "Habakkuk 1:2-3; 2:2-4",
+            "psalm": "Psalm 95:1-2, 6-7, 8-9",
+            "second": "2 Timothy 1:6-8, 13-14",
+            "gospel": "Luke 17:5-10"
           }
         },
         {
+          "id": "ordinary-28-c",
           "name": "Twenty-Eighth Sunday in Ordinary Time",
-          "datePattern": "ordinary_28",
+          "date_pattern": "ordinary_28",
           "readings": {
-            "first": { "book": "2 Kings", "chapter": 5, "startVerse": 14, "endVerse": 17 },
-            "psalm": { "book": "Psalms", "chapter": 98, "startVerse": 1, "endVerse": 9 },
-            "second": { "book": "2 Timothy", "chapter": 2, "startVerse": 8, "endVerse": 13 },
-            "gospel": { "book": "Luke", "chapter": 17, "startVerse": 11, "endVerse": 19 }
+            "first": "2 Kings 5:14-17",
+            "psalm": "Psalm 98:1, 2-3, 3-4",
+            "second": "2 Timothy 2:8-13",
+            "gospel": "Luke 17:11-19"
           }
         },
         {
+          "id": "ordinary-29-c",
           "name": "Twenty-Ninth Sunday in Ordinary Time",
-          "datePattern": "ordinary_29",
+          "date_pattern": "ordinary_29",
           "readings": {
-            "first": { "book": "Exodus", "chapter": 17, "startVerse": 8, "endVerse": 13 },
-            "psalm": { "book": "Psalms", "chapter": 121, "startVerse": 1, "endVerse": 8 },
-            "second": { "book": "2 Timothy", "chapter": 3, "startVerse": 14, "endVerse": 17, "endChapter": 4, "endVerseAlt": 2 },
-            "gospel": { "book": "Luke", "chapter": 18, "startVerse": 1, "endVerse": 8 }
+            "first": "Exodus 17:8-13",
+            "psalm": "Psalm 121:1-2, 3-4, 5-6, 7-8",
+            "second": "2 Timothy 3:14—4:2",
+            "gospel": "Luke 18:1-8"
           }
         },
         {
+          "id": "ordinary-30-c",
           "name": "Thirtieth Sunday in Ordinary Time",
-          "datePattern": "ordinary_30",
+          "date_pattern": "ordinary_30",
           "readings": {
-            "first": { "book": "Sirach", "chapter": 35, "startVerse": 12, "endVerse": 18 },
-            "psalm": { "book": "Psalms", "chapter": 34, "startVerse": 2, "endVerse": 23 },
-            "second": { "book": "2 Timothy", "chapter": 4, "startVerse": 6, "endVerse": 18 },
-            "gospel": { "book": "Luke", "chapter": 18, "startVerse": 9, "endVerse": 14 }
+            "first": "Sirach 35:12-14, 16-18",
+            "psalm": "Psalm 34:2-3, 17-18, 19, 23",
+            "second": "2 Timothy 4:6-8, 16-18",
+            "gospel": "Luke 18:9-14"
           }
         },
         {
+          "id": "ordinary-31-c",
           "name": "Thirty-First Sunday in Ordinary Time",
-          "datePattern": "ordinary_31",
+          "date_pattern": "ordinary_31",
           "readings": {
-            "first": { "book": "Wisdom", "chapter": 11, "startVerse": 22, "endVerse": 26, "endChapter": 12, "endVerseAlt": 2 },
-            "psalm": { "book": "Psalms", "chapter": 145, "startVerse": 1, "endVerse": 14 },
-            "second": { "book": "2 Thessalonians", "chapter": 1, "startVerse": 11, "endVerse": 12, "endChapter": 2, "endVerseAlt": 2 },
-            "gospel": { "book": "Luke", "chapter": 19, "startVerse": 1, "endVerse": 10 }
+            "first": "Wisdom 11:22—12:2",
+            "psalm": "Psalm 145:1-2, 8-9, 10-11, 13, 14",
+            "second": "2 Thessalonians 1:11—2:2",
+            "gospel": "Luke 19:1-10"
           }
         },
         {
+          "id": "ordinary-32-c",
           "name": "Thirty-Second Sunday in Ordinary Time",
-          "datePattern": "ordinary_32",
+          "date_pattern": "ordinary_32",
           "readings": {
-            "first": { "book": "2 Maccabees", "chapter": 7, "startVerse": 1, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 17, "startVerse": 1, "endVerse": 15 },
-            "second": { "book": "2 Thessalonians", "chapter": 2, "startVerse": 16, "endVerse": 17, "endChapter": 3, "endVerseAlt": 5 },
-            "gospel": { "book": "Luke", "chapter": 20, "startVerse": 27, "endVerse": 38 }
+            "first": "2 Maccabees 7:1-2, 9-14",
+            "psalm": "Psalm 17:1, 5-6, 8, 15",
+            "second": "2 Thessalonians 2:16—3:5",
+            "gospel": "Luke 20:27-38"
           }
         },
         {
+          "id": "ordinary-33-c",
           "name": "Thirty-Third Sunday in Ordinary Time",
-          "datePattern": "ordinary_33",
+          "date_pattern": "ordinary_33",
           "readings": {
-            "first": { "book": "Malachi", "chapter": 3, "startVerse": 19, "endVerse": 20 },
-            "psalm": { "book": "Psalms", "chapter": 98, "startVerse": 5, "endVerse": 9 },
-            "second": { "book": "2 Thessalonians", "chapter": 3, "startVerse": 7, "endVerse": 12 },
-            "gospel": { "book": "Luke", "chapter": 21, "startVerse": 5, "endVerse": 19 }
+            "first": "Malachi 3:19-20a",
+            "psalm": "Psalm 98:5-6, 7-8, 9",
+            "second": "2 Thessalonians 3:7-12",
+            "gospel": "Luke 21:5-19"
           }
         },
         {
+          "id": "christ-king-c",
           "name": "Our Lord Jesus Christ, King of the Universe",
-          "datePattern": "christ_the_king",
+          "date_pattern": "christ_king",
           "readings": {
-            "first": { "book": "2 Samuel", "chapter": 5, "startVerse": 1, "endVerse": 3 },
-            "psalm": { "book": "Psalms", "chapter": 122, "startVerse": 1, "endVerse": 5 },
-            "second": { "book": "Colossians", "chapter": 1, "startVerse": 12, "endVerse": 20 },
-            "gospel": { "book": "Luke", "chapter": 23, "startVerse": 35, "endVerse": 43 }
+            "first": "2 Samuel 5:1-3",
+            "psalm": "Psalm 122:1-2, 3-4, 4-5",
+            "second": "Colossians 1:12-20",
+            "gospel": "Luke 23:35-43"
           }
         }
       ]
     },
     "solemnities": {
+      "name": "Solemnities and Feasts",
       "feast_days": [
         {
-          "name": "The Most Holy Trinity",
-          "datePattern": "trinity_sunday",
+          "id": "presentation-lord-c",
+          "name": "The Presentation of the Lord",
+          "date_pattern": "february_2",
           "readings": {
-            "first": { "book": "Proverbs", "chapter": 8, "startVerse": 22, "endVerse": 31 },
-            "psalm": { "book": "Psalms", "chapter": 8, "startVerse": 4, "endVerse": 9 },
-            "second": { "book": "Romans", "chapter": 5, "startVerse": 1, "endVerse": 5 },
-            "gospel": { "book": "John", "chapter": 16, "startVerse": 12, "endVerse": 15 }
+            "first": "Malachi 3:1-4",
+            "psalm": "Psalm 24:7, 8, 9, 10",
+            "second": "Hebrews 2:14-18",
+            "gospel": "Luke 2:22-40"
           }
         },
         {
-          "name": "The Most Holy Body and Blood of Christ (Corpus Christi)",
-          "datePattern": "corpus_christi",
+          "id": "annunciation-c",
+          "name": "The Annunciation of the Lord",
+          "date_pattern": "march_25",
           "readings": {
-            "first": { "book": "Genesis", "chapter": 14, "startVerse": 18, "endVerse": 20 },
-            "psalm": { "book": "Psalms", "chapter": 110, "startVerse": 1, "endVerse": 4 },
-            "second": { "book": "1 Corinthians", "chapter": 11, "startVerse": 23, "endVerse": 26 },
-            "sequence": "Lauda Sion",
-            "gospel": { "book": "Luke", "chapter": 9, "startVerse": 11, "endVerse": 17 }
+            "first": "Isaiah 7:10-14; 8:10",
+            "psalm": "Psalm 40:7-8a, 8b-9, 10, 11",
+            "second": "Hebrews 10:4-10",
+            "gospel": "Luke 1:26-38"
           }
         },
         {
+          "id": "sacred-heart-c",
           "name": "The Most Sacred Heart of Jesus",
-          "datePattern": "sacred_heart",
+          "date_pattern": "sacred_heart",
           "readings": {
-            "first": { "book": "Ezekiel", "chapter": 34, "startVerse": 11, "endVerse": 16 },
-            "psalm": { "book": "Psalms", "chapter": 23, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "Romans", "chapter": 5, "startVerse": 5, "endVerse": 11 },
-            "gospel": { "book": "Luke", "chapter": 15, "startVerse": 3, "endVerse": 7 }
+            "first": "Ezekiel 34:11-16",
+            "psalm": "Psalm 23:1-3a, 3b-4, 5, 6",
+            "second": "Romans 5:5b-11",
+            "gospel": "Luke 15:3-7"
           }
         },
         {
-          "name": "The Nativity of Saint John the Baptist - Vigil",
-          "datePattern": "june_23",
-          "readings": {
-            "first": { "book": "Jeremiah", "chapter": 1, "startVerse": 4, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 71, "startVerse": 1, "endVerse": 17 },
-            "second": { "book": "1 Peter", "chapter": 1, "startVerse": 8, "endVerse": 12 },
-            "gospel": { "book": "Luke", "chapter": 1, "startVerse": 5, "endVerse": 17 }
-          }
-        },
-        {
-          "name": "The Nativity of Saint John the Baptist - Mass During the Day",
-          "datePattern": "june_24",
-          "readings": {
-            "first": { "book": "Isaiah", "chapter": 49, "startVerse": 1, "endVerse": 6 },
-            "psalm": { "book": "Psalms", "chapter": 139, "startVerse": 1, "endVerse": 15 },
-            "second": { "book": "Acts", "chapter": 13, "startVerse": 22, "endVerse": 26 },
-            "gospel": { "book": "Luke", "chapter": 1, "startVerse": 57, "endVerse": 80 }
-          }
-        },
-        {
-          "name": "Saints Peter and Paul, Apostles - Vigil",
-          "datePattern": "june_28",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 3, "startVerse": 1, "endVerse": 10 },
-            "psalm": { "book": "Psalms", "chapter": 19, "startVerse": 2, "endVerse": 5 },
-            "second": { "book": "Galatians", "chapter": 1, "startVerse": 11, "endVerse": 20 },
-            "gospel": { "book": "John", "chapter": 21, "startVerse": 15, "endVerse": 19 }
-          }
-        },
-        {
-          "name": "Saints Peter and Paul, Apostles - Mass During the Day",
-          "datePattern": "june_29",
-          "readings": {
-            "first": { "book": "Acts", "chapter": 12, "startVerse": 1, "endVerse": 11 },
-            "psalm": { "book": "Psalms", "chapter": 34, "startVerse": 2, "endVerse": 9 },
-            "second": { "book": "2 Timothy", "chapter": 4, "startVerse": 6, "endVerse": 18 },
-            "gospel": { "book": "Matthew", "chapter": 16, "startVerse": 13, "endVerse": 19 }
-          }
-        },
-        {
-          "name": "The Transfiguration of the Lord",
-          "datePattern": "august_6",
-          "readings": {
-            "first": { "book": "Daniel", "chapter": 7, "startVerse": 9, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 97, "startVerse": 1, "endVerse": 9 },
-            "second": { "book": "2 Peter", "chapter": 1, "startVerse": 16, "endVerse": 19 },
-            "gospel": { "book": "Luke", "chapter": 9, "startVerse": 28, "endVerse": 36 }
-          }
-        },
-        {
+          "id": "assumption-vigil-c",
           "name": "The Assumption of the Blessed Virgin Mary - Vigil",
-          "datePattern": "august_14",
+          "date_pattern": "august_14",
           "readings": {
-            "first": { "book": "1 Chronicles", "chapter": 15, "startVerse": 3, "endVerse": 16, "endChapter": 16, "endVerseAlt": 2 },
-            "psalm": { "book": "Psalms", "chapter": 132, "startVerse": 6, "endVerse": 14 },
-            "second": { "book": "1 Corinthians", "chapter": 15, "startVerse": 54, "endVerse": 57 },
-            "gospel": { "book": "Luke", "chapter": 11, "startVerse": 27, "endVerse": 28 }
+            "first": "1 Chronicles 15:3-4, 15-16; 16:1-2",
+            "psalm": "Psalm 132:6-7, 9-10, 13-14",
+            "second": "1 Corinthians 15:54b-57",
+            "gospel": "Luke 11:27-28"
           }
         },
         {
-          "name": "The Assumption of the Blessed Virgin Mary - Mass During the Day",
-          "datePattern": "august_15",
+          "id": "assumption-c",
+          "name": "The Assumption of the Blessed Virgin Mary",
+          "date_pattern": "august_15",
           "readings": {
-            "first": { "book": "Revelation", "chapter": 11, "startVerse": 19, "endVerse": 19, "endChapter": 12, "endVerseAlt": 10 },
-            "psalm": { "book": "Psalms", "chapter": 45, "startVerse": 10, "endVerse": 16 },
-            "second": { "book": "1 Corinthians", "chapter": 15, "startVerse": 20, "endVerse": 27 },
-            "gospel": { "book": "Luke", "chapter": 1, "startVerse": 39, "endVerse": 56 }
+            "first": "Revelation 11:19a; 12:1-6a, 10ab",
+            "psalm": "Psalm 45:10, 11, 12, 16",
+            "second": "1 Corinthians 15:20-27",
+            "gospel": "Luke 1:39-56"
           }
         },
         {
-          "name": "The Exaltation of the Holy Cross",
-          "datePattern": "september_14",
-          "readings": {
-            "first": { "book": "Numbers", "chapter": 21, "startVerse": 4, "endVerse": 9 },
-            "psalm": { "book": "Psalms", "chapter": 78, "startVerse": 1, "endVerse": 38 },
-            "second": { "book": "Philippians", "chapter": 2, "startVerse": 6, "endVerse": 11 },
-            "gospel": { "book": "John", "chapter": 3, "startVerse": 13, "endVerse": 17 }
-          }
-        },
-        {
+          "id": "all-saints-c",
           "name": "All Saints",
-          "datePattern": "november_1",
+          "date_pattern": "november_1",
           "readings": {
-            "first": { "book": "Revelation", "chapter": 7, "startVerse": 2, "endVerse": 14 },
-            "psalm": { "book": "Psalms", "chapter": 24, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "1 John", "chapter": 3, "startVerse": 1, "endVerse": 3 },
-            "gospel": { "book": "Matthew", "chapter": 5, "startVerse": 1, "endVerse": 12 }
+            "first": "Revelation 7:2-4, 9-14",
+            "psalm": "Psalm 24:1bc-2, 3-4ab, 5-6",
+            "second": "1 John 3:1-3",
+            "gospel": "Matthew 5:1-12a"
           }
         },
         {
-          "name": "The Commemoration of All the Faithful Departed (All Souls Day)",
-          "datePattern": "november_2",
+          "id": "all-souls-c",
+          "name": "The Commemoration of All the Faithful Departed",
+          "date_pattern": "november_2",
           "readings": {
-            "first": { "book": "Wisdom", "chapter": 3, "startVerse": 1, "endVerse": 9 },
-            "psalm": { "book": "Psalms", "chapter": 23, "startVerse": 1, "endVerse": 6 },
-            "second": { "book": "Romans", "chapter": 6, "startVerse": 3, "endVerse": 9 },
-            "gospel": { "book": "John", "chapter": 6, "startVerse": 37, "endVerse": 40 }
+            "first": "Wisdom 3:1-9",
+            "psalm": "Psalm 23:1-3a, 3b-4, 5, 6",
+            "second": "Romans 5:5-11",
+            "gospel": "John 6:37-40"
           }
         },
         {
-          "name": "The Dedication of the Lateran Basilica",
-          "datePattern": "november_9",
-          "readings": {
-            "first": { "book": "Ezekiel", "chapter": 47, "startVerse": 1, "endVerse": 12 },
-            "psalm": { "book": "Psalms", "chapter": 46, "startVerse": 2, "endVerse": 9 },
-            "second": { "book": "1 Corinthians", "chapter": 3, "startVerse": 9, "endVerse": 17 },
-            "gospel": { "book": "John", "chapter": 2, "startVerse": 13, "endVerse": 22 }
-          }
-        },
-        {
+          "id": "immaculate-conception-c",
           "name": "The Immaculate Conception of the Blessed Virgin Mary",
-          "datePattern": "december_8",
+          "date_pattern": "december_8",
           "readings": {
-            "first": { "book": "Genesis", "chapter": 3, "startVerse": 9, "endVerse": 20 },
-            "psalm": { "book": "Psalms", "chapter": 98, "startVerse": 1, "endVerse": 4 },
-            "second": { "book": "Ephesians", "chapter": 1, "startVerse": 3, "endVerse": 12 },
-            "gospel": { "book": "Luke", "chapter": 1, "startVerse": 26, "endVerse": 38 }
+            "first": "Genesis 3:9-15, 20",
+            "psalm": "Psalm 98:1, 2-3ab, 3cd-4",
+            "second": "Ephesians 1:3-6, 11-12",
+            "gospel": "Luke 1:26-38"
           }
         }
       ]
