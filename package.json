@@ -38,6 +38,8 @@
     "data:import-rcl": "ts-node src/scripts/import-rcl-with-dates.ts",
     "data:import-rcl:prod": "node dist/scripts/import-rcl-with-dates.js",
     "data:import-daily": "ts-node src/scripts/import-daily-lectionary.ts",
+    "data:import-catholic": "ts-node src/scripts/import-catholic-lectionary.ts",
+    "data:import-catholic:prod": "node dist/scripts/import-catholic-lectionary.js",
     "db:seed-production": "sh scripts/seed-production.sh"
   },
   "keywords": [
