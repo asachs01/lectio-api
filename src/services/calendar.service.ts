@@ -52,9 +52,9 @@ export class CalendarService {
 
     const liturgicalYearRepo = this.getLiturgicalYearRepository();
     const liturgicalYear = await liturgicalYearRepo.findOne({
-      where: { 
+      where: {
         year,
-        tradition: { id: tradition.id },
+        traditionId: tradition.id,
       },
       relations: ['seasons'],
     });
@@ -84,9 +84,9 @@ export class CalendarService {
 
     const specialDayRepo = this.getSpecialDayRepository();
     const specialDays = await specialDayRepo.find({
-      where: { 
+      where: {
         year,
-        tradition: { id: tradition.id },
+        traditionId: tradition.id,
       },
       order: { date: 'ASC' },
     });
@@ -123,8 +123,8 @@ export class CalendarService {
     const liturgicalYearRepo = this.getLiturgicalYearRepository();
     const liturgicalYears = await liturgicalYearRepo.find({
       where: [
-        { year: currentYear, tradition: { id: tradition.id } },
-        { year: currentYear - 1, tradition: { id: tradition.id } },
+        { year: currentYear, traditionId: tradition.id },
+        { year: currentYear - 1, traditionId: tradition.id },
       ],
       relations: ['seasons'],
     });
@@ -160,8 +160,8 @@ export class CalendarService {
     const specialDayRepo = this.getSpecialDayRepository();
     const specialDays = await specialDayRepo.find({
       where: [
-        { year: currentYear, tradition: { id: tradition.id } },
-        { year: currentYear + 1, tradition: { id: tradition.id } },
+        { year: currentYear, traditionId: tradition.id },
+        { year: currentYear + 1, traditionId: tradition.id },
       ],
       order: { date: 'ASC' },
     });
