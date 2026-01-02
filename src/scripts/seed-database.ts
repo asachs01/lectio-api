@@ -3,7 +3,8 @@ import { Tradition } from '../models/tradition.entity';
 import { Reading } from '../models/reading.entity';
 import { Season } from '../models/season.entity';
 import { SpecialDay, SpecialDayType } from '../models/special-day.entity';
-import { LiturgicalYear } from '../models/liturgical-year.entity';
+import { LiturgicalYear, LiturgicalCycle } from '../models/liturgical-year.entity';
+import { Scripture } from '../models/scripture.entity';
 import { LiturgicalCalendar } from '../utils/liturgical-calendar';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
@@ -43,7 +44,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'lectionary_api',
   synchronize: true, // Enable for seeding
   logging: true,
-  entities: [Tradition, Reading, Season, SpecialDay, LiturgicalYear],
+  entities: [Tradition, Reading, Season, SpecialDay, LiturgicalYear, Scripture],
 });
 
 async function seed(): Promise<void> {
@@ -98,31 +99,41 @@ async function seed(): Promise<void> {
     console.log('✅ Traditions created');
 
     // Create Liturgical Years with calculated dates
-    const years = [];
+    const years: Array<{
+      name: string;
+      year: number;
+      cycle: LiturgicalCycle;
+      tradition: Tradition | undefined;
+      startDate: Date;
+      endDate: Date;
+    }> = [];
     for (let calendarYear = 2023; calendarYear <= 2026; calendarYear++) {
       const liturgicalYear = LiturgicalCalendar.generateLiturgicalYear(calendarYear);
       const nextLiturgicalYear = LiturgicalCalendar.generateLiturgicalYear(calendarYear + 1);
-      
+
       years.push({
+        name: `Year ${liturgicalYear.cycle} (${liturgicalYear.year})`,
         year: liturgicalYear.year,
-        yearCycle: liturgicalYear.cycle,
+        cycle: liturgicalYear.cycle as LiturgicalCycle,
         tradition: traditionEntities.find(t => t.abbreviation === 'RCL'),
         startDate: liturgicalYear.advent1,
         endDate: new Date(nextLiturgicalYear.advent1.getTime() - 24 * 60 * 60 * 1000), // Day before next Advent
       });
     }
 
-    const yearEntities = [];
+    const yearEntities: LiturgicalYear[] = [];
     for (const year of years) {
-      const exists = await AppDataSource.getRepository(LiturgicalYear).findOne({ 
-        where: { 
+      const exists = await AppDataSource.getRepository(LiturgicalYear).findOne({
+        where: {
           year: year.year,
           tradition: { id: year.tradition?.id },
-        }, 
+        },
       });
       if (!exists) {
-        const entity = await AppDataSource.getRepository(LiturgicalYear).save(year);
+        const entity = await AppDataSource.getRepository(LiturgicalYear).save(year as any);
         yearEntities.push(entity);
+      } else {
+        yearEntities.push(exists);
       }
     }
     console.log('✅ Liturgical years created');
