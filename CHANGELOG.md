@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Removed duplicate source files in src directory
 - Consolidated ORM configuration files
+- Fixed TypeORM entity loading in import scripts by using explicit imports instead of glob patterns
+- Fixed LiturgicalYear creation with required `name` field and correct `cycle` column
+- Fixed UUID validation in TraditionsService.getSeasons() to prevent PostgreSQL errors
+- Fixed date formatting in TraditionsService and CalendarService to handle both Date objects and strings from TypeORM
 
 ### Security
 - Added rate limiting to prevent API abuse
