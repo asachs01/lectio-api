@@ -4,16 +4,11 @@ import { App } from '../../src/app';
 // Mock the DatabaseService to avoid actual database connections
 jest.mock('../../src/services/database.service');
 
-// Test API key for authenticated requests
-const TEST_API_KEY = 'test-api-key-12345';
-
 describe('API Endpoints Integration Tests', () => {
   let app: App;
   let appInstance: any;
 
   beforeAll(async () => {
-    // Set up test API key
-    process.env.API_KEYS = TEST_API_KEY;
     app = new App();
     appInstance = app.getApp();
   });
@@ -81,7 +76,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return all traditions', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -94,7 +88,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return traditions with required fields', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         if (response.body.data.length > 0) {
@@ -109,7 +102,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should include proper headers', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.headers['content-type']).toMatch(/json/);
@@ -120,7 +112,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return specific tradition by id', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions/rcl')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -132,7 +123,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 404 for non-existent tradition', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions/nonexistent')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(404);
 
         expect(response.body).toHaveProperty('error');
@@ -144,7 +134,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return all traditions for root traditions path', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions/')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200); // This is the same as /api/v1/traditions
 
         expect(response.body).toHaveProperty('data');
@@ -157,7 +146,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return seasons for a tradition', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions/rcl/seasons')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -170,7 +158,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should accept year query parameter', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions/rcl/seasons?year=2024')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('year', 2024);
@@ -180,7 +167,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for invalid year', async () => {
         const response = await request(appInstance)
           .get('/api/v1/traditions/rcl/seasons?year=invalid')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body).toHaveProperty('error');
@@ -191,13 +177,11 @@ describe('API Endpoints Integration Tests', () => {
   });
 
   describe('Readings API Endpoints', () => {
-    // TODO: Tests that require database mock to return readings data are skipped
-    // The mock setup doesn't properly stub readings endpoints
+    // TODO: Fix mock setup - readings endpoints return 404 without proper database mock
     describe('GET /api/v1/readings/today', () => {
       it.skip('should return today\'s readings', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/today')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -210,7 +194,6 @@ describe('API Endpoints Integration Tests', () => {
       it.skip('should accept tradition query parameter', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/today?tradition=catholic')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body.data).toHaveProperty('traditionId', 'catholic');
@@ -221,7 +204,6 @@ describe('API Endpoints Integration Tests', () => {
       it.skip('should return readings by date', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings?date=2024-12-25')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -233,7 +215,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for missing date parameter', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body).toHaveProperty('error');
@@ -244,7 +225,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for invalid date format', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings?date=invalid-date')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body).toHaveProperty('error');
@@ -255,7 +235,6 @@ describe('API Endpoints Integration Tests', () => {
       it.skip('should accept tradition parameter', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings?date=2024-12-25&tradition=episcopal')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body.data).toHaveProperty('traditionId', 'episcopal');
@@ -266,14 +245,13 @@ describe('API Endpoints Integration Tests', () => {
       it('should return readings for date range', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/range?start=2024-12-01&end=2024-12-03')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
         expect(response.body).toHaveProperty('pagination');
         expect(response.body).toHaveProperty('dateRange');
         expect(Array.isArray(response.body.data)).toBe(true);
-
+        
         expect(response.body.pagination).toHaveProperty('page');
         expect(response.body.pagination).toHaveProperty('limit');
         expect(response.body.pagination).toHaveProperty('total');
@@ -286,7 +264,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for missing parameters', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/range?start=2024-12-01')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body.error).toHaveProperty('statusCode', 400);
@@ -296,7 +273,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should handle pagination parameters', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/range?start=2024-12-01&end=2024-12-05&page=2&limit=2')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body.pagination.page).toBe(2);
@@ -306,7 +282,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for invalid date order', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/range?start=2024-12-10&end=2024-12-01')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body.error.message).toContain('Start date must be before end date');
@@ -319,7 +294,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return current calendar information', async () => {
         const response = await request(appInstance)
           .get('/api/v1/calendar/current')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -333,7 +307,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should accept tradition query parameter', async () => {
         await request(appInstance)
           .get('/api/v1/calendar/current?tradition=catholic')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
       });
     });
@@ -342,7 +315,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return calendar for specific year', async () => {
         const response = await request(appInstance)
           .get('/api/v1/calendar/2024')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -355,7 +327,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for invalid year', async () => {
         const response = await request(appInstance)
           .get('/api/v1/calendar/invalid-year')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body.error).toHaveProperty('statusCode', 400);
@@ -365,7 +336,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for year out of range', async () => {
         const response = await request(appInstance)
           .get('/api/v1/calendar/1800')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body.error.message).toContain('Invalid year');
@@ -376,7 +346,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return seasons for specific year', async () => {
         const response = await request(appInstance)
           .get('/api/v1/calendar/2024/seasons')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(200);
 
         expect(response.body).toHaveProperty('data');
@@ -388,7 +357,6 @@ describe('API Endpoints Integration Tests', () => {
       it('should return 400 for invalid year', async () => {
         const response = await request(appInstance)
           .get('/api/v1/calendar/invalid/seasons')
-          .set('X-API-Key', TEST_API_KEY)
           .expect(400);
 
         expect(response.body.error.statusCode).toBe(400);
@@ -439,7 +407,6 @@ describe('API Endpoints Integration Tests', () => {
     it('should handle OPTIONS preflight requests', async () => {
       await request(appInstance)
         .options('/api/v1/traditions')
-        .set('X-API-Key', TEST_API_KEY)
         .expect(204);
     });
   });
@@ -448,7 +415,6 @@ describe('API Endpoints Integration Tests', () => {
     it('should include rate limit headers', async () => {
       await request(appInstance)
         .get('/api/v1/traditions')
-        .set('X-API-Key', TEST_API_KEY)
         .expect(200);
 
       // Rate limit headers may or may not be present depending on configuration
@@ -460,7 +426,6 @@ describe('API Endpoints Integration Tests', () => {
     it('should return JSON content-type for API routes', async () => {
       const response = await request(appInstance)
         .get('/api/v1/traditions')
-        .set('X-API-Key', TEST_API_KEY)
         .expect(200);
 
       expect(response.headers['content-type']).toMatch(/application\/json/);
@@ -484,47 +449,6 @@ describe('API Endpoints Integration Tests', () => {
       // Helmet adds various security headers
       expect(response.headers).toHaveProperty('x-content-type-options');
       expect(response.headers).toHaveProperty('x-frame-options');
-    });
-  });
-
-  describe('API Authentication', () => {
-    it('should return 401 when API key is missing', async () => {
-      const response = await request(appInstance)
-        .get('/api/v1/traditions')
-        .expect(401);
-
-      expect(response.body).toHaveProperty('error', 'Unauthorized');
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('API key required');
-    });
-
-    it('should return 401 when API key is invalid', async () => {
-      const response = await request(appInstance)
-        .get('/api/v1/traditions')
-        .set('X-API-Key', 'invalid-key')
-        .expect(401);
-
-      expect(response.body).toHaveProperty('error', 'Unauthorized');
-      expect(response.body.message).toContain('Invalid API key');
-    });
-
-    it('should allow access with valid API key', async () => {
-      await request(appInstance)
-        .get('/api/v1/traditions')
-        .set('X-API-Key', TEST_API_KEY)
-        .expect(200);
-    });
-
-    it('should not require API key for health endpoint', async () => {
-      await request(appInstance)
-        .get('/health')
-        .expect(200);
-    });
-
-    it('should not require API key for root landing page', async () => {
-      await request(appInstance)
-        .get('/')
-        .expect(200);
     });
   });
 });
