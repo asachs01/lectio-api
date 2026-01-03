@@ -7,6 +7,10 @@
 import { DataSource, In } from 'typeorm';
 import { Reading, ReadingType, ReadingOffice } from '../models/reading.entity';
 import { Tradition } from '../models/tradition.entity';
+import { LiturgicalYear } from '../models/liturgical-year.entity';
+import { Season } from '../models/season.entity';
+import { SpecialDay } from '../models/special-day.entity';
+import { Scripture } from '../models/scripture.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 import { config } from 'dotenv';
@@ -25,9 +29,7 @@ const AppDataSource = new DataSource({
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: false,
-  entities: [
-    path.join(__dirname, '..', 'models', '*.entity{.ts,.js}'),
-  ],
+  entities: [Tradition, LiturgicalYear, Season, SpecialDay, Reading, Scripture],
 });
 
 interface DailyReadingData {

@@ -13,6 +13,8 @@ import { Reading, ReadingType } from '../models/reading.entity';
 import { Season, LiturgicalColor } from '../models/season.entity';
 import { LiturgicalYear, LiturgicalCycle } from '../models/liturgical-year.entity';
 import { Tradition } from '../models/tradition.entity';
+import { Scripture } from '../models/scripture.entity';
+import { SpecialDay } from '../models/special-day.entity';
 import { LiturgicalCalendar } from '../utils/liturgical-calendar';
 
 interface ReadingData {
@@ -308,9 +310,7 @@ async function initializeDatabase(): Promise<void> {
     synchronize: false,
     logging: false,
     ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-    entities: process.env.NODE_ENV === 'production'
-      ? [path.join(__dirname, '../models/*.entity.js')]
-      : [path.join(__dirname, '../models/*.entity.ts')],
+    entities: [Tradition, LiturgicalYear, Season, SpecialDay, Reading, Scripture],
   });
   await AppDataSource.initialize();
   console.log('Database connection initialized');
