@@ -247,6 +247,12 @@ const options: swaggerJSDoc.Options = {
         description: 'Search and query scripture passages and liturgical content',
       },
     ],
+    // Global security - all endpoints require API key by default
+    security: [
+      {
+        ApiKeyAuth: [],
+      },
+    ],
   },
   // Determine API paths based on whether we're running from dist/ or src/
   // __dirname will be dist/config when running compiled JS, or src/config when running ts-node

@@ -38,7 +38,10 @@ node_modules/
 # Deployment artifacts
 .app-id
 .app-url
-dist/ 
+dist/
+
+# Test coverage
+coverage/ 
 
 # Plans and documentation (per project requirements)
 plans/

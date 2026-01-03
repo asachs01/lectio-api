@@ -2,292 +2,381 @@
   "master": {
     "tasks": [
       {
-        "id": 37,
-        "title": "Implement Pre-commit Hooks and Code Quality Enforcement",
-        "description": "Set up Husky pre-commit hooks to enforce TypeScript type checking, linting, and testing before code is committed.",
-        "details": "Install Husky (v9+) and lint-staged. Configure pre-commit hooks to run `npm run typecheck`, `npm run lint`, and `npm test`. Ensure lint-staged is set up to only check staged files for linting and type errors. Integrate with ESLint (v9+) and TypeScript (v5.4+) for maximum compatibility. Block commits if any check fails. Document the workflow in CONTRIBUTING.md.",
-        "testStrategy": "Attempt to commit code with type errors, lint errors, and failing tests; verify that the commit is blocked. Validate that clean code passes all hooks and is committed successfully.",
+        "id": 46,
+        "title": "Remove default admin key and implement proper environment validation",
+        "description": "Replace the default admin key with proper environment variable validation to prevent unauthenticated access to admin endpoints.",
+        "details": "1. Modify `src/routes/admin.routes.ts` to remove the default admin key fallback\n2. Implement proper environment variable validation at startup\n3. Add clear error handling for missing environment variables\n4. Update documentation to clarify required environment variables\n\nPseudo-code implementation:\n```typescript\n// In src/routes/admin.routes.ts\nconst ADMIN_KEY = process.env.ADMIN_KEY;\nif (!ADMIN_KEY) {\n  throw new Error('ADMIN_KEY environment variable is required');\n}\n\n// In application startup (src/index.ts or similar)\nfunction validateRequiredEnvVars() {\n  const required = ['ADMIN_KEY', 'DB_USERNAME', 'DB_PASSWORD'];\n  const missing = required.filter(key => !process.env[key]);\n  \n  if (missing.length > 0) {\n    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);\n  }\n}\n```",
+        "testStrategy": "1. Unit test the environment validation function with various scenarios (all variables present, some missing)\n2. Integration test to verify application fails to start when ADMIN_KEY is missing\n3. Test admin routes with valid and invalid keys to ensure proper authentication\n4. Verify error messages are clear and actionable",
         "priority": "high",
         "dependencies": [],
-        "status": "done",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Install Husky and lint-staged",
-            "description": "Add Husky (v9+) and lint-staged as development dependencies and initialize Husky in the project.",
-            "dependencies": [],
-            "details": "Run `npm install --save-dev husky lint-staged`. Initialize Husky with `npx husky install` and ensure the prepare script is set in package.json for automatic setup on install.\n<info added on 2025-08-24T17:23:03.005Z>\nInstallation completed successfully. Husky v9.1.7 and lint-staged v15.5.2 have been added as dev dependencies. Husky has been initialized in the project, creating the .husky directory with a default pre-commit hook that runs `npm test`. The `prepare` script has been added to package.json with the value `husky` to ensure automatic setup whenever the project is installed. The project is now ready for configuring the pre-commit hook with custom commands.\n</info added on 2025-08-24T17:23:03.005Z>",
-            "status": "done",
-            "testStrategy": "Verify that the .husky directory is created and Husky is initialized. Confirm lint-staged is listed in devDependencies."
-          },
-          {
-            "id": 2,
-            "title": "Configure Husky Pre-commit Hook",
-            "description": "Set up a Husky pre-commit hook to run type checking, linting, and testing commands before commits.",
-            "dependencies": [
-              "37.1"
-            ],
-            "details": "Create a .husky/pre-commit file that runs `npm run typecheck`, `npm run lint`, and `npm test`. Ensure the hook blocks commits if any command fails.\n<info added on 2025-08-24T17:25:45.216Z>\nSuccessfully configured the Husky pre-commit hook. Created a .husky/pre-commit script that runs:\n\n1. TypeScript type checking (`npm run typecheck`)\n2. lint-staged for linting staged files\n3. Tests (`npm test`)\n4. Build verification\n\nThe hook is executable and blocks commits if any check fails. Each step provides clear feedback with emojis and error messages to help developers understand what failed. The pre-commit hook is now fully operational and will prevent broken code from being committed to the repository.\n</info added on 2025-08-24T17:25:45.216Z>",
-            "status": "done",
-            "testStrategy": "Attempt to commit code with type errors, lint errors, or failing tests and confirm the commit is blocked."
-          },
-          {
-            "id": 3,
-            "title": "Configure lint-staged for Staged File Checks",
-            "description": "Set up lint-staged to only run linting and type checking on staged files.",
-            "dependencies": [
-              "37.1"
-            ],
-            "details": "Update lint-staged configuration in package.json or .lintstagedrc to run ESLint and TypeScript checks on staged files only.\n<info added on 2025-08-24T17:25:54.814Z>\nSuccessfully configured lint-staged in package.json with the following settings:\n- ESLint with --fix option runs on staged JavaScript and TypeScript files\n- TypeScript type checking runs only on staged TypeScript files\n- Configuration is properly integrated with the Husky pre-commit hook\n- The setup now only processes staged files, improving commit performance\n- All checks are fully operational and ready for use by the development team\n</info added on 2025-08-24T17:25:54.814Z>",
-            "status": "done",
-            "testStrategy": "Stage files with lint or type errors and verify that only those files are checked and errors block the commit."
-          },
-          {
-            "id": 4,
-            "title": "Integrate ESLint and TypeScript for Compatibility",
-            "description": "Ensure ESLint (v9+) and TypeScript (v5.4+) are installed and properly configured for maximum compatibility.",
-            "dependencies": [
-              "37.1"
-            ],
-            "details": "Install and configure ESLint and TypeScript, including recommended plugins and rules. Verify that both tools work together without conflicts.\n<info added on 2025-08-24T17:23:46.152Z>\nESLint configuration has been successfully fixed by correcting the extends reference from '@typescript-eslint/recommended' to 'plugin:@typescript-eslint/recommended'. The linter is now operational and has identified 448 issues (263 errors, 185 warnings) throughout the codebase, with 247 of these being automatically fixable using the --fix option. TypeScript compilation is also functioning correctly, and both tools are now properly integrated and compatible with each other. This configuration is ready to be incorporated into the pre-commit hooks as planned.\n</info added on 2025-08-24T17:23:46.152Z>",
-            "status": "done",
-            "testStrategy": "Run `npm run lint` and `npm run typecheck` to confirm no configuration errors and that both tools catch relevant issues."
-          },
-          {
-            "id": 5,
-            "title": "Document Workflow in CONTRIBUTING.md",
-            "description": "Write clear documentation of the pre-commit workflow, including setup, usage, and troubleshooting steps.",
-            "dependencies": [
-              "37.2",
-              "37.3",
-              "37.4"
-            ],
-            "details": "Update or create CONTRIBUTING.md to describe Husky, lint-staged, ESLint, and TypeScript integration, and how contributors should use and troubleshoot the hooks.\n<info added on 2025-08-24T17:26:54.134Z>\nThe CONTRIBUTING.md documentation has been successfully created with comprehensive content covering all required aspects of the development workflow. The document includes detailed sections on:\n\n1. Development environment setup instructions\n2. Pre-commit hooks configuration with Husky and lint-staged\n3. ESLint and TypeScript integration details\n4. Step-by-step workflow for contributors\n5. Troubleshooting guide for common issues\n6. Code quality standards and best practices\n7. Project structure overview\n8. Guidelines for submitting pull requests\n\nAll sections provide clear instructions that will help new contributors understand how to work with the codebase while maintaining quality standards through the automated pre-commit checks.\n</info added on 2025-08-24T17:26:54.134Z>",
-            "status": "done",
-            "testStrategy": "Review documentation for completeness and clarity. Have a new contributor follow the steps and confirm successful setup and usage."
-          }
-        ]
-      },
-      {
-        "id": 38,
-        "title": "Resolve TypeScript Compilation and Type Safety Issues",
-        "description": "Fix all TypeScript compilation errors and enforce strict type safety across the codebase, especially in middleware and models.",
-        "details": "Upgrade TypeScript to latest LTS (v5.4+). Refactor middleware files (health-checks.ts, observability.ts, rate-limiter.ts) to resolve type errors. Ensure all models and database entities use explicit types and interfaces. Fix import/export and module resolution issues. Use tsconfig strict mode. Implement typed error objects for error handling. Leverage ESLint TypeScript plugin for additional type checks.",
-        "testStrategy": "Run `npm run typecheck` and ensure zero errors. Add type-driven unit tests for critical modules. Review PRs for type safety violations.",
-        "priority": "high",
-        "dependencies": [
-          37
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Upgrade TypeScript and Configure Strict Mode",
-            "description": "Upgrade the project to the latest LTS version of TypeScript (v5.4+), update all relevant dependencies, and enable strict type checking in tsconfig.json.",
-            "dependencies": [],
-            "details": "Ensure all deprecated compiler options are removed or replaced according to TypeScript 5.4+ requirements. Set 'strict' to true in tsconfig.json and review for any breaking changes introduced by the upgrade.\n<info added on 2025-08-24T17:28:48.817Z>\nSuccessfully upgraded TypeScript to v5.8.3, exceeding the required v5.4+ target. Updated tsconfig.json with optimized compiler options including enabling strict mode while maintaining compatibility with existing code. Added noFallthroughCasesInSwitch for improved switch statement safety. The configuration balances strictness with practicality - initial testing with maximum strictness revealed 301 type errors, but our current balanced approach reduced this to 98 manageable errors that can be systematically addressed. These remaining errors are primarily in middleware and models, which aligns with the next subtask focus areas. The project is now ready to proceed with targeted type error resolution.\n</info added on 2025-08-24T17:28:48.817Z>",
-            "status": "done",
-            "testStrategy": "Run 'npm run typecheck' and verify that the project compiles without errors. Confirm that strict mode is enforced by introducing intentional type errors and ensuring they are caught."
-          },
-          {
-            "id": 2,
-            "title": "Refactor Middleware for Type Safety",
-            "description": "Refactor all middleware files (health-checks.ts, observability.ts, rate-limiter.ts) to resolve existing type errors and enforce explicit typing.",
-            "dependencies": [
-              "38.1"
-            ],
-            "details": "Update function signatures, request/response types, and any shared utilities to use explicit TypeScript types and interfaces. Address any issues arising from the TypeScript upgrade.",
-            "status": "pending",
-            "testStrategy": "Run 'npm run typecheck' and ensure zero type errors in middleware files. Add or update unit tests to verify type-driven behavior."
-          },
-          {
-            "id": 3,
-            "title": "Enforce Explicit Types in Models and Database Entities",
-            "description": "Audit all models and database entities to ensure explicit TypeScript types and interfaces are used throughout.",
-            "dependencies": [
-              "38.1"
-            ],
-            "details": "Replace implicit 'any' types with well-defined interfaces or types. Ensure all properties, method parameters, and return types are explicitly typed.",
-            "status": "pending",
-            "testStrategy": "Run 'npm run typecheck' and confirm no implicit 'any' warnings or errors. Add type-driven unit tests for critical model logic."
-          },
-          {
-            "id": 4,
-            "title": "Resolve Import/Export and Module Resolution Issues",
-            "description": "Identify and fix all import/export and module resolution errors across the codebase to ensure compatibility with the upgraded TypeScript version.",
-            "dependencies": [
-              "38.1"
-            ],
-            "details": "Update import/export syntax as needed, adjust tsconfig paths or module settings, and verify all modules resolve correctly in both development and build environments.",
-            "status": "pending",
-            "testStrategy": "Run 'npm run typecheck' and build the project to ensure all modules resolve without errors. Add integration tests for modules with complex dependencies."
-          },
-          {
-            "id": 5,
-            "title": "Implement Typed Error Handling and Integrate ESLint TypeScript Plugin",
-            "description": "Refactor error handling to use typed error objects and configure the ESLint TypeScript plugin for additional type checks.",
-            "dependencies": [
-              "38.2",
-              "38.3",
-              "38.4"
-            ],
-            "details": "Define custom error types/interfaces, update error handling logic to use them, and ensure ESLint is configured to enforce type safety rules.",
-            "status": "pending",
-            "testStrategy": "Run 'npm run lint' and 'npm run typecheck' to verify no lint or type errors. Add tests to ensure typed errors are correctly thrown and handled."
-          }
-        ]
-      },
-      {
-        "id": 39,
-        "title": "Repair and Enforce ESLint Configuration",
-        "description": "Fix broken ESLint configuration and enforce code style and best practices throughout the codebase.",
-        "details": "Update ESLint to v9+ and @typescript-eslint to latest. Repair or regenerate .eslintrc.js/.json. Ensure compatibility with TypeScript and Prettier. Add recommended rules for Node.js, security, and import sorting. Run `eslint --fix` across the codebase. Integrate ESLint into CI and pre-commit hooks.",
-        "testStrategy": "Run `npm run lint` and verify zero errors. Intentionally introduce lint violations and confirm they are caught. Validate auto-fix works as expected.",
-        "priority": "high",
-        "dependencies": [
-          37,
-          38
-        ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 40,
-        "title": "Overhaul Test Infrastructure and Achieve >80% Coverage",
-        "description": "Fix failing integration tests, write comprehensive unit and service tests, and establish robust test utilities.",
-        "details": "Upgrade Jest (v30+) and Supertest (v8+). Refactor tests/integration/api.test.ts to match actual API contracts. Write unit tests for all controllers and service layer logic. Add middleware tests for authentication, rate limiting, and observability. Create reusable test fixtures and utilities. Integrate test coverage reporting (e.g., jest --coverage).",
-        "testStrategy": "Run `npm test` and ensure all tests pass with >80% coverage. Use coverage reports to identify and address gaps. Validate test utilities with sample cases.",
+        "id": 47,
+        "title": "Enable SSL certificate validation for database connections",
+        "description": "Fix the critical security vulnerability by enabling proper SSL certificate validation for database connections to prevent man-in-the-middle attacks.",
+        "details": "1. Update the database configuration in `src/config/database.config.ts` to properly handle SSL connections\n2. Remove the `rejectUnauthorized: false` setting which disables certificate validation\n3. Implement proper CA certificate handling for production environments\n4. Add environment variable for specifying CA certificate path\n\nPseudo-code implementation:\n```typescript\n// In src/config/database.config.ts\nconst sslConfig = process.env.DB_SSL === 'true' \n  ? process.env.NODE_ENV === 'production'\n    ? { \n        rejectUnauthorized: true,\n        ca: process.env.DB_CA_CERT ? fs.readFileSync(process.env.DB_CA_CERT) : undefined \n      }\n    : { rejectUnauthorized: true }\n  : false;\n\n// In database config object\nssl: sslConfig,\n```",
+        "testStrategy": "1. Unit test SSL configuration generation with different environment variables\n2. Integration test with a mock SSL server to verify certificate validation\n3. Test connection with valid and invalid certificates\n4. Document and test deployment process with proper certificates",
         "priority": "high",
-        "dependencies": [
-          38,
-          39
-        ],
+        "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 41,
-        "title": "Test and Validate Database Models, Migrations, and Associations",
-        "description": "Ensure all TypeORM entities, migrations, and associations are correct and fully tested.",
-        "details": "Upgrade TypeORM (v0.3+). Write tests for all entity relationships and constraints. Validate migration scripts and seeding processes in a test database. Implement error handling for database connection failures. Use testcontainers or Docker Compose for isolated DB testing.",
-        "testStrategy": "Run automated tests for all entities and migrations. Simulate migration failures and verify error handling. Check referential integrity and constraint enforcement.",
+        "id": 48,
+        "title": "Implement authentication middleware for all API endpoints",
+        "description": "Add authentication middleware to all public API endpoints as required by the project specifications, ensuring all routes are properly secured.",
+        "details": "1. Create a new authentication middleware in `src/middleware/auth.middleware.ts`\n2. Implement API key or JWT validation based on project requirements\n3. Apply the middleware to all non-health check routes\n4. Update Swagger documentation to reflect authentication requirements\n\nPseudo-code implementation:\n```typescript\n// src/middleware/auth.middleware.ts\nimport { Request, Response, NextFunction } from 'express';\nimport { logger } from '../utils/logger';\n\nexport function authMiddleware(req: Request, res: Response, next: NextFunction) {\n  const apiKey = req.headers['x-api-key'] || req.query.apiKey;\n  \n  if (!apiKey) {\n    return res.status(401).json({ \n      error: { \n        message: 'Authentication required', \n        statusCode: 401,\n        timestamp: new Date().toISOString() \n      } \n    });\n  }\n  \n  // Validate API key (from database or environment variable)\n  if (apiKey !== process.env.API_KEY) {\n    logger.warn(`Invalid API key attempt: ${req.ip}`);\n    return res.status(403).json({ \n      error: { \n        message: 'Invalid authentication credentials', \n        statusCode: 403,\n        timestamp: new Date().toISOString() \n      } \n    });\n  }\n  \n  next();\n}\n\n// Apply to routes in src/app.ts\napp.use('/api/v1/readings', authMiddleware, readingsRouter);\napp.use('/api/v1/traditions', authMiddleware, traditionsRouter);\napp.use('/api/v1/calendar', authMiddleware, calendarRouter);\n```",
+        "testStrategy": "1. Unit test the auth middleware with various scenarios (missing key, invalid key, valid key)\n2. Integration tests for each protected endpoint to verify authentication\n3. Test bypass of health check endpoints\n4. Performance test to ensure minimal overhead\n5. Test error response format consistency",
         "priority": "high",
-        "dependencies": [
-          40
-        ],
+        "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 42,
-        "title": "Comprehensive API Endpoint Validation and Testing",
-        "description": "Test all REST endpoints for correct request/response validation, error handling, and authentication flows.",
-        "details": "Use Supertest and Postman for endpoint testing. Validate all endpoints against OpenAPI 3.0 spec. Test for correct HTTP status codes, error envelopes, and input validation. Verify authentication and authorization flows (API key, JWT). Ensure API documentation matches implementation.",
-        "testStrategy": "Automate endpoint tests in CI. Use Postman/Newman for regression suites. Cross-check OpenAPI spec with actual responses. Test invalid inputs and edge cases.",
+        "id": 49,
+        "title": "Replace shell command execution with programmatic alternatives",
+        "description": "Replace the unsafe `execSync` calls in admin routes with programmatic alternatives or job queue implementation to prevent command injection vulnerabilities.",
+        "details": "1. Install and configure a job queue library (Bull or Agenda)\n2. Create dedicated job processors for each current shell command\n3. Replace direct `execSync` calls with job queue operations\n4. Implement proper error handling and job status tracking\n\nPseudo-code implementation:\n```typescript\n// Install Bull: npm install bull @types/bull\n\n// src/jobs/queue.ts\nimport Queue from 'bull';\nimport { redisConfig } from '../config/redis.config';\n\nexport const migrationQueue = new Queue('database-migrations', {\n  redis: redisConfig\n});\n\nexport const importQueue = new Queue('data-imports', {\n  redis: redisConfig\n});\n\n// src/jobs/processors/migration.processor.ts\nimport { DataSource } from 'typeorm';\nimport { migrationQueue } from '../queue';\nimport { logger } from '../../utils/logger';\n\nmigrationQueue.process(async (job) => {\n  try {\n    const dataSource = await getDataSource();\n    const migrations = await dataSource.runMigrations();\n    return { success: true, migrations };\n  } catch (error) {\n    logger.error('Migration job failed:', error);\n    throw error;\n  }\n});\n\n// In admin routes\nrouter.post('/run-migrations', adminAuth, async (req, res) => {\n  try {\n    const job = await migrationQueue.add({}, { \n      attempts: 3,\n      backoff: { type: 'exponential', delay: 5000 }\n    });\n    \n    return res.json({ \n      success: true, \n      message: 'Migration job queued', \n      jobId: job.id \n    });\n  } catch (error) {\n    logger.error('Failed to queue migration job:', error);\n    return res.status(500).json({ error: 'Failed to queue migration job' });\n  }\n});\n```",
+        "testStrategy": "1. Unit test job processors with mocked database connections\n2. Integration test job queue with test database\n3. Test error handling and retry logic\n4. Test job status reporting\n5. Load test with multiple concurrent jobs",
         "priority": "high",
-        "dependencies": [
-          40,
-          41
-        ],
+        "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 43,
-        "title": "Validate Build, Deployment, and Observability Pipeline",
-        "description": "Ensure Docker build, environment configuration, logging, and monitoring are functional and production-ready.",
-        "details": "Update Dockerfile for multi-stage builds and Node.js LTS. Validate environment variable handling with dotenv and process.env. Test logging (e.g., pino v8+) and monitoring (e.g., Prometheus, Grafana). Create deployment validation script. Integrate with GitHub Actions for CI/CD. Ensure health check endpoints are operational.",
-        "testStrategy": "Run `npm run build` and deploy to staging. Validate logs and metrics in monitoring dashboard. Simulate failures and verify observability. Confirm health checks and deployment script success.",
+        "id": 50,
+        "title": "Create database schema sync migration",
+        "description": "Create a comprehensive migration to align the database schema with TypeORM entities, fixing the critical issue of schema drift and missing columns.",
+        "details": "1. Audit all entities against existing migrations to identify discrepancies\n2. Create a new migration that adds missing columns and fixes type mismatches\n3. Add validation to ensure entity-migration consistency\n4. Document the schema changes\n\nPseudo-code implementation:\n```typescript\n// src/migrations/1704456789-SchemaSync.ts\nimport { MigrationInterface, QueryRunner } from 'typeorm';\n\nexport class SchemaSync1704456789 implements MigrationInterface {\n  name = 'SchemaSync1704456789';\n\n  public async up(queryRunner: QueryRunner): Promise<void> {\n    // Add missing tradition_id column to special_day table\n    await queryRunner.query(`\n      ALTER TABLE \"special_day\" ADD COLUMN IF NOT EXISTS \"tradition_id\" integer\n    `);\n    \n    // Add foreign key constraint\n    await queryRunner.query(`\n      ALTER TABLE \"special_day\" ADD CONSTRAINT \"FK_special_day_tradition\" \n      FOREIGN KEY (\"tradition_id\") REFERENCES \"tradition\"(\"id\") ON DELETE CASCADE\n    `);\n    \n    // Fix type mismatches\n    // Convert rank from integer/varchar to enum\n    await queryRunner.query(`\n      ALTER TABLE \"special_day\" \n      ALTER COLUMN \"rank\" TYPE text\n    `);\n    \n    // Convert reading_office from varchar to enum\n    await queryRunner.query(`\n      ALTER TABLE \"reading\" \n      ALTER COLUMN \"reading_office\" TYPE text\n    `);\n    \n    // Add missing indexes\n    await queryRunner.query(`\n      CREATE INDEX IF NOT EXISTS \"idx_reading_date_tradition_office\" \n      ON \"reading\" (\"date\", \"tradition_id\", \"reading_office\")\n    `);\n    \n    await queryRunner.query(`\n      CREATE INDEX IF NOT EXISTS \"idx_tradition_year\" \n      ON \"tradition\" (\"tradition_id\", \"year\")\n    `);\n  }\n\n  public async down(queryRunner: QueryRunner): Promise<void> {\n    // Remove indexes\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_tradition_year\"`);\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_reading_date_tradition_office\"`);\n    \n    // Remove foreign key\n    await queryRunner.query(`ALTER TABLE \"special_day\" DROP CONSTRAINT IF EXISTS \"FK_special_day_tradition\"`);\n    \n    // Remove column\n    await queryRunner.query(`ALTER TABLE \"special_day\" DROP COLUMN IF EXISTS \"tradition_id\"`);\n  }\n}\n```",
+        "testStrategy": "1. Create test database and run migrations from scratch to verify schema creation\n2. Test with existing data to ensure compatibility\n3. Verify foreign key constraints work correctly\n4. Test rollback (down migration) functionality\n5. Create entity validation test to ensure entities match schema",
         "priority": "high",
-        "dependencies": [
-          42
-        ],
+        "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 44,
-        "title": "Fix Production Database Seeding for Liturgical Year Seasons",
-        "description": "Update the database seeding process to include complete liturgical year seasons (Lent, Easter, Pentecost, and Ordinary Time) through November 2025 to resolve the currentSeason returning null for dates after February 2025.",
-        "details": "1. Analyze the current database seeding implementation in the production environment to identify why liturgical seasons are missing after February 2025.\n\n2. Update the seeding script to include all missing liturgical seasons:\n   - Lent (typically 40 days before Easter)\n   - Easter (typically 50 days after Easter Sunday)\n   - Pentecost (follows Easter season)\n   - Ordinary Time (periods between other liturgical seasons)\n\n3. Ensure proper date calculations for variable liturgical seasons like Lent and Easter which depend on the Easter date calculation for each year.\n\n4. Implement a validation function to verify that all dates through November 2025 have a corresponding season assigned.\n\n5. Create a database migration script that can be safely applied to the production database without data loss:\n   ```typescript\n   // Example migration structure\n   export class AddMissingLiturgicalSeasons1234567890123 implements MigrationInterface {\n     public async up(queryRunner: QueryRunner): Promise<void> {\n       // Insert missing liturgical seasons\n       await queryRunner.query(`\n         INSERT INTO liturgical_seasons (name, start_date, end_date) \n         VALUES \n           ('Lent', '2025-02-15', '2025-04-05'),\n           ('Easter', '2025-04-06', '2025-05-25'),\n           ('Pentecost', '2025-05-26', '2025-06-02'),\n           ('Ordinary Time', '2025-06-03', '2025-11-30')\n       `);\n     }\n     \n     public async down(queryRunner: QueryRunner): Promise<void> {\n       // Remove added seasons if needed\n       await queryRunner.query(`\n         DELETE FROM liturgical_seasons \n         WHERE start_date >= '2025-02-15' AND end_date <= '2025-11-30'\n       `);\n     }\n   }\n   ```\n\n6. Update the currentSeason function to include proper error handling if a season is not found, returning a meaningful error message instead of null.\n\n7. Document the liturgical calendar calculation logic to ensure future maintenance is easier.\n\n8. Consider implementing an automated process to generate liturgical seasons for future years to prevent this issue from recurring.",
-        "testStrategy": "1. Create a test database environment that mirrors the production setup.\n\n2. Execute the updated seeding script against the test database.\n\n3. Write and run automated tests that:\n   - Query the database to verify all liturgical seasons exist through November 2025\n   - Call the currentSeason function with various dates throughout 2025 to ensure it returns the correct season\n   - Specifically test edge cases like season transitions (e.g., from Lent to Easter)\n   - Verify that dates in February 2025 and beyond no longer return null\n\n4. Create a validation script that:\n   ```javascript\n   // Example validation script\n   async function validateSeasons() {\n     const startDate = new Date('2025-01-01');\n     const endDate = new Date('2025-11-30');\n     \n     for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {\n       const season = await getCurrentSeason(d);\n       if (!season) {\n         console.error(`Missing season for date: ${d.toISOString().split('T')[0]}`);\n       }\n     }\n   }\n   ```\n\n5. Deploy the changes to a staging environment that mirrors production.\n\n6. Perform manual verification in the staging environment using the application UI to confirm seasons display correctly.\n\n7. Create a rollback plan in case issues are discovered after deploying to production.\n\n8. After deploying to production, monitor logs for any null season errors to confirm the fix is working.",
+        "id": 51,
+        "title": "Move admin key to Authorization header with constant-time comparison",
+        "description": "Improve security by moving the admin key from request body to Authorization header and implement constant-time comparison to prevent timing attacks.",
+        "details": "1. Update admin routes to use Authorization header instead of request body\n2. Implement constant-time comparison for admin key validation\n3. Update error handling to not expose sensitive information\n4. Document the new authentication method\n\nPseudo-code implementation:\n```typescript\n// Install crypto-js: npm install crypto-js @types/crypto-js\n\n// src/middleware/admin-auth.middleware.ts\nimport { Request, Response, NextFunction } from 'express';\nimport { timingSafeEqual } from 'crypto';\nimport { logger } from '../utils/logger';\n\nexport function adminAuthMiddleware(req: Request, res: Response, next: NextFunction) {\n  const authHeader = req.headers.authorization;\n  \n  if (!authHeader || !authHeader.startsWith('Bearer ')) {\n    return res.status(401).json({ \n      error: { \n        message: 'Admin authentication required', \n        statusCode: 401,\n        timestamp: new Date().toISOString() \n      } \n    });\n  }\n  \n  const providedKey = authHeader.slice(7); // Remove 'Bearer ' prefix\n  const adminKey = process.env.ADMIN_KEY;\n  \n  if (!adminKey) {\n    logger.error('ADMIN_KEY environment variable not set');\n    return res.status(500).json({ \n      error: { \n        message: 'Server configuration error', \n        statusCode: 500,\n        timestamp: new Date().toISOString() \n      } \n    });\n  }\n  \n  // Constant-time comparison to prevent timing attacks\n  try {\n    const providedBuffer = Buffer.from(providedKey);\n    const actualBuffer = Buffer.from(adminKey);\n    \n    if (\n      providedBuffer.length !== actualBuffer.length ||\n      !timingSafeEqual(providedBuffer, actualBuffer)\n    ) {\n      logger.warn(`Invalid admin authentication attempt from ${req.ip}`);\n      return res.status(403).json({ \n        error: { \n          message: 'Invalid admin credentials', \n          statusCode: 403,\n          timestamp: new Date().toISOString() \n        } \n      });\n    }\n    \n    next();\n  } catch (error) {\n    logger.error('Error during admin authentication:', error);\n    return res.status(500).json({ \n      error: { \n        message: 'Authentication error', \n        statusCode: 500,\n        timestamp: new Date().toISOString() \n      } \n    });\n  }\n}\n\n// Update admin routes\nrouter.use(adminAuthMiddleware);\n```",
+        "testStrategy": "1. Unit test the admin auth middleware with various scenarios\n2. Test with valid and invalid Authorization headers\n3. Test with missing Authorization header\n4. Verify timing-safe comparison works correctly\n5. Test error handling and response format",
+        "priority": "high",
+        "dependencies": [],
         "status": "pending",
-        "dependencies": [
-          41
-        ],
+        "subtasks": []
+      },
+      {
+        "id": 52,
+        "title": "Implement dependency injection container",
+        "description": "Implement a dependency injection container to reduce tight coupling, improve testability, and manage service lifecycles properly.",
+        "details": "1. Install a DI container library (tsyringe, inversify, or awilix)\n2. Create interfaces for all services\n3. Register services with the container\n4. Update controllers to use injected dependencies\n5. Remove lazy controller initialization pattern\n\nPseudo-code implementation:\n```typescript\n// Install tsyringe: npm install tsyringe reflect-metadata\n\n// src/di/container.ts\nimport 'reflect-metadata';\nimport { container } from 'tsyringe';\nimport { ReadingsService } from '../services/readings.service';\nimport { TraditionsService } from '../services/traditions.service';\nimport { CalendarService } from '../services/calendar.service';\nimport { DatabaseService } from '../services/database.service';\n\n// Register services\ncontainer.register('DatabaseService', { useClass: DatabaseService });\ncontainer.register('ReadingsService', { useClass: ReadingsService });\ncontainer.register('TraditionsService', { useClass: TraditionsService });\ncontainer.register('CalendarService', { useClass: CalendarService });\n\nexport { container };\n\n// src/services/readings.service.ts\nimport { injectable, inject } from 'tsyringe';\n\n@injectable()\nexport class ReadingsService {\n  constructor(\n    @inject('DatabaseService') private databaseService: DatabaseService,\n    @inject('TraditionsService') private traditionsService: TraditionsService\n  ) {}\n  \n  // Service methods\n}\n\n// src/controllers/readings.controller.ts\nimport { injectable, inject } from 'tsyringe';\n\n@injectable()\nexport class ReadingsController {\n  constructor(\n    @inject('ReadingsService') private readingsService: ReadingsService\n  ) {}\n  \n  // Controller methods\n}\n\n// src/routes/readings.routes.ts\nimport { container } from '../di/container';\n\nconst router = express.Router();\nconst readingsController = container.resolve(ReadingsController);\n\nrouter.get('/today', (req, res) => readingsController.getToday(req, res));\n// Other routes\n```",
+        "testStrategy": "1. Unit test the DI container setup\n2. Test service resolution and dependency injection\n3. Create mock implementations for testing\n4. Verify controllers receive correct dependencies\n5. Test application bootstrapping with DI",
         "priority": "medium",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Analyze Current Database Seeding Implementation",
-            "description": "Review the existing production database seeding scripts and data to identify why liturgical seasons are missing after February 2025.",
-            "dependencies": [],
-            "details": "Examine the current seeding logic, data sources, and any date calculation mechanisms to pinpoint gaps or errors that result in incomplete liturgical season coverage.\n<info added on 2025-09-02T15:34:39.163Z>\nAnalysis of the production database seeding implementation reveals that the system uses import-rcl-with-dates.js and import-daily-lectionary.js for seeding, not the local seed.js script as initially thought. The production database currently contains only 3 liturgical seasons:\n\n1. Advent (2024-12-03 to 2024-12-24)\n2. Christmas (2024-12-25 to 2025-01-06)\n3. Epiphany (2025-01-07 to 2025-02-13)\n\nAll seasons after February 2025 are missing from the database, including Lent, Easter, Pentecost, and Ordinary Time. This explains why currentSeason returns null for dates beyond February 2025.\n</info added on 2025-09-02T15:34:39.163Z>",
-            "status": "done",
-            "testStrategy": "Document all findings and confirm the absence of liturgical seasons for dates after February 2025 by querying the production database."
-          },
-          {
-            "id": 2,
-            "title": "Update Seeding Script to Include Complete Liturgical Seasons",
-            "description": "Modify the seeding script to insert all missing liturgical year seasons (Lent, Easter, Pentecost, and Ordinary Time) through November 2025.",
-            "dependencies": [
-              "44.1"
-            ],
-            "details": "Ensure the script covers all required seasons, using accurate start and end dates for each, and follows best practices for data seeding in production environments.\n<info added on 2025-09-02T15:36:34.454Z>\nUpdated the production seeding script (import-rcl-with-dates.ts) by implementing the createAllLiturgicalSeasons function that utilizes LiturgicalCalendar.generateLiturgicalYear() to create all six liturgical seasons (Advent, Christmas, Epiphany, Lent, Easter, Ordinary Time) with accurate start and end dates. This resolves the issue where currentSeason was returning null for dates after February 2025 due to missing seasons in the database. The implementation follows production data seeding best practices and has been deployed to the production environment for testing.\n</info added on 2025-09-02T15:36:34.454Z>\n<info added on 2025-09-02T15:44:49.475Z>\nReverted changes to import-rcl-with-dates.ts due to critical production issues. The implementation of createAllLiturgicalSeasons function caused 500 errors across all calendar endpoints in production. Service is currently degraded with all calendar endpoints failing. Will pursue an alternative approach by developing a standalone database migration/update script that can safely add the missing liturgical seasons without modifying the main seeding process. This approach will allow for more controlled testing before affecting production data flow.\n</info added on 2025-09-02T15:44:49.475Z>",
-            "status": "in-progress",
-            "testStrategy": "Run the updated script in a test environment and verify that all intended seasons are present in the database."
-          },
-          {
-            "id": 3,
-            "title": "Implement Accurate Date Calculations for Variable Seasons",
-            "description": "Develop or update logic to correctly calculate the dates for variable liturgical seasons, such as Lent and Easter, for each year through November 2025.",
-            "dependencies": [
-              "44.2"
-            ],
-            "details": "Use established algorithms for determining Easter and dependent seasons, ensuring all calculations are programmatically reproducible and documented.",
-            "status": "pending",
-            "testStrategy": "Write unit tests for the date calculation functions to confirm accuracy for all relevant years."
-          },
-          {
-            "id": 4,
-            "title": "Create Validation and Error Handling for Season Assignment",
-            "description": "Implement a validation function to ensure every date through November 2025 has a corresponding liturgical season, and update the currentSeason function to return meaningful errors if a season is not found.",
-            "dependencies": [
-              "44.3"
-            ],
-            "details": "The validation should systematically check for gaps in season coverage, and error handling should provide clear diagnostics for missing data.",
-            "status": "pending",
-            "testStrategy": "Automate tests that query all dates in the target range and verify that a valid season is returned or an informative error is provided."
-          },
-          {
-            "id": 5,
-            "title": "Develop Safe Migration Script and Documentation",
-            "description": "Create a database migration script to insert the missing seasons without data loss, and document the liturgical calendar calculation logic for future maintenance.",
-            "dependencies": [
-              "44.4"
-            ],
-            "details": "Ensure the migration script is idempotent and includes rollback logic. Provide clear documentation of the calculation and seeding process for future developers.",
-            "status": "pending",
-            "testStrategy": "Apply the migration to a test database, verify data integrity, and review documentation for completeness and clarity."
-          }
-        ]
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": 45,
-        "title": "Add Catholic and Episcopal/Anglican Lectionary Data",
-        "description": "Currently the API only supports RCL (Revised Common Lectionary) data. Need to research and import lectionary data for Catholic and Episcopal/Anglican traditions, identifying any substantial differences from RCL.",
-        "details": "Research tasks:\n1. Research Catholic Lectionary (Roman Missal) - understand differences from RCL\n2. Research Episcopal/Anglican Lectionary - may be very similar to RCL but check for differences\n3. Find reliable data sources for both traditions\n\nImplementation tasks:\n1. Create import scripts for Catholic lectionary data\n2. Create import scripts for Episcopal/Anglican lectionary data\n3. Seed the database with the new tradition data\n4. Update API documentation to reflect available traditions\n5. Test all traditions work correctly with the readings endpoints",
-        "testStrategy": "1. Verify Catholic tradition returns different readings than RCL where applicable\n2. Verify Episcopal tradition returns readings\n3. Compare specific dates where traditions differ (e.g., feast days)\n4. Test /traditions endpoint lists all three traditions\n5. Test /readings/today works for each tradition",
-        "status": "pending",
+        "id": 53,
+        "title": "Fix error handling to prevent silent failures",
+        "description": "Improve error handling in services to prevent silent failures and ensure proper error propagation to clients.",
+        "details": "1. Audit all catch blocks in services that return null, empty arrays, or swallow errors\n2. Implement proper error propagation\n3. Create custom error classes for different error types\n4. Standardize error response format across the application\n\nPseudo-code implementation:\n```typescript\n// src/errors/app-error.ts\nexport class AppError extends Error {\n  constructor(\n    public message: string,\n    public statusCode: number = 500,\n    public code?: string,\n    public details?: any\n  ) {\n    super(message);\n    this.name = this.constructor.name;\n    Error.captureStackTrace(this, this.constructor);\n  }\n}\n\nexport class NotFoundError extends AppError {\n  constructor(message: string = 'Resource not found', details?: any) {\n    super(message, 404, 'NOT_FOUND', details);\n  }\n}\n\nexport class DatabaseError extends AppError {\n  constructor(message: string = 'Database error', details?: any) {\n    super(message, 500, 'DATABASE_ERROR', details);\n  }\n}\n\n// In services\nimport { DatabaseError, NotFoundError } from '../errors/app-error';\n\nexport class ReadingsService {\n  async getReadingsByDate(date: string): Promise<Reading[]> {\n    try {\n      const readings = await this.readingRepository.find({ where: { date } });\n      \n      if (!readings || readings.length === 0) {\n        throw new NotFoundError(`No readings found for date ${date}`);\n      }\n      \n      return readings;\n    } catch (error) {\n      if (error instanceof AppError) {\n        throw error; // Re-throw application errors\n      }\n      \n      logger.error(`Error fetching readings for date ${date}:`, error);\n      throw new DatabaseError('Failed to fetch readings', { date, originalError: error.message });\n    }\n  }\n}\n\n// In error handler middleware\nimport { AppError } from '../errors/app-error';\n\nexport function errorHandler(error: Error, req: Request, res: Response, next: NextFunction) {\n  if (error instanceof AppError) {\n    return res.status(error.statusCode).json({\n      error: {\n        message: error.message,\n        code: error.code,\n        statusCode: error.statusCode,\n        timestamp: new Date().toISOString(),\n        details: process.env.NODE_ENV === 'production' ? undefined : error.details\n      }\n    });\n  }\n  \n  // Default error handling\n  const statusCode = 500;\n  return res.status(statusCode).json({\n    error: {\n      message: 'Internal server error',\n      statusCode,\n      timestamp: new Date().toISOString()\n    }\n  });\n}\n```",
+        "testStrategy": "1. Unit test custom error classes\n2. Test error propagation in services\n3. Test error handler middleware with different error types\n4. Verify consistent error response format\n5. Test error logging to ensure sensitive data is not exposed",
+        "priority": "medium",
         "dependencies": [],
-        "priority": "high",
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 54,
+        "title": "Add missing database indexes for common query patterns",
+        "description": "Create missing composite indexes for common query patterns to improve database performance and query efficiency.",
+        "details": "1. Identify common query patterns from the codebase\n2. Create a migration to add missing indexes\n3. Benchmark query performance before and after\n4. Document the indexes and their purpose\n\nPseudo-code implementation:\n```typescript\n// src/migrations/1704456790-AddMissingIndexes.ts\nimport { MigrationInterface, QueryRunner } from 'typeorm';\n\nexport class AddMissingIndexes1704456790 implements MigrationInterface {\n  name = 'AddMissingIndexes1704456790';\n\n  public async up(queryRunner: QueryRunner): Promise<void> {\n    // Common query: WHERE date = ? AND traditionId = ? AND readingOffice = ?\n    await queryRunner.query(`\n      CREATE INDEX IF NOT EXISTS \"idx_reading_date_tradition_office\" \n      ON \"reading\" (\"date\", \"tradition_id\", \"reading_office\")\n    `);\n    \n    // Common query: WHERE traditionId = ? AND year = ?\n    await queryRunner.query(`\n      CREATE INDEX IF NOT EXISTS \"idx_tradition_year\" \n      ON \"tradition\" (\"tradition_id\", \"year\")\n    `);\n    \n    // Common query: WHERE date >= ? AND date <= ? AND traditionId = ?\n    await queryRunner.query(`\n      CREATE INDEX IF NOT EXISTS \"idx_reading_date_range_tradition\" \n      ON \"reading\" (\"date\", \"tradition_id\")\n    `);\n    \n    // Common query: WHERE proper = ? AND traditionId = ?\n    await queryRunner.query(`\n      CREATE INDEX IF NOT EXISTS \"idx_reading_proper_tradition\" \n      ON \"reading\" (\"proper\", \"tradition_id\")\n    `);\n    \n    // Remove redundant indexes\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_tradition_name_unique\"`);\n  }\n\n  public async down(queryRunner: QueryRunner): Promise<void> {\n    // Remove added indexes\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_reading_proper_tradition\"`);\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_reading_date_range_tradition\"`);\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_tradition_year\"`);\n    await queryRunner.query(`DROP INDEX IF EXISTS \"idx_reading_date_tradition_office\"`);\n    \n    // Restore removed indexes\n    await queryRunner.query(`\n      CREATE UNIQUE INDEX IF NOT EXISTS \"idx_tradition_name_unique\" \n      ON \"tradition\" (\"name\")\n    `);\n  }\n}\n```",
+        "testStrategy": "1. Benchmark query performance before and after index creation\n2. Test with large datasets to verify index effectiveness\n3. Verify indexes are being used with EXPLAIN ANALYZE\n4. Test index creation and removal (migration up/down)\n5. Document index usage patterns",
+        "priority": "medium",
+        "dependencies": [
+          50
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 55,
+        "title": "Standardize response formats across all endpoints",
+        "description": "Create a consistent response envelope format for all API endpoints to improve client integration and developer experience.",
+        "details": "1. Define a standard response format for all endpoints\n2. Create response formatter utilities\n3. Update all controllers to use the standard format\n4. Document the response format in Swagger\n\nPseudo-code implementation:\n```typescript\n// src/utils/response-formatter.ts\nexport interface StandardResponse<T> {\n  data: T;\n  timestamp: string;\n  pagination?: {\n    total: number;\n    page: number;\n    limit: number;\n    hasMore: boolean;\n  };\n}\n\nexport function formatResponse<T>(data: T, pagination?: { total: number; page: number; limit: number }): StandardResponse<T> {\n  const response: StandardResponse<T> = {\n    data,\n    timestamp: new Date().toISOString()\n  };\n  \n  if (pagination) {\n    response.pagination = {\n      ...pagination,\n      hasMore: pagination.page * pagination.limit < pagination.total\n    };\n  }\n  \n  return response;\n}\n\n// In controllers\nimport { formatResponse } from '../utils/response-formatter';\n\nexport class ReadingsController {\n  async getToday(req: Request, res: Response) {\n    try {\n      const readings = await this.readingsService.getReadingsForToday();\n      return res.json(formatResponse(readings));\n    } catch (error) {\n      next(error);\n    }\n  }\n  \n  async getByDateRange(req: Request, res: Response) {\n    try {\n      const { startDate, endDate } = req.query;\n      const page = parseInt(req.query.page as string) || 1;\n      const limit = parseInt(req.query.limit as string) || 10;\n      \n      const { readings, total } = await this.readingsService.getByDateRange(\n        startDate as string,\n        endDate as string,\n        page,\n        limit\n      );\n      \n      return res.json(formatResponse(readings, { total, page, limit }));\n    } catch (error) {\n      next(error);\n    }\n  }\n}\n\n// Update admin routes to use the same format\nrouter.post('/run-migrations', adminAuth, async (req, res) => {\n  try {\n    const result = await runMigrations();\n    return res.json(formatResponse({ success: true, message: 'Migrations completed', results: result }));\n  } catch (error) {\n    next(error);\n  }\n});\n```",
+        "testStrategy": "1. Unit test the response formatter utility\n2. Test with different data types and pagination options\n3. Integration test all endpoints to verify consistent response format\n4. Verify Swagger documentation matches actual response format\n5. Test error responses follow the same format",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-14T17:36:14.216Z",
-      "updated": "2025-12-08T21:04:39.149Z",
+      "updated": "2026-01-03T15:54:53.814Z",
       "description": "Tasks for master context"
+    }
+  },
+  "project-overhaul": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Remove default admin key and implement proper environment validation",
+        "description": "Replace the default admin key with proper environment variable validation that fails on startup if the ADMIN_KEY is not set.",
+        "details": "Modify the admin routes file to remove the default fallback value for ADMIN_KEY and implement proper validation:\n\n```typescript\n// In src/routes/admin.routes.ts\n// Replace:\nconst ADMIN_KEY = process.env.ADMIN_KEY || 'default-admin-key-change-me';\n\n// With:\nconst ADMIN_KEY = process.env.ADMIN_KEY;\nif (!ADMIN_KEY) {\n  throw new Error('ADMIN_KEY environment variable is required');\n}\n\n// Also update the application startup in src/index.ts to handle this error gracefully\nprocess.on('uncaughtException', (error) => {\n  if (error.message.includes('ADMIN_KEY environment variable is required')) {\n    console.error('FATAL: Missing required environment variable ADMIN_KEY');\n    process.exit(1);\n  }\n  // Handle other uncaught exceptions\n});\n```\n\nEnsure that deployment documentation is updated to reflect this required environment variable.",
+        "testStrategy": "1. Unit test: Verify that the application throws an error when ADMIN_KEY is not set\n2. Integration test: Verify that the application exits with a non-zero status code when ADMIN_KEY is missing\n3. Manual test: Attempt to start the application without setting ADMIN_KEY and verify it fails with a clear error message",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Remove default fallback value from ADMIN_KEY",
+            "description": "Modify admin.routes.ts to throw error if ADMIN_KEY env var is not set instead of using default value",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 2,
+            "title": "Add startup validation for required environment variables",
+            "description": "Create validation in index.ts or config to check all required env vars before server starts",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 3,
+            "title": "Remove default database credentials",
+            "description": "Remove default postgres/password fallbacks from database.config.ts",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Enable SSL certificate validation for database connections",
+        "description": "Fix the critical security vulnerability by enabling proper SSL certificate validation for database connections.",
+        "details": "Modify the database configuration to properly validate SSL certificates:\n\n```typescript\n// In src/config/database.config.ts\n// Replace:\nssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,\n\n// With:\nssl: process.env.DB_SSL === 'true' ? \n  { \n    rejectUnauthorized: true,\n    ca: process.env.DB_CA_CERT ? fs.readFileSync(process.env.DB_CA_CERT) : undefined \n  } : \n  false,\n```\n\nAdd the necessary imports at the top of the file:\n```typescript\nimport * as fs from 'fs';\n```\n\nUpdate deployment documentation to include instructions for providing the CA certificate file path via the DB_CA_CERT environment variable when DB_SSL is enabled.",
+        "testStrategy": "1. Unit test: Verify that the SSL configuration is correctly set based on environment variables\n2. Integration test: Set up a test database with SSL enabled and verify connection succeeds with proper certificates\n3. Security test: Attempt to connect with an invalid certificate and verify connection is rejected",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update SSL config to validate certificates",
+            "description": "Change rejectUnauthorized from false to true in database.config.ts",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 2
+          },
+          {
+            "id": 2,
+            "title": "Configure CA certificate for production database",
+            "description": "Set up proper CA certificate handling for DigitalOcean managed database",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 2
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Move admin key to Authorization header with constant-time comparison",
+        "description": "Improve security by moving the admin key from request body to Authorization header and implement constant-time comparison to prevent timing attacks.",
+        "details": "Modify the admin routes to use Authorization header instead of request body:\n\n```typescript\n// In src/routes/admin.routes.ts\n// Import crypto for constant-time comparison\nimport * as crypto from 'crypto';\n\n// Replace the key verification middleware\nconst verifyAdminKey = (req: Request, res: Response, next: NextFunction) => {\n  const authHeader = req.headers.authorization;\n  \n  if (!authHeader || !authHeader.startsWith('Bearer ')) {\n    return res.status(401).json({ error: 'Unauthorized: Missing or invalid Authorization header' });\n  }\n  \n  const providedKey = authHeader.substring(7); // Remove 'Bearer ' prefix\n  \n  // Use constant-time comparison to prevent timing attacks\n  if (!crypto.timingSafeEqual(Buffer.from(providedKey), Buffer.from(ADMIN_KEY))) {\n    return res.status(403).json({ error: 'Forbidden: Invalid admin key' });\n  }\n  \n  next();\n};\n\n// Update all admin routes to use this middleware\n```\n\nUpdate any client code or documentation to reflect this change in authentication method.",
+        "testStrategy": "1. Unit test: Verify that the middleware correctly validates the Authorization header\n2. Integration test: Test admin endpoints with valid and invalid Authorization headers\n3. Security test: Verify that timing attacks are mitigated by using constant-time comparison",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Move admin key from request body to Authorization header",
+            "description": "Update admin.routes.ts to read key from Authorization header instead of req.body",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 3
+          },
+          {
+            "id": 2,
+            "title": "Implement constant-time comparison for admin key",
+            "description": "Use crypto.timingSafeEqual to prevent timing attacks on admin key validation",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 3
+          },
+          {
+            "id": 3,
+            "title": "Redact sensitive data from error logs",
+            "description": "Update error-handler.ts to filter admin keys and credentials before logging",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 3
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Implement authentication middleware for all API endpoints",
+        "description": "Add authentication middleware to all public API endpoints as required by the project specifications.",
+        "details": "Create an authentication middleware and apply it to all non-health check routes:\n\n```typescript\n// Create src/middleware/auth.middleware.ts\nimport { Request, Response, NextFunction } from 'express';\nimport * as crypto from 'crypto';\n\nconst API_KEY = process.env.API_KEY;\nif (!API_KEY) {\n  throw new Error('API_KEY environment variable is required');\n}\n\nexport const authenticateApiRequest = (req: Request, res: Response, next: NextFunction) => {\n  const apiKey = req.headers['x-api-key'];\n  \n  if (!apiKey) {\n    return res.status(401).json({ \n      error: { \n        message: 'Authentication required', \n        statusCode: 401,\n        timestamp: new Date().toISOString()\n      } \n    });\n  }\n  \n  // Use constant-time comparison\n  if (!crypto.timingSafeEqual(Buffer.from(apiKey.toString()), Buffer.from(API_KEY))) {\n    return res.status(403).json({ \n      error: { \n        message: 'Invalid API key', \n        statusCode: 403,\n        timestamp: new Date().toISOString()\n      } \n    });\n  }\n  \n  next();\n};\n```\n\nApply this middleware to all route files:\n\n```typescript\n// In src/routes/readings.routes.ts, traditions.routes.ts, calendar.routes.ts\nimport { authenticateApiRequest } from '../middleware/auth.middleware';\n\n// Apply to all routes except health checks\nrouter.use(authenticateApiRequest);\n```\n\nUpdate the application documentation to reflect the authentication requirements.",
+        "testStrategy": "1. Unit test: Verify that the middleware correctly validates the API key\n2. Integration test: Test all endpoints with valid and invalid API keys\n3. E2E test: Verify that health check endpoints remain accessible without authentication\n4. Documentation test: Ensure API documentation reflects authentication requirements",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create API key authentication middleware",
+            "description": "Implement middleware that validates API keys from Authorization header",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 2,
+            "title": "Apply auth middleware to readings routes",
+            "description": "Add authentication middleware to all /api/v1/readings endpoints",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 3,
+            "title": "Apply auth middleware to traditions routes",
+            "description": "Add authentication middleware to all /api/v1/traditions endpoints",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 4
+          },
+          {
+            "id": 4,
+            "title": "Apply auth middleware to calendar routes",
+            "description": "Add authentication middleware to all /api/v1/calendar endpoints",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 4
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Replace execSync with job queue for admin operations",
+        "description": "Replace the synchronous shell command execution in admin routes with an asynchronous job queue to prevent command injection and blocking the event loop.",
+        "details": "Install and implement a job queue system (Bull with Redis):\n\n```bash\nnpm install bull redis @types/bull\n```\n\nCreate a job queue service:\n\n```typescript\n// Create src/services/job-queue.service.ts\nimport Queue from 'bull';\nimport { TypeormMigrationRunner } from '../utils/typeorm-migration-runner';\nimport { DataImporter } from '../utils/data-importer';\n\nexport class JobQueueService {\n  private migrationQueue: Queue.Queue;\n  private importQueue: Queue.Queue;\n  \n  constructor() {\n    const redisConfig = {\n      host: process.env.REDIS_HOST || 'localhost',\n      port: parseInt(process.env.REDIS_PORT || '6379')\n    };\n    \n    this.migrationQueue = new Queue('database-migrations', { redis: redisConfig });\n    this.importQueue = new Queue('data-imports', { redis: redisConfig });\n    \n    this.setupProcessors();\n  }\n  \n  private setupProcessors() {\n    this.migrationQueue.process(async (job) => {\n      const migrationRunner = new TypeormMigrationRunner();\n      return await migrationRunner.runMigrations();\n    });\n    \n    this.importQueue.process(async (job) => {\n      const importer = new DataImporter();\n      return await importer.importRclWithDates();\n    });\n  }\n  \n  public async queueMigration() {\n    return this.migrationQueue.add({}, { attempts: 3 });\n  }\n  \n  public async queueImport() {\n    return this.importQueue.add({}, { attempts: 3 });\n  }\n}\n```\n\nCreate the utility classes to handle the operations programmatically:\n\n```typescript\n// Create src/utils/typeorm-migration-runner.ts\nimport { DataSource } from 'typeorm';\nimport { DatabaseService } from '../services/database.service';\n\nexport class TypeormMigrationRunner {\n  async runMigrations() {\n    const dataSource = await DatabaseService.getDataSource();\n    const migrations = await dataSource.runMigrations();\n    return { success: true, migrations };\n  }\n}\n\n// Create src/utils/data-importer.ts\n// Implement the programmatic version of the import script\n```\n\nUpdate the admin routes to use the job queue:\n\n```typescript\n// In src/routes/admin.routes.ts\nimport { JobQueueService } from '../services/job-queue.service';\n\nconst jobQueueService = new JobQueueService();\n\n// Replace execSync calls with job queue\nrouter.post('/run-migrations', verifyAdminKey, async (req, res) => {\n  try {\n    const job = await jobQueueService.queueMigration();\n    res.json({ success: true, message: 'Migration job queued', jobId: job.id });\n  } catch (error) {\n    res.status(500).json({ error: `Failed to queue migration: ${error.message}` });\n  }\n});\n\nrouter.post('/import-rcl', verifyAdminKey, async (req, res) => {\n  try {\n    const job = await jobQueueService.queueImport();\n    res.json({ success: true, message: 'Import job queued', jobId: job.id });\n  } catch (error) {\n    res.status(500).json({ error: `Failed to queue import: ${error.message}` });\n  }\n});\n```\n\nAdd a new endpoint to check job status:\n\n```typescript\nrouter.get('/job/:id', verifyAdminKey, async (req, res) => {\n  try {\n    const jobId = req.params.id;\n    const migrationJob = await jobQueueService.migrationQueue.getJob(jobId);\n    const importJob = await jobQueueService.importQueue.getJob(jobId);\n    const job = migrationJob || importJob;\n    \n    if (!job) {\n      return res.status(404).json({ error: 'Job not found' });\n    }\n    \n    const state = await job.getState();\n    const result = job.returnvalue;\n    \n    res.json({ jobId, state, result });\n  } catch (error) {\n    res.status(500).json({ error: `Failed to get job status: ${error.message}` });\n  }\n});\n```",
+        "testStrategy": "1. Unit test: Verify that the job queue service correctly queues jobs\n2. Integration test: Test the job queue with mock operations\n3. E2E test: Verify that admin endpoints correctly queue jobs and return job IDs\n4. Security test: Verify that command injection is no longer possible",
+        "priority": "high",
+        "dependencies": [
+          1,
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and configure BullMQ job queue",
+            "description": "Set up BullMQ with Redis for background job processing",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 5
+          },
+          {
+            "id": 2,
+            "title": "Replace execSync migration call with job",
+            "description": "Convert migration:run from execSync to BullMQ job",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 5
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Create database schema sync migration",
+        "description": "Create a comprehensive migration to align the database schema with entity definitions, fixing the critical issue of missing columns and type mismatches.",
+        "details": "Create a new migration that addresses all schema drift issues:\n\n```typescript\n// Create src/migrations/1704456789-SchemaSyncFix.ts\nimport { MigrationInterface, QueryRunner } from 'typeorm';\n\nexport class SchemaSyncFix1704456789 implements MigrationInterface {\n  name = 'SchemaSyncFix1704456789';\n\n  public async up(queryRunner: QueryRunner): Promise<void> {\n    // Check if tradition_id column exists in special_day table\n    const specialDayColumns = await queryRunner.query(\n      `SELECT column_name FROM information_schema.columns WHERE table_name = 'special_day' AND column_name = 'tradition_id'`\n    );\n    \n    if (specialDayColumns.length === 0) {\n      // Add missing tradition_id column\n      await queryRunner.query(\n        `ALTER TABLE \"special_day\" ADD \"tradition_id\" integer`\n      );\n      \n      // Add foreign key constraint\n      await queryRunner.query(\n        `ALTER TABLE \"special_day\" ADD CONSTRAINT \"FK_special_day_tradition\" FOREIGN KEY (\"tradition_id\") REFERENCES \"tradition\"(\"id\") ON DELETE CASCADE`\n      );\n    }\n    \n    // Fix rank column type if needed\n    await queryRunner.query(\n      `ALTER TABLE \"special_day\" ALTER COLUMN \"rank\" TYPE varchar USING rank::varchar`\n    );\n    \n    // Fix reading_office column type if needed\n    await queryRunner.query(\n      `ALTER TABLE \"reading\" ALTER COLUMN \"reading_office\" TYPE varchar USING reading_office::varchar`\n    );\n    \n    // Add missing indexes\n    await queryRunner.query(\n      `CREATE INDEX IF NOT EXISTS \"idx_reading_date_tradition_office\" ON \"reading\" (\"date\", \"tradition_id\", \"reading_office\")`\n    );\n    \n    await queryRunner.query(\n      `CREATE INDEX IF NOT EXISTS \"idx_tradition_year\" ON \"reading\" (\"tradition_id\", \"year\")`\n    );\n    \n    // Remove redundant indexes\n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_tradition_name_unique\"`\n    );\n  }\n\n  public async down(queryRunner: QueryRunner): Promise<void> {\n    // Revert index changes\n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_reading_date_tradition_office\"`\n    );\n    \n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_tradition_year\"`\n    );\n    \n    await queryRunner.query(\n      `CREATE UNIQUE INDEX IF NOT EXISTS \"idx_tradition_name_unique\" ON \"tradition\" (\"name\")`\n    );\n    \n    // Note: We don't revert the column additions or type changes as that could cause data loss\n    // In a real down migration, you would need to carefully handle this\n  }\n}\n```\n\nCreate a script to verify schema alignment:\n\n```typescript\n// Create src/scripts/verify-schema-alignment.ts\nimport { DatabaseService } from '../services/database.service';\n\nasync function verifySchemaAlignment() {\n  const dataSource = await DatabaseService.getDataSource();\n  const queryRunner = dataSource.createQueryRunner();\n  \n  try {\n    // Check for all known schema drift issues\n    const issues = [];\n    \n    // Check special_day.tradition_id\n    const specialDayColumns = await queryRunner.query(\n      `SELECT column_name FROM information_schema.columns WHERE table_name = 'special_day' AND column_name = 'tradition_id'`\n    );\n    \n    if (specialDayColumns.length === 0) {\n      issues.push('Missing column: special_day.tradition_id');\n    }\n    \n    // Check other columns and types...\n    \n    if (issues.length === 0) {\n      console.log('✅ Schema is aligned with entity definitions');\n    } else {\n      console.error('❌ Schema drift detected:');\n      issues.forEach(issue => console.error(`- ${issue}`));\n    }\n  } finally {\n    await queryRunner.release();\n  }\n}\n\nverifySchemaAlignment().catch(console.error);\n```\n\nAdd a new admin endpoint to run the verification:\n\n```typescript\n// In src/routes/admin.routes.ts\nrouter.get('/verify-schema', verifyAdminKey, async (req, res) => {\n  try {\n    const dataSource = await DatabaseService.getDataSource();\n    const queryRunner = dataSource.createQueryRunner();\n    \n    try {\n      // Perform schema verification checks\n      const issues = [];\n      \n      // Check special_day.tradition_id\n      const specialDayColumns = await queryRunner.query(\n        `SELECT column_name FROM information_schema.columns WHERE table_name = 'special_day' AND column_name = 'tradition_id'`\n      );\n      \n      if (specialDayColumns.length === 0) {\n        issues.push('Missing column: special_day.tradition_id');\n      }\n      \n      // Add more checks...\n      \n      res.json({ success: true, schemaAligned: issues.length === 0, issues });\n    } finally {\n      await queryRunner.release();\n    }\n  } catch (error) {\n    res.status(500).json({ error: `Failed to verify schema: ${error.message}` });\n  }\n});\n```",
+        "testStrategy": "1. Unit test: Verify that the migration correctly identifies and fixes schema issues\n2. Integration test: Run the migration on a test database and verify the schema matches entity definitions\n3. Verification test: Run the schema verification script before and after migration to confirm fixes\n4. Rollback test: Test the down migration to ensure it properly reverts changes",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement dependency injection container",
+        "description": "Implement a dependency injection container to reduce tight coupling, improve testability, and enable proper lifecycle management of services.",
+        "details": "Install the tsyringe DI container:\n\n```bash\nnpm install tsyringe reflect-metadata\n```\n\nAdd reflect-metadata import to the entry point:\n\n```typescript\n// In src/index.ts at the top\nimport 'reflect-metadata';\n```\n\nCreate interfaces for services:\n\n```typescript\n// Create src/interfaces/services/readings-service.interface.ts\nexport interface IReadingsService {\n  findReadingsByDate(date: string, traditionId?: number): Promise<any>;\n  getToday(traditionId?: number): Promise<any>;\n  // Add other methods...\n}\n\n// Create similar interfaces for other services\n```\n\nUpdate services to implement interfaces and use DI:\n\n```typescript\n// In src/services/readings.service.ts\nimport { injectable, inject } from 'tsyringe';\nimport { IReadingsService } from '../interfaces/services/readings-service.interface';\nimport { ITraditionsService } from '../interfaces/services/traditions-service.interface';\n\n@injectable()\nexport class ReadingsService implements IReadingsService {\n  constructor(\n    @inject('TraditionsService') private traditionsService: ITraditionsService,\n    @inject('DatabaseService') private databaseService: DatabaseService\n  ) {}\n  \n  // Implement methods using injected dependencies\n}\n```\n\nUpdate the database service to be injectable:\n\n```typescript\n// In src/services/database.service.ts\nimport { singleton } from 'tsyringe';\n\n@singleton()\nexport class DatabaseService {\n  private dataSource: DataSource;\n  \n  constructor() {\n    // Initialize dataSource\n  }\n  \n  public async getDataSource(): Promise<DataSource> {\n    if (!this.dataSource || !this.dataSource.isInitialized) {\n      // Initialize dataSource\n    }\n    return this.dataSource;\n  }\n}\n```\n\nRegister services in a container configuration:\n\n```typescript\n// Create src/config/container.ts\nimport { container } from 'tsyringe';\nimport { DatabaseService } from '../services/database.service';\nimport { ReadingsService } from '../services/readings.service';\nimport { TraditionsService } from '../services/traditions.service';\nimport { CalendarService } from '../services/calendar.service';\n\nexport function configureContainer() {\n  // Register services\n  container.registerSingleton('DatabaseService', DatabaseService);\n  container.registerSingleton('ReadingsService', ReadingsService);\n  container.registerSingleton('TraditionsService', TraditionsService);\n  container.registerSingleton('CalendarService', CalendarService);\n  \n  return container;\n}\n```\n\nUpdate controllers to use DI:\n\n```typescript\n// In src/controllers/readings.controller.ts\nimport { injectable, inject } from 'tsyringe';\nimport { IReadingsService } from '../interfaces/services/readings-service.interface';\n\n@injectable()\nexport class ReadingsController {\n  constructor(\n    @inject('ReadingsService') private readingsService: IReadingsService\n  ) {}\n  \n  // Controller methods using injected service\n}\n```\n\nUpdate route files to use the container:\n\n```typescript\n// In src/routes/readings.routes.ts\nimport { container } from 'tsyringe';\nimport { ReadingsController } from '../controllers/readings.controller';\n\nconst router = express.Router();\nconst readingsController = container.resolve(ReadingsController);\n\nrouter.get('/today', (req, res) => readingsController.getToday(req, res));\n// Other routes...\n\nexport default router;\n```\n\nUpdate app.ts to configure the container:\n\n```typescript\n// In src/app.ts\nimport { configureContainer } from './config/container';\n\n// Configure DI container\nconfigureContainer();\n```",
+        "testStrategy": "1. Unit test: Verify that services can be resolved from the container\n2. Integration test: Test that controllers correctly use injected services\n3. Mocking test: Verify that services can be easily mocked for testing\n4. Lifecycle test: Verify that singleton services maintain state correctly",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Fix error handling in services to prevent silent failures",
+        "description": "Update service methods to properly propagate errors instead of silently returning null or empty arrays, allowing controllers to decide how to handle errors.",
+        "details": "Refactor error handling in services to properly propagate errors:\n\n```typescript\n// In src/services/readings.service.ts\n\n// Replace patterns like this:\nasync findReadingsByDate(date: string, traditionId?: number): Promise<any> {\n  try {\n    // ... implementation ...\n  } catch (error) {\n    logger.error(`Error fetching readings for date ${date}:`, error);\n    return null;  // Silent failure\n  }\n}\n\n// With proper error propagation:\nasync findReadingsByDate(date: string, traditionId?: number): Promise<any> {\n  try {\n    // ... implementation ...\n  } catch (error) {\n    logger.error(`Error fetching readings for date ${date}:`, error);\n    // Create a custom error with context\n    throw new ServiceError(\n      'Failed to fetch readings', \n      { date, traditionId, originalError: error }\n    );\n  }\n}\n```\n\nCreate a custom error class:\n\n```typescript\n// Create src/utils/errors.ts\nexport class ServiceError extends Error {\n  public readonly context: any;\n  \n  constructor(message: string, context: any = {}) {\n    super(message);\n    this.name = 'ServiceError';\n    this.context = context;\n  }\n}\n```\n\nUpdate controllers to handle these errors properly:\n\n```typescript\n// In src/controllers/readings.controller.ts\nimport { ServiceError } from '../utils/errors';\n\nasync getReadingsByDate(req: Request, res: Response): Promise<void> {\n  try {\n    const { date } = req.params;\n    const { traditionId } = req.query;\n    \n    const readings = await this.readingsService.findReadingsByDate(\n      date, \n      traditionId ? parseInt(traditionId as string) : undefined\n    );\n    \n    res.json({\n      data: readings,\n      timestamp: new Date().toISOString()\n    });\n  } catch (error) {\n    if (error instanceof ServiceError) {\n      // Log with request context\n      logger.error(`Service error in getReadingsByDate: ${error.message}`, {\n        requestId: req.id,\n        path: req.path,\n        params: req.params,\n        query: req.query,\n        context: error.context\n      });\n      \n      res.status(500).json({\n        error: {\n          message: 'Failed to retrieve readings',\n          statusCode: 500,\n          timestamp: new Date().toISOString()\n        }\n      });\n    } else {\n      // Unexpected error\n      logger.error(`Unexpected error in getReadingsByDate: ${error.message}`, error);\n      res.status(500).json({\n        error: {\n          message: 'An unexpected error occurred',\n          statusCode: 500,\n          timestamp: new Date().toISOString()\n        }\n      });\n    }\n  }\n}\n```\n\nUpdate the error handler middleware to handle these custom errors:\n\n```typescript\n// In src/middleware/error-handler.ts\nimport { ServiceError } from '../utils/errors';\n\nexport const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {\n  if (err instanceof ServiceError) {\n    // Handle service errors\n    logger.error(`Service error: ${err.message}`, {\n      requestId: req.id,\n      path: req.path,\n      context: err.context\n    });\n    \n    return res.status(500).json({\n      error: {\n        message: err.message,\n        statusCode: 500,\n        timestamp: new Date().toISOString()\n      }\n    });\n  }\n  \n  // Handle other error types...\n};\n```",
+        "testStrategy": "1. Unit test: Verify that service methods throw appropriate errors\n2. Integration test: Test error propagation from services to controllers\n3. E2E test: Verify that API endpoints return proper error responses\n4. Logging test: Verify that errors are logged with appropriate context",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Standardize API response formats",
+        "description": "Create a consistent response format for all API endpoints to improve client integration and maintainability.",
+        "details": "Create a response formatter utility:\n\n```typescript\n// Create src/utils/response-formatter.ts\nexport interface StandardResponse<T> {\n  data: T;\n  timestamp: string;\n  pagination?: {\n    total: number;\n    page: number;\n    limit: number;\n  };\n}\n\nexport interface ErrorResponse {\n  error: {\n    message: string;\n    statusCode: number;\n    timestamp: string;\n    details?: any;\n  };\n}\n\nexport class ResponseFormatter {\n  static success<T>(data: T, pagination?: { total: number; page: number; limit: number; }): StandardResponse<T> {\n    return {\n      data,\n      timestamp: new Date().toISOString(),\n      pagination\n    };\n  }\n  \n  static error(message: string, statusCode: number, details?: any): ErrorResponse {\n    return {\n      error: {\n        message,\n        statusCode,\n        timestamp: new Date().toISOString(),\n        details\n      }\n    };\n  }\n}\n```\n\nUpdate controllers to use the formatter:\n\n```typescript\n// In src/controllers/readings.controller.ts\nimport { ResponseFormatter } from '../utils/response-formatter';\n\nasync getReadingsByDate(req: Request, res: Response): Promise<void> {\n  try {\n    const { date } = req.params;\n    const { traditionId } = req.query;\n    \n    const readings = await this.readingsService.findReadingsByDate(\n      date, \n      traditionId ? parseInt(traditionId as string) : undefined\n    );\n    \n    res.json(ResponseFormatter.success(readings));\n  } catch (error) {\n    // Handle error...\n    res.status(500).json(ResponseFormatter.error('Failed to retrieve readings', 500));\n  }\n}\n\nasync getReadingsByDateRange(req: Request, res: Response): Promise<void> {\n  try {\n    const { startDate, endDate } = req.params;\n    const { traditionId, page = '1', limit = '10' } = req.query;\n    \n    const pageNum = parseInt(page as string);\n    const limitNum = parseInt(limit as string);\n    \n    const { readings, total } = await this.readingsService.getByDateRange(\n      startDate,\n      endDate,\n      traditionId ? parseInt(traditionId as string) : undefined,\n      pageNum,\n      limitNum\n    );\n    \n    res.json(ResponseFormatter.success(readings, { total, page: pageNum, limit: limitNum }));\n  } catch (error) {\n    // Handle error...\n  }\n}\n```\n\nUpdate admin routes to use the same format:\n\n```typescript\n// In src/routes/admin.routes.ts\nimport { ResponseFormatter } from '../utils/response-formatter';\n\nrouter.post('/run-migrations', verifyAdminKey, async (req, res) => {\n  try {\n    // Implementation...\n    res.json(ResponseFormatter.success({ message: 'Migrations completed successfully', results }));\n  } catch (error) {\n    res.status(500).json(ResponseFormatter.error(`Failed to run migrations: ${error.message}`, 500));\n  }\n});\n```\n\nUpdate error handler middleware to use the formatter:\n\n```typescript\n// In src/middleware/error-handler.ts\nimport { ResponseFormatter } from '../utils/response-formatter';\n\nexport const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {\n  // Handle different error types...\n  \n  // Default error response\n  const statusCode = 500;\n  res.status(statusCode).json(ResponseFormatter.error(\n    'An unexpected error occurred',\n    statusCode\n  ));\n};\n```\n\nUpdate the OpenAPI/Swagger documentation to reflect the standardized response format:\n\n```typescript\n// In src/config/swagger.ts\nconst responseSchemas = {\n  StandardResponse: {\n    type: 'object',\n    properties: {\n      data: {\n        type: 'object',\n        description: 'Response data'\n      },\n      timestamp: {\n        type: 'string',\n        format: 'date-time',\n        description: 'Response timestamp'\n      },\n      pagination: {\n        type: 'object',\n        properties: {\n          total: { type: 'integer' },\n          page: { type: 'integer' },\n          limit: { type: 'integer' }\n        },\n        required: ['total', 'page', 'limit']\n      }\n    },\n    required: ['data', 'timestamp']\n  },\n  ErrorResponse: {\n    type: 'object',\n    properties: {\n      error: {\n        type: 'object',\n        properties: {\n          message: { type: 'string' },\n          statusCode: { type: 'integer' },\n          timestamp: { type: 'string', format: 'date-time' },\n          details: { type: 'object' }\n        },\n        required: ['message', 'statusCode', 'timestamp']\n      }\n    },\n    required: ['error']\n  }\n};\n```",
+        "testStrategy": "1. Unit test: Verify that the ResponseFormatter correctly formats success and error responses\n2. Integration test: Test that all controllers use the standardized format\n3. API test: Verify that all endpoints return responses in the expected format\n4. Documentation test: Ensure that Swagger documentation reflects the standardized format",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Add missing database indexes for common query patterns",
+        "description": "Create missing composite indexes to optimize common query patterns and improve database performance.",
+        "details": "Create a new migration to add the missing indexes:\n\n```typescript\n// Create src/migrations/1704456790-AddMissingIndexes.ts\nimport { MigrationInterface, QueryRunner } from 'typeorm';\n\nexport class AddMissingIndexes1704456790 implements MigrationInterface {\n  name = 'AddMissingIndexes1704456790';\n\n  public async up(queryRunner: QueryRunner): Promise<void> {\n    // Add composite index for common reading lookup pattern\n    await queryRunner.query(\n      `CREATE INDEX IF NOT EXISTS \"idx_reading_date_tradition_office\" ON \"reading\" (\"date\", \"tradition_id\", \"reading_office\")`\n    );\n    \n    // Add index for tradition and year lookups\n    await queryRunner.query(\n      `CREATE INDEX IF NOT EXISTS \"idx_reading_tradition_year\" ON \"reading\" (\"tradition_id\", \"year\")`\n    );\n    \n    // Add index for liturgical year lookups\n    await queryRunner.query(\n      `CREATE INDEX IF NOT EXISTS \"idx_reading_liturgical_year\" ON \"reading\" (\"liturgical_year_id\")`\n    );\n    \n    // Add index for special day lookups\n    await queryRunner.query(\n      `CREATE INDEX IF NOT EXISTS \"idx_special_day_date_tradition\" ON \"special_day\" (\"date\", \"tradition_id\")`\n    );\n    \n    // Remove redundant indexes\n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_tradition_name_unique\"`\n    );\n  }\n\n  public async down(queryRunner: QueryRunner): Promise<void> {\n    // Remove added indexes\n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_reading_date_tradition_office\"`\n    );\n    \n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_reading_tradition_year\"`\n    );\n    \n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_reading_liturgical_year\"`\n    );\n    \n    await queryRunner.query(\n      `DROP INDEX IF EXISTS \"idx_special_day_date_tradition\"`\n    );\n    \n    // Restore removed indexes\n    await queryRunner.query(\n      `CREATE UNIQUE INDEX IF NOT EXISTS \"idx_tradition_name_unique\" ON \"tradition\" (\"name\")`\n    );\n  }\n}\n```\n\nCreate a script to analyze query performance:\n\n```typescript\n// Create src/scripts/analyze-query-performance.ts\nimport { DatabaseService } from '../services/database.service';\n\nasync function analyzeQueryPerformance() {\n  const dataSource = await DatabaseService.getDataSource();\n  const queryRunner = dataSource.createQueryRunner();\n  \n  try {\n    // Test common query patterns\n    console.log('Analyzing query performance...');\n    \n    // Test date + tradition + office query\n    console.time('Query 1: date + tradition + office');\n    await queryRunner.query(\n      `EXPLAIN ANALYZE SELECT * FROM reading WHERE date = '2023-01-01' AND tradition_id = 1 AND reading_office = 'morning'`\n    );\n    console.timeEnd('Query 1: date + tradition + office');\n    \n    // Test tradition + year query\n    console.time('Query 2: tradition + year');\n    await queryRunner.query(\n      `EXPLAIN ANALYZE SELECT * FROM reading WHERE tradition_id = 1 AND year = 'A'`\n    );\n    console.timeEnd('Query 2: tradition + year');\n    \n    // Add more query tests...\n    \n  } finally {\n    await queryRunner.release();\n  }\n}\n\nanalyzeQueryPerformance().catch(console.error);\n```\n\nAdd an admin endpoint to run the performance analysis:\n\n```typescript\n// In src/routes/admin.routes.ts\nrouter.get('/analyze-performance', verifyAdminKey, async (req, res) => {\n  try {\n    const dataSource = await DatabaseService.getDataSource();\n    const queryRunner = dataSource.createQueryRunner();\n    \n    try {\n      const results = {};\n      \n      // Test date + tradition + office query\n      const query1 = await queryRunner.query(\n        `EXPLAIN ANALYZE SELECT * FROM reading WHERE date = '2023-01-01' AND tradition_id = 1 AND reading_office = 'morning'`\n      );\n      results.dateAndTraditionQuery = query1;\n      \n      // Add more query tests...\n      \n      res.json(ResponseFormatter.success({ performanceAnalysis: results }));\n    } finally {\n      await queryRunner.release();\n    }\n  } catch (error) {\n    res.status(500).json(ResponseFormatter.error(`Failed to analyze performance: ${error.message}`, 500));\n  }\n});\n```",
+        "testStrategy": "1. Performance test: Measure query execution time before and after adding indexes\n2. Integration test: Verify that indexes are correctly created by the migration\n3. Rollback test: Verify that indexes are correctly removed when rolling back the migration\n4. Load test: Verify performance improvement under load with the new indexes",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2026-01-03T02:32:32.291Z",
+      "updated": "2026-01-03T02:32:32.291Z",
+      "description": "Tasks for project-overhaul context"
     }
   }
 }
