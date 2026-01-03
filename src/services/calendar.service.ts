@@ -7,7 +7,17 @@ import { LiturgicalYear } from '../models/liturgical-year.entity';
 import { Repository } from 'typeorm';
 
 export class CalendarService {
-  
+
+  private formatDate(date: Date | string | null | undefined): string {
+    if (!date) {
+      return '';
+    }
+    if (typeof date === 'string') {
+      return date.split('T')[0];
+    }
+    return date.toISOString().split('T')[0];
+  }
+
   private getTraditionRepository(): Repository<Tradition> {
     return DatabaseService.getDataSource().getRepository(Tradition);
   }
@@ -67,8 +77,8 @@ export class CalendarService {
       id: season.id,
       name: season.name,
       color: season.color,
-      startDate: typeof season.startDate === 'string' ? season.startDate : season.startDate.toISOString().split('T')[0],
-      endDate: typeof season.endDate === 'string' ? season.endDate : season.endDate.toISOString().split('T')[0],
+      startDate: this.formatDate(season.startDate),
+      endDate: this.formatDate(season.endDate),
       traditionId,
       year,
       createdAt: season.createdAt,
@@ -94,7 +104,7 @@ export class CalendarService {
     return specialDays.map(day => ({
       id: day.id,
       name: day.name,
-      date: day.date.toISOString().split('T')[0],
+      date: this.formatDate(day.date),
       type: day.type as 'feast' | 'fast' | 'commemoration' | 'other',
       traditionId,
       year,
@@ -138,9 +148,8 @@ export class CalendarService {
         allSeasons = allSeasons.concat(liturgicalYear.seasons);
         // Check if today falls within this liturgical year's date range
         if (liturgicalYear.startDate && liturgicalYear.endDate) {
-          // Handle both string and Date formats
-          const startDate = typeof liturgicalYear.startDate === 'string' ? liturgicalYear.startDate : liturgicalYear.startDate.toISOString().split('T')[0];
-          const endDate = typeof liturgicalYear.endDate === 'string' ? liturgicalYear.endDate : liturgicalYear.endDate.toISOString().split('T')[0];
+          const startDate = this.formatDate(liturgicalYear.startDate);
+          const endDate = this.formatDate(liturgicalYear.endDate);
           if (todayStr >= startDate && todayStr <= endDate) {
             currentLiturgicalYear = liturgicalYear;
           }
@@ -150,9 +159,8 @@ export class CalendarService {
 
     // Find current season
     const currentSeason = allSeasons.find(season => {
-      // Handle both string and Date formats for season dates
-      const startDate = typeof season.startDate === 'string' ? season.startDate : season.startDate.toISOString().split('T')[0];
-      const endDate = typeof season.endDate === 'string' ? season.endDate : season.endDate.toISOString().split('T')[0];
+      const startDate = this.formatDate(season.startDate);
+      const endDate = this.formatDate(season.endDate);
       return todayStr >= startDate && todayStr <= endDate;
     });
 
@@ -175,7 +183,7 @@ export class CalendarService {
       })
       .map(day => ({
         name: day.name,
-        date: day.date.toISOString().split('T')[0],
+        date: this.formatDate(day.date),
         daysUntil: Math.ceil((new Date(day.date).getTime() - today.getTime()) / (24 * 60 * 60 * 1000)),
       }));
 
@@ -184,8 +192,8 @@ export class CalendarService {
         id: currentSeason.id,
         name: currentSeason.name,
         color: currentSeason.color,
-        startDate: typeof currentSeason.startDate === 'string' ? currentSeason.startDate : currentSeason.startDate.toISOString().split('T')[0],
-        endDate: typeof currentSeason.endDate === 'string' ? currentSeason.endDate : currentSeason.endDate.toISOString().split('T')[0],
+        startDate: this.formatDate(currentSeason.startDate),
+        endDate: this.formatDate(currentSeason.endDate),
         traditionId,
         year: currentLiturgicalYear?.year || currentYear,
         createdAt: currentSeason.createdAt,
