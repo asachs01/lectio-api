@@ -34,7 +34,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=redis-datasource
     volumes:
@@ -120,7 +120,7 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
     environment:
-      - DATA_SOURCE_NAME=postgresql://postgres:password@postgres:5432/lectionary_api?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:?DB_PASSWORD is required}@postgres:5432/${DB_NAME:-lectionary_api}?sslmode=disable
     ports:
       - "9187:9187"
     depends_on:

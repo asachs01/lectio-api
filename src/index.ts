@@ -3,12 +3,16 @@ import { config } from 'dotenv';
 import { App } from './app';
 import { logger } from './utils/logger';
 import { DatabaseService } from './services/database.service';
+import { assertValidEnvironment } from './config/env.validation';
 
 // Load environment variables
 config();
 
 async function bootstrap(): Promise<void> {
   try {
+    // Validate required environment variables before starting
+    assertValidEnvironment();
+
     // Initialize database connection
     await DatabaseService.initialize();
     logger.info('Database connection established');
