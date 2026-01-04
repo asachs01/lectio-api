@@ -1,6 +1,6 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes, defaultResource } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 // import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
@@ -30,13 +30,13 @@ export class TelemetryService {
     const environment = process.env.NODE_ENV || 'development';
 
     // Configure resource with service information
-    const resource = new Resource({
+    const resource = resourceFromAttributes({
       [ATTR_SERVICE_NAME]: serviceName,
       [ATTR_SERVICE_VERSION]: serviceVersion,
       'service.environment': environment,
       'service.namespace': 'lectionary',
       'deployment.environment': environment,
-    }).merge(Resource.default());
+    }).merge(defaultResource());
 
     // Configure trace exporter (OTLP) - currently disabled due to type compatibility issues
     // const traceExporter = new OTLPTraceExporter({

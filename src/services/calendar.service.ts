@@ -39,7 +39,6 @@ export class CalendarService {
   }
 
   public async getByYear(year: number, traditionId: string): Promise<LiturgicalCalendar | null> {
-    // TODO: Implement database query
     const seasons = await this.getSeasonsByYear(year, traditionId);
     const specialDays = await this.getSpecialDaysByYear(year, traditionId);
 
