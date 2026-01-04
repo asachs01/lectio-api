@@ -60,7 +60,7 @@ jobs:
       run: npm run build
     
     - name: Run database migrations
-      run: npm run db:run-migrations
+      run: npx ts-node --compiler-options '{"module":"commonjs"}' ./node_modules/typeorm/cli.js migration:run -d ormconfig.js
       env:
         DB_HOST: localhost
         DB_PORT: 5432
