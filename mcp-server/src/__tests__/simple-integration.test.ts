@@ -1,64 +1,30 @@
-import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, test, expect, beforeAll } from '@jest/globals';
 import axios from 'axios';
-import { spawn } from 'child_process';
-import type { ChildProcess } from 'child_process';
 
+/**
+ * Integration test that connects to already-running servers.
+ * In CI, the workflow starts both API and MCP servers before running tests.
+ * Locally, start servers manually before running: npm run dev
+ */
 describe('MCP Server Simple Integration Test', () => {
-  let mcpProcess: ChildProcess;
-  let apiProcess: ChildProcess;
-  const MCP_PORT = 3005;
-  const API_PORT = 3006;
+  // Use environment variables with fallbacks for local development
+  const MCP_PORT = process.env.MCP_PORT || '3001';
+  const API_PORT = process.env.API_PORT || '3000';
+  const MCP_URL = process.env.MCP_SERVER_URL || `http://localhost:${MCP_PORT}`;
 
   beforeAll(async () => {
-    // Start the API server
-    apiProcess = spawn('npm', ['start'], {
-      cwd: '/home/asachs/Documents/projects/lectio-api',
-      env: {
-        ...process.env,
-        PORT: API_PORT.toString(),
-        NODE_ENV: 'test',
-      },
-      stdio: 'pipe',
-    });
-
-    // Start MCP server
-    mcpProcess = spawn('npm', ['start'], {
-      cwd: '/home/asachs/projects/lectio-api-mcp/mcp-server',
-      env: {
-        ...process.env,
-        MCP_TRANSPORT: 'http',
-        PORT: MCP_PORT.toString(),
-        LECTIO_API_URL: `http://localhost:${API_PORT}/api/v1`,
-        NODE_ENV: 'test',
-      },
-      stdio: 'pipe',
-    });
-
-    // Wait for servers to be ready
-    await waitForServer(`http://localhost:${API_PORT}/health`, 30000);
-    await waitForServer(`http://localhost:${MCP_PORT}/health`, 30000);
-  }, 60000);
-
-  afterAll(async () => {
-    // Force kill processes to ensure cleanup
-    if (mcpProcess) {
-      mcpProcess.kill('SIGKILL');
-    }
-    if (apiProcess) {
-      apiProcess.kill('SIGKILL');
-    }
-    // Give processes time to clean up
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  });
+    // Wait for servers to be ready (they should already be running)
+    await waitForServer(`${MCP_URL}/health`, 10000);
+  }, 15000);
 
   test('MCP server health check', async () => {
-    const response = await axios.get(`http://localhost:${MCP_PORT}/health`);
+    const response = await axios.get(`${MCP_URL}/health`);
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty('status', 'healthy');
   });
 
   test('List tools via RPC', async () => {
-    const response = await axios.post(`http://localhost:${MCP_PORT}/rpc`, {
+    const response = await axios.post(`${MCP_URL}/rpc`, {
       jsonrpc: '2.0',
       id: 'test-list',
       method: 'tools/list',
@@ -71,7 +37,7 @@ describe('MCP Server Simple Integration Test', () => {
   });
 
   test('Get readings tool', async () => {
-    const response = await axios.post(`http://localhost:${MCP_PORT}/rpc`, {
+    const response = await axios.post(`${MCP_URL}/rpc`, {
       jsonrpc: '2.0',
       id: 'test-readings',
       method: 'tools/call',
@@ -100,7 +66,7 @@ async function waitForServer(url: string, timeout: number): Promise<void> {
       await axios.get(url, { timeout: 1000 });
       return;
     } catch {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 

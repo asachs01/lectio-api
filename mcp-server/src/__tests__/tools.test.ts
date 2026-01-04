@@ -1,74 +1,68 @@
 import { describe, test, expect, jest } from '@jest/globals';
 import { z } from 'zod';
 
-// Mock data
-const mockReadings = {
-  id: 'rcl-2025-08-25',
-  date: '2025-08-25',
-  traditionId: 'rcl',
-  seasonId: 'ordinary',
-  readings: [
-    { type: 'first', citation: 'Jeremiah 1:4-10', text: 'Mock text' },
-    { type: 'psalm', citation: 'Psalm 71:1-6', text: 'Mock text' },
-    { type: 'second', citation: 'Hebrews 12:18-29', text: 'Mock text' },
-    { type: 'gospel', citation: 'Luke 13:10-17', text: 'Mock text' }
-  ]
-};
-
-const mockCalendar = {
-  currentSeason: {
-    id: 'ordinary',
-    name: 'Ordinary Time',
-    color: 'green',
-    startDate: '2025-06-01',
-    endDate: '2025-11-30',
-    traditionId: 'rcl'
-  },
-  currentYear: 2025,
-  today: '2025-08-25',
-  upcomingSpecialDays: [] as unknown[]
-};
-
-const mockYearCalendar = {
-  year: 2025,
-  tradition: 'rcl',
-  seasons: [] as unknown[],
-  specialDays: [] as unknown[]
-};
-
-const mockSeasons = [
-  { id: 'advent', name: 'Advent', color: 'purple' },
-  { id: 'christmas', name: 'Christmas', color: 'white' },
-  { id: 'epiphany', name: 'Epiphany', color: 'green' }
-];
-
-const mockSpecialDays = [
-  { name: 'Christmas Day', date: '2025-12-25', type: 'feast' }
-];
-
-const mockAnalysis = {
-  date: '2025-08-25',
-  season: { id: 'ordinary', name: 'Ordinary Time' },
-  readings: {},
-  themes: ['Discipleship', 'Healing'],
-  connections: {}
-};
-
-// Mock the client module
-jest.mock('../client.js', () => ({
-  LectionaryClient: jest.fn().mockImplementation(() => ({
-    getReadings: jest.fn().mockResolvedValue(mockReadings),
-    getCurrentCalendar: jest.fn().mockResolvedValue(mockCalendar),
-    getCalendarByYear: jest.fn().mockResolvedValue(mockYearCalendar),
-    getSeasonsByYear: jest.fn().mockResolvedValue(mockSeasons),
-    getSpecialDays: jest.fn().mockResolvedValue(mockSpecialDays),
-    getReadingsByDateRange: jest.fn().mockResolvedValue([]),
-    getReadingsBySeason: jest.fn().mockResolvedValue([]),
-    findByScripture: jest.fn().mockResolvedValue({ message: 'Not implemented' }),
-    findFeastDay: jest.fn().mockResolvedValue([]),
-    analyzeLiturgicalContext: jest.fn().mockResolvedValue(mockAnalysis)
-  }))
-}));
+// Mock the client module with inline data to avoid type inference issues
+jest.mock('../client.js', () => {
+  const mockClient = {
+    getReadings: () => Promise.resolve({
+      id: 'rcl-2025-08-25',
+      date: '2025-08-25',
+      traditionId: 'rcl',
+      seasonId: 'ordinary',
+      readings: [
+        { type: 'first', citation: 'Jeremiah 1:4-10', text: 'Mock text' },
+        { type: 'psalm', citation: 'Psalm 71:1-6', text: 'Mock text' },
+        { type: 'second', citation: 'Hebrews 12:18-29', text: 'Mock text' },
+        { type: 'gospel', citation: 'Luke 13:10-17', text: 'Mock text' }
+      ]
+    }),
+    getCurrentCalendar: () => Promise.resolve({
+      currentSeason: {
+        id: 'ordinary',
+        name: 'Ordinary Time',
+        color: 'green',
+        startDate: '2025-06-01',
+        endDate: '2025-11-30',
+        traditionId: 'rcl'
+      },
+      currentYear: 2025,
+      today: '2025-08-25',
+      upcomingSpecialDays: []
+    }),
+    getCalendarByYear: () => Promise.resolve({
+      year: 2025,
+      tradition: 'rcl',
+      seasons: [],
+      specialDays: []
+    }),
+    getSeasonsByYear: () => Promise.resolve([
+      { id: 'advent', name: 'Advent', color: 'purple' },
+      { id: 'christmas', name: 'Christmas', color: 'white' },
+      { id: 'epiphany', name: 'Epiphany', color: 'green' }
+    ]),
+    getSpecialDays: () => Promise.resolve([
+      { name: 'Christmas Day', date: '2025-12-25', type: 'feast' }
+    ]),
+    getReadingsByDateRange: () => Promise.resolve([]),
+    getReadingsBySeason: () => Promise.resolve([]),
+    findByScripture: () => Promise.resolve({ message: 'Not implemented' }),
+    findFeastDay: () => Promise.resolve([]),
+    analyzeLiturgicalContext: () => Promise.resolve({
+      date: '2025-08-25',
+      season: { id: 'ordinary', name: 'Ordinary Time' },
+      readings: {},
+      themes: ['Discipleship', 'Healing'],
+      connections: {}
+    })
+  };
+  return {
+    LectionaryClient: class {
+      constructor() {
+        return mockClient;
+      }
+    }
+  };
+});
 
 describe('MCP Tool Schemas', () => {
   describe('GetReadingsSchema', () => {
