@@ -637,7 +637,7 @@ async function importCatholicData(): Promise<void> {
     console.log('📊 Import Summary:');
     console.log(`   Total Readings: ${count}`);
     console.log(`   Unique Dates: ${uniqueDates.count}`);
-    console.log(`   Years Covered: 2024-2027`);
+    console.log('   Years Covered: 2024-2027');
 
     // Test a specific date
     const testDate = new Date('2025-12-25'); // Christmas Day
