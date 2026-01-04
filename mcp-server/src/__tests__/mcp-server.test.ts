@@ -1,60 +1,22 @@
-import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, test, expect, beforeAll } from '@jest/globals';
 import axios from 'axios';
-import { spawn } from 'child_process';
-import type { ChildProcess } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
+/**
+ * Integration tests that connect to already-running servers.
+ * In CI, the workflow starts both API and MCP servers before running tests.
+ * Locally, start servers manually before running tests.
+ */
 describe('MCP Server Integration Tests', () => {
-  let mcpProcess: ChildProcess;
-  let apiProcess: ChildProcess;
-  const MCP_PORT = 3003;
-  const API_PORT = 3004;
-  const MCP_URL = `http://localhost:${MCP_PORT}`;
+  // Use environment variables with fallbacks for local development
+  const MCP_PORT = process.env.MCP_PORT || '3001';
+  const API_PORT = process.env.API_PORT || '3000';
+  const MCP_URL = process.env.MCP_SERVER_URL || `http://localhost:${MCP_PORT}`;
   const API_URL = `http://localhost:${API_PORT}/api/v1`;
 
   beforeAll(async () => {
-    // Start the main API server
-    console.log('Starting API server...');
-    apiProcess = spawn('npm', ['start'], {
-      cwd: path.join(__dirname, '../../../'),
-      env: {
-        ...process.env,
-        PORT: API_PORT.toString(),
-        NODE_ENV: 'test'
-      }
-    });
-
-    // Start MCP server
-    console.log('Starting MCP server...');
-    mcpProcess = spawn('npm', ['start'], {
-      cwd: path.join(__dirname, '../../'),
-      env: {
-        ...process.env,
-        MCP_TRANSPORT: 'http',
-        PORT: MCP_PORT.toString(),
-        LECTIO_API_URL: API_URL,
-        NODE_ENV: 'test'
-      }
-    });
-
-    // Wait for servers to be ready
-    await waitForServer(MCP_URL + '/health', 30000);
-    await waitForServer(`http://localhost:${API_PORT}/health`, 30000);
-  }, 60000);
-
-  afterAll(async () => {
-    if (mcpProcess) {
-      mcpProcess.kill('SIGTERM');
-    }
-    if (apiProcess) {
-      apiProcess.kill('SIGTERM');
-    }
-    // Give processes time to clean up
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  });
+    // Wait for servers to be ready (they should already be running)
+    await waitForServer(MCP_URL + '/health', 15000);
+  }, 20000);
 
   describe('Health and Status', () => {
     test('MCP server health check returns healthy status', async () => {
