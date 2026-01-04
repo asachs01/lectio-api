@@ -60,7 +60,7 @@ jobs:
       run: npm run build
     
     - name: Run database migrations
-      run: npm run db:migrate
+      run: npm run db:run-migrations
       env:
         DB_HOST: localhost
         DB_PORT: 5432
