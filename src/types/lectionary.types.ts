@@ -53,12 +53,27 @@ export interface Reading {
   type: ReadingType;
   citation: string;
   text: string;
+  isAlternative?: boolean;
+  office?: string;
+}
+
+export interface LiturgicalMetadata {
+  season: string | null;
+  year: string | null;
+  dayName: string | null;
+  liturgicalColor: string | null;
 }
 
 export interface DailyReading {
   id: string;
   date: string;
   traditionId: string;
+  // Liturgical metadata
+  season: string | null;
+  year: string | null;
+  dayName: string | null;
+  liturgicalColor: string | null;
+  // Legacy field for backwards compatibility
   seasonId: string;
   readings: Reading[];
   createdAt: Date;

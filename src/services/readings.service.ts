@@ -118,12 +118,12 @@ export class ReadingsService {
       // Query the database for readings on this date using tradition UUID
       // Use QueryBuilder for better control over date comparison
       // Use CAST syntax instead of :: for proper parameter binding
-      // Note: specialDay and scripture joins removed due to schema mismatch in production
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
         .leftJoinAndSelect('reading.season', 'season')
         .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+        .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
         .andWhere('reading.date = CAST(:date AS date)', { date })
         .orderBy('reading.readingOrder', 'ASC')
@@ -189,7 +189,7 @@ export class ReadingsService {
       // Note: scripture relation removed due to schema mismatch in production
       const readings = await repository.find({
         where: conditions,
-        relations: ['tradition', 'season', 'liturgicalYear'],
+        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay'],
         order: {
           readingOrder: 'ASC',
         },
@@ -208,16 +208,41 @@ export class ReadingsService {
     traditionId: string,
     seasonId: string,
   ): DailyReading {
+    // Extract liturgical metadata from the first reading's relations
+    const firstReading = readings[0];
+    const season = firstReading?.season;
+    const liturgicalYear = firstReading?.liturgicalYear;
+    const specialDay = firstReading?.specialDay;
+
+    // Determine liturgical color: specialDay > season > null
+    const liturgicalColor = specialDay?.liturgicalColor || season?.color || null;
+
+    // Determine day name from specialDay or notes (for "Proper X" etc.)
+    let dayName: string | null = null;
+    if (specialDay?.name) {
+      dayName = specialDay.name;
+    } else if (firstReading?.notes) {
+      // Check if notes contain a proper name like "Proper 16"
+      dayName = firstReading.notes;
+    }
+
     return {
       id: `${traditionId}-${date}`,
       date,
       traditionId,
+      // Liturgical metadata
+      season: season?.name || null,
+      year: liturgicalYear?.cycle || null,
+      dayName,
+      liturgicalColor,
+      // Legacy field for backwards compatibility
       seasonId,
       readings: readings.map(r => ({
         type: r.readingType as ReadingType,
         citation: r.scriptureReference,
         text: r.text || '',
         isAlternative: r.isAlternative || false,
+        office: r.readingOffice || undefined,
       })),
       createdAt: readings[0]?.createdAt || new Date(),
       updatedAt: readings[0]?.updatedAt || new Date(),
@@ -252,12 +277,12 @@ export class ReadingsService {
 
       // Get paginated readings using QueryBuilder
       const skip = (page - 1) * limit;
-      // Note: scripture join removed due to schema mismatch in production
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
         .leftJoinAndSelect('reading.season', 'season')
         .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+        .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .where('reading.traditionId = :traditionUuid', { traditionUuid })
         .andWhere('reading.date >= CAST(:startDate AS date)', { startDate })
         .andWhere('reading.date <= CAST(:endDate AS date)', { endDate })
@@ -277,26 +302,18 @@ export class ReadingsService {
         readingsByDate.get(dateStr)!.push(reading);
       });
 
-      // Convert to DailyReading format
+      // Convert to DailyReading format using formatDailyReading for consistent metadata extraction
       const dailyReadings: DailyReading[] = Array.from(readingsByDate.entries()).map(([dateStr, dateReadings]) => {
         const dateObj = new Date(dateStr);
         const year = dateObj.getFullYear();
         const season = this.calendarService.getSeasonForDate(dateObj, year);
 
-        return {
-          id: `${traditionIdentifier}-${dateStr}`,
-          date: dateStr,
-          traditionId: traditionIdentifier,
-          seasonId: dateReadings[0].seasonId || season?.name || 'ordinary',
-          readings: dateReadings.map(r => ({
-            type: r.readingType as ReadingType,
-            citation: r.scriptureReference,
-            text: r.text || '',
-            isAlternative: r.isAlternative || false,
-          })),
-          createdAt: dateReadings[0].createdAt,
-          updatedAt: dateReadings[0].updatedAt,
-        };
+        return this.formatDailyReading(
+          dateReadings,
+          dateStr,
+          traditionIdentifier,
+          dateReadings[0].seasonId || season?.name || 'ordinary',
+        );
       });
 
       // If no readings found in database, return empty result
@@ -353,7 +370,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear'],
+        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay'],
         order: {
           readingOrder: 'ASC',
         },
@@ -402,7 +419,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear'],
+        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay'],
         order: {
           date: 'ASC',
           readingOrder: 'ASC',
@@ -437,6 +454,9 @@ export class ReadingsService {
       const readings = await repository
         .createQueryBuilder('reading')
         .leftJoinAndSelect('reading.tradition', 'tradition')
+        .leftJoinAndSelect('reading.season', 'season')
+        .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+        .leftJoinAndSelect('reading.specialDay', 'specialDay')
         .where('reading.date = CAST(:date AS date)', { date })
         .andWhere('reading.traditionId IS NOT NULL')
         .andWhere('reading.readingOffice IN (:...offices)', {
@@ -450,6 +470,14 @@ export class ReadingsService {
         return null;
       }
 
+      // Extract liturgical metadata from the first reading
+      const firstReading = readings[0];
+      const season = firstReading?.season;
+      const liturgicalYear = firstReading?.liturgicalYear;
+      const specialDay = firstReading?.specialDay;
+      const liturgicalColor = specialDay?.liturgicalColor || season?.color || null;
+      const dayName = specialDay?.name || firstReading?.notes || null;
+
       // Group by office (morning/evening)
       const morningReadings = readings.filter(r => r.readingOffice === ReadingOffice.MORNING);
       const eveningReadings = readings.filter(r => r.readingOffice === ReadingOffice.EVENING);
@@ -459,7 +487,13 @@ export class ReadingsService {
         id: `bcp-daily-${date}`,
         date,
         traditionId: 'bcp-daily-office',
-        seasonId: null,
+        // Liturgical metadata
+        season: season?.name || null,
+        year: liturgicalYear?.cycle || null,
+        dayName,
+        liturgicalColor,
+        // Legacy field
+        seasonId: season?.id || null,
         readings: [
           ...morningReadings.map(r => ({
             type: r.readingType as any,

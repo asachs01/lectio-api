@@ -20,6 +20,10 @@ describe('ReadingsController', () => {
     id: 'rcl-2023-12-03',
     date: '2023-12-03',
     traditionId: 'rcl',
+    season: 'Advent',
+    year: 'A',
+    dayName: 'First Sunday of Advent',
+    liturgicalColor: 'purple',
     seasonId: 'advent',
     readings: [
       {
@@ -181,7 +185,9 @@ describe('ReadingsController', () => {
 
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -210,7 +216,9 @@ describe('ReadingsController', () => {
       const mockDate = new Date('2023-12-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -226,7 +234,9 @@ describe('ReadingsController', () => {
       const mockDate = new Date('2023-12-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -265,7 +275,9 @@ describe('ReadingsController', () => {
 
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
@@ -290,22 +302,28 @@ describe('ReadingsController', () => {
       const mockDate = new Date('2023-12-15T10:00:00.000Z');
       jest.spyOn(global, 'Date')
         .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) return mockDate;
+          if (args.length === 0) {
+            return mockDate;
+          }
           return new (originalDate as any)(...args);
         }) as any);
 
-      const mockDailyOffice = {
+      const mockDailyOffice: DailyReading = {
         id: 'bcp-daily-2023-12-15',
         date: '2023-12-15',
         traditionId: 'bcp-daily-office',
-        seasonId: null,
+        season: 'Advent',
+        year: null,
+        dayName: null,
+        liturgicalColor: 'purple',
+        seasonId: 'advent',
         readings: [
           { type: ReadingType.FIRST, citation: 'Isaiah 1:1-20', text: 'Morning reading', office: 'morning' },
           { type: ReadingType.SECOND, citation: 'Luke 1:1-25', text: 'Evening reading', office: 'evening' },
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as unknown as DailyReading;
+      };
 
       mockReadingsService.getByDate.mockResolvedValue(null);
       mockReadingsService.getDailyOfficeReadings.mockResolvedValue(mockDailyOffice);
@@ -513,7 +531,7 @@ describe('ReadingsController', () => {
           pagination: expect.objectContaining({
             totalPages: 3, // 25 items / 10 per page = 3 pages
           }),
-        })
+        }),
       );
     });
 
