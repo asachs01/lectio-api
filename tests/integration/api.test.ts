@@ -73,8 +73,7 @@ describe('API Integration Tests', () => {
   });
 
   describe('Readings API', () => {
-    // TODO: Fix mock setup - readings endpoints return 404 without proper database mock
-    it.skip('should get today\'s readings', async () => {
+    it('should get today\'s readings', async () => {
       const response = await request(app.getApp())
         .get('/api/v1/readings/today')
         .expect(200);
@@ -84,7 +83,7 @@ describe('API Integration Tests', () => {
       expect(Array.isArray(response.body.data.readings)).toBe(true);
     });
 
-    it.skip('should get readings by date', async () => {
+    it('should get readings by date', async () => {
       const response = await request(app.getApp())
         .get('/api/v1/readings?date=2024-12-25')
         .expect(200);

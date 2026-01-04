@@ -177,9 +177,8 @@ describe('API Endpoints Integration Tests', () => {
   });
 
   describe('Readings API Endpoints', () => {
-    // TODO: Fix mock setup - readings endpoints return 404 without proper database mock
     describe('GET /api/v1/readings/today', () => {
-      it.skip('should return today\'s readings', async () => {
+      it('should return today\'s readings', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/today')
           .expect(200);
@@ -191,7 +190,7 @@ describe('API Endpoints Integration Tests', () => {
         expect(Array.isArray(response.body.data.readings)).toBe(true);
       });
 
-      it.skip('should accept tradition query parameter', async () => {
+      it('should accept tradition query parameter', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings/today?tradition=catholic')
           .expect(200);
@@ -201,7 +200,7 @@ describe('API Endpoints Integration Tests', () => {
     });
 
     describe('GET /api/v1/readings', () => {
-      it.skip('should return readings by date', async () => {
+      it('should return readings by date', async () => {
         const response = await request(appInstance)
           .get('/api/v1/readings?date=2024-12-25')
           .expect(200);
@@ -232,12 +231,12 @@ describe('API Endpoints Integration Tests', () => {
         expect(response.body.error.message).toContain('Invalid date format');
       });
 
-      it.skip('should accept tradition parameter', async () => {
+      it('should accept tradition parameter', async () => {
         const response = await request(appInstance)
-          .get('/api/v1/readings?date=2024-12-25&tradition=episcopal')
+          .get('/api/v1/readings?date=2024-12-25&tradition=catholic')
           .expect(200);
 
-        expect(response.body.data).toHaveProperty('traditionId', 'episcopal');
+        expect(response.body.data).toHaveProperty('traditionId', 'catholic');
       });
     });
 

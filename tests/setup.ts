@@ -149,6 +149,21 @@ jest.mock('../src/services/database.service', () => {
         getRepository: jest.fn((entity) => {
           // Return different mock repos based on entity type
           if (entity && entity.name === 'Reading') {
+            const createQueryBuilder = () => {
+              const qb: any = {
+                leftJoinAndSelect: jest.fn().mockReturnThis(),
+                where: jest.fn().mockReturnThis(),
+                andWhere: jest.fn().mockReturnThis(),
+                orderBy: jest.fn().mockReturnThis(),
+                addOrderBy: jest.fn().mockReturnThis(),
+                skip: jest.fn().mockReturnThis(),
+                take: jest.fn().mockReturnThis(),
+                getMany: jest.fn().mockResolvedValue(mockReadings),
+                getOne: jest.fn().mockResolvedValue(mockReadings[0] || null),
+                getCount: jest.fn().mockResolvedValue(mockReadings.length),
+              };
+              return qb;
+            };
             return {
               find: jest.fn().mockImplementation((options) => {
                 // Return readings filtered by date if specified
@@ -159,6 +174,7 @@ jest.mock('../src/services/database.service', () => {
               }),
               findOne: jest.fn().mockResolvedValue(null),
               count: jest.fn().mockResolvedValue(4),
+              createQueryBuilder: jest.fn().mockImplementation(createQueryBuilder),
             };
           } else if (entity && entity.name === 'Tradition') {
             return {
