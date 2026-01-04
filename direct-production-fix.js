@@ -8,6 +8,12 @@ const path = require('path');
 // Load environment variables
 config();
 
+// This script is intended for production - require credentials
+if (!process.env.DB_PASSWORD) {
+  console.error('ERROR: DB_PASSWORD environment variable is required');
+  process.exit(1);
+}
+
 console.log('🚀 DIRECT PRODUCTION RCL FIX - FINAL ATTEMPT');
 console.log('📡 Connecting to production database...');
 
@@ -17,7 +23,7 @@ const AppDataSource = new DataSource({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   username: process.env.DB_USERNAME || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
+  password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'lectionary_api',
   synchronize: false,
   logging: true,

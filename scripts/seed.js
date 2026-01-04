@@ -2,12 +2,18 @@ const { DataSource } = require('typeorm');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
+const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction && !process.env.DB_PASSWORD) {
+  console.error('ERROR: DB_PASSWORD environment variable is required in production');
+  process.exit(1);
+}
+
 const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   username: process.env.DB_USERNAME || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
+  password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME || 'lectionary_api',
   synchronize: true,
   logging: true,
