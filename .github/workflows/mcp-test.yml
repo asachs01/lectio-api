@@ -60,13 +60,13 @@ jobs:
       run: npm run build
     
     - name: Run database migrations
-      run: npm run migration:run
+      run: npm run db:migrate
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/lectionary_api_test
         NODE_ENV: test
-    
+
     - name: Seed test database
-      run: npm run seed
+      run: npm run db:seed
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/lectionary_api_test
         NODE_ENV: test
