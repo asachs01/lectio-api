@@ -102,12 +102,15 @@ class TraditionsService {
     async getSeasons(traditionId, year) {
         try {
             this.ensureRepositories();
-            // First find the tradition
+            // Check if traditionId looks like a UUID
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(traditionId);
+            // First find the tradition - only query by UUID if it looks like one
+            const whereConditions = [{ abbreviation: traditionId.toUpperCase() }];
+            if (isUuid) {
+                whereConditions.push({ id: traditionId });
+            }
             const tradition = await this.traditionRepository.findOne({
-                where: [
-                    { abbreviation: traditionId.toUpperCase() },
-                    { id: traditionId },
-                ],
+                where: whereConditions,
             });
             if (!tradition) {
                 logger_1.logger.warn(`Tradition not found: ${traditionId}`);
@@ -150,13 +153,22 @@ class TraditionsService {
             updatedAt: tradition.updatedAt,
         };
     }
+    formatDate(date) {
+        if (!date) {
+            return '';
+        }
+        if (typeof date === 'string') {
+            return date.split('T')[0];
+        }
+        return date.toISOString().split('T')[0];
+    }
     mapSeasonToResponse(season, traditionId, year) {
         return {
             id: season.id,
             name: season.name,
             color: season.color || 'green',
-            startDate: season.startDate?.toISOString().split('T')[0] || '',
-            endDate: season.endDate?.toISOString().split('T')[0] || '',
+            startDate: this.formatDate(season.startDate),
+            endDate: this.formatDate(season.endDate),
             traditionId,
             year,
             createdAt: season.createdAt,

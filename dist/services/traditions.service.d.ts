@@ -9,6 +9,7 @@ export declare class TraditionsService {
     getById(id: string): Promise<LectionaryTradition | null>;
     getSeasons(traditionId: string, year: number): Promise<LiturgicalSeason[]>;
     private mapTraditionToResponse;
+    private formatDate;
     private mapSeasonToResponse;
 }
 //# sourceMappingURL=traditions.service.d.ts.map

@@ -92,6 +92,11 @@ class App {
                 res.setHeader('Content-Type', 'application/json');
                 res.send(swagger_1.swaggerSpec);
             });
+            // Alias for OpenAPI spec at common convention path
+            this.app.get('/api/openapi.json', (_req, res) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.send(swagger_1.swaggerSpec);
+            });
         }
         // API routes
         this.app.use('/api', routes_1.apiRouter);

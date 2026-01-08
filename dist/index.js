@@ -5,10 +5,13 @@ const dotenv_1 = require("dotenv");
 const app_1 = require("./app");
 const logger_1 = require("./utils/logger");
 const database_service_1 = require("./services/database.service");
+const env_validation_1 = require("./config/env.validation");
 // Load environment variables
 (0, dotenv_1.config)();
 async function bootstrap() {
     try {
+        // Validate required environment variables before starting
+        (0, env_validation_1.assertValidEnvironment)();
         // Initialize database connection
         await database_service_1.DatabaseService.initialize();
         logger_1.logger.info('Database connection established');

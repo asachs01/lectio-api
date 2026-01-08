@@ -1,5 +1,6 @@
 import { LiturgicalCalendar, LiturgicalSeason, SpecialDay, CurrentCalendarInfo } from '../types/lectionary.types';
 export declare class CalendarService {
+    private formatDate;
     private getTraditionRepository;
     private getSpecialDayRepository;
     private getLiturgicalYearRepository;
