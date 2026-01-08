@@ -60,5 +60,15 @@ module.exports = {
         '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
+    {
+      files: ['mcp-server/**/*.ts'],
+      parserOptions: {
+        project: './mcp-server/tsconfig.json',
+      },
+      rules: {
+        'no-console': 'off', // MCP server uses console for logging
+        '@typescript-eslint/explicit-function-return-type': 'off',
+      },
+    },
   ],
 };

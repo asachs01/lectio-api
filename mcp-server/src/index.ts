@@ -5,18 +5,28 @@ import {
   CallToolRequestSchema, 
   ListToolsRequestSchema,
   McpError,
-  ErrorCode
+  ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import axios from 'axios';
 import { createHttpStreamingServer } from './http-streaming.js';
 import { LectionaryClient } from './client.js';
+import {
+  elicitTradition,
+  elicitSearchType,
+  elicitDateRange,
+  elicitSeason,
+  elicitScripture,
+  elicitFeastName,
+} from './elicitation.js';
 
 // Initialize API client
 const apiBaseUrl = process.env.LECTIO_API_URL || 'http://localhost:3000/api/v1';
 const client = new LectionaryClient(apiBaseUrl);
 
 // Create MCP server
+// Note: Elicitation is a CLIENT capability - the server checks if clients support it
+// via getClientCapabilities() before attempting to elicit user input
 const server = new Server(
   {
     name: 'lectio-api-mcp',
@@ -26,7 +36,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  }
+  },
 );
 
 // Decision tree-based tool schemas
@@ -43,7 +53,7 @@ const ExploreCalendarSchema = z.object({
 });
 
 const SearchLectionarySchema = z.object({
-  searchType: z.enum(['date_range', 'season', 'scripture', 'feast']).describe('Type of search to perform'),
+  searchType: z.enum(['date_range', 'season', 'scripture', 'feast']).optional().describe('Type of search to perform (will prompt if not provided)'),
   startDate: z.string().optional().describe('Start date for date range search (YYYY-MM-DD)'),
   endDate: z.string().optional().describe('End date for date range search (YYYY-MM-DD)'),
   season: z.string().optional().describe('Season name to search (advent, christmas, lent, easter, etc.)'),
@@ -70,9 +80,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             date: { type: 'string', description: 'Date in YYYY-MM-DD format' },
             tradition: { type: 'string', description: 'Lectionary tradition (rcl, catholic, episcopal)' },
-            includeText: { type: 'boolean', description: 'Include full scripture text' }
-          }
-        }
+            includeText: { type: 'boolean', description: 'Include full scripture text' },
+          },
+        },
       },
       {
         name: 'explore_calendar',
@@ -83,34 +93,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             focus: { 
               type: 'string', 
               enum: ['current', 'year', 'seasons', 'special_days'],
-              description: 'What aspect of calendar to explore'
+              description: 'What aspect of calendar to explore',
             },
             year: { type: 'number', description: 'Year to explore' },
-            tradition: { type: 'string', description: 'Lectionary tradition' }
+            tradition: { type: 'string', description: 'Lectionary tradition' },
           },
-          required: ['focus']
-        }
+          required: ['focus'],
+        },
       },
       {
         name: 'search_lectionary',
-        description: 'Search lectionary by date range, season, scripture reference, or feast day',
+        description: 'Search lectionary by date range, season, scripture reference, or feast day. If search type is not specified, will interactively guide you through options.',
         inputSchema: {
           type: 'object',
           properties: {
             searchType: {
               type: 'string',
               enum: ['date_range', 'season', 'scripture', 'feast'],
-              description: 'Type of search'
+              description: 'Type of search (optional - will prompt if not provided)',
             },
             startDate: { type: 'string', description: 'Start date for range search' },
             endDate: { type: 'string', description: 'End date for range search' },
             season: { type: 'string', description: 'Season name' },
             scripture: { type: 'string', description: 'Scripture reference' },
             feastName: { type: 'string', description: 'Feast or special day name' },
-            tradition: { type: 'string', description: 'Lectionary tradition' }
+            tradition: { type: 'string', description: 'Lectionary tradition' },
           },
-          required: ['searchType']
-        }
+        },
       },
       {
         name: 'analyze_liturgical_context',
@@ -122,13 +131,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             depth: { 
               type: 'string',
               enum: ['basic', 'detailed', 'comprehensive'],
-              description: 'Analysis depth'
+              description: 'Analysis depth',
             },
-            tradition: { type: 'string', description: 'Lectionary tradition' }
+            tradition: { type: 'string', description: 'Lectionary tradition' },
           },
-          required: ['date']
-        }
-      }
+          required: ['date'],
+        },
+      },
     ],
   };
 });
@@ -138,114 +147,151 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case 'get_readings': {
-        const params = GetReadingsSchema.parse(args);
-        const readings = await client.getReadings(params.date, params.tradition, params.includeText);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(readings, null, 2),
-            },
-          ],
-        };
-      }
+    case 'get_readings': {
+      const params = GetReadingsSchema.parse(args);
 
-      case 'explore_calendar': {
-        const params = ExploreCalendarSchema.parse(args);
-        let result: any;
+      // Elicit tradition if not specified and client supports it
+      const tradition = await elicitTradition(server, params.tradition);
+
+      const readings = await client.getReadings(params.date, tradition, params.includeText);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(readings, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'explore_calendar': {
+      const params = ExploreCalendarSchema.parse(args);
+      let result: any;
         
-        switch (params.focus) {
-          case 'current':
-            result = await client.getCurrentCalendar(params.tradition);
-            break;
-          case 'year':
-            if (!params.year) {
-              throw new McpError(ErrorCode.InvalidParams, 'Year is required for year focus');
-            }
-            result = await client.getCalendarByYear(params.year, params.tradition);
-            break;
-          case 'seasons':
-            if (!params.year) {
-              throw new McpError(ErrorCode.InvalidParams, 'Year is required for seasons focus');
-            }
-            result = await client.getSeasonsByYear(params.year, params.tradition);
-            break;
-          case 'special_days':
-            if (!params.year) {
-              params.year = new Date().getFullYear();
-            }
-            result = await client.getSpecialDays(params.year, params.tradition);
-            break;
+      switch (params.focus) {
+      case 'current':
+        result = await client.getCurrentCalendar(params.tradition);
+        break;
+      case 'year':
+        if (!params.year) {
+          throw new McpError(ErrorCode.InvalidParams, 'Year is required for year focus');
         }
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
-      }
-
-      case 'search_lectionary': {
-        const params = SearchLectionarySchema.parse(args);
-        let result: any;
-        
-        switch (params.searchType) {
-          case 'date_range':
-            if (!params.startDate || !params.endDate) {
-              throw new McpError(ErrorCode.InvalidParams, 'Start and end dates required for date range search');
-            }
-            result = await client.getReadingsByDateRange(params.startDate, params.endDate, params.tradition);
-            break;
-          case 'season':
-            if (!params.season) {
-              throw new McpError(ErrorCode.InvalidParams, 'Season name required for season search');
-            }
-            result = await client.getReadingsBySeason(params.season, params.tradition);
-            break;
-          case 'scripture':
-            if (!params.scripture) {
-              throw new McpError(ErrorCode.InvalidParams, 'Scripture reference required for scripture search');
-            }
-            result = await client.findByScripture(params.scripture, params.tradition);
-            break;
-          case 'feast':
-            if (!params.feastName) {
-              throw new McpError(ErrorCode.InvalidParams, 'Feast name required for feast day search');
-            }
-            result = await client.findFeastDay(params.feastName, params.tradition);
-            break;
+        result = await client.getCalendarByYear(params.year, params.tradition);
+        break;
+      case 'seasons':
+        if (!params.year) {
+          throw new McpError(ErrorCode.InvalidParams, 'Year is required for seasons focus');
         }
+        result = await client.getSeasonsByYear(params.year, params.tradition);
+        break;
+      case 'special_days':
+        if (!params.year) {
+          params.year = new Date().getFullYear();
+        }
+        result = await client.getSpecialDays(params.year, params.tradition);
+        break;
+      }
         
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'search_lectionary': {
+      const params = SearchLectionarySchema.parse(args);
+      let result: unknown;
+
+      // Elicit search type if not specified
+      let searchType = params.searchType;
+      if (!searchType) {
+        searchType = await elicitSearchType(server, searchType) as typeof params.searchType;
+        if (!searchType) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  error: 'Search type is required. Please specify one of: date_range, season, scripture, feast',
+                }, null, 2),
+              },
+            ],
+          };
+        }
       }
 
-      case 'analyze_liturgical_context': {
-        const params = AnalyzeLiturgicalContextSchema.parse(args);
-        const analysis = await client.analyzeLiturgicalContext(params.date, params.depth, params.tradition);
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(analysis, null, 2),
-            },
-          ],
-        };
+      // Elicit tradition if needed
+      const tradition = await elicitTradition(server, params.tradition);
+
+      switch (searchType) {
+      case 'date_range': {
+        // Elicit date range if not provided
+        const dateRange = await elicitDateRange(server, params.startDate, params.endDate);
+        if (!dateRange) {
+          throw new McpError(ErrorCode.InvalidParams, 'Start and end dates required for date range search');
+        }
+        result = await client.getReadingsByDateRange(dateRange.startDate, dateRange.endDate, tradition);
+        break;
+      }
+      case 'season': {
+        // Elicit season if not provided
+        const season = await elicitSeason(server, params.season);
+        if (!season) {
+          throw new McpError(ErrorCode.InvalidParams, 'Season name required for season search');
+        }
+        result = await client.getReadingsBySeason(season, tradition);
+        break;
+      }
+      case 'scripture': {
+        // Elicit scripture reference if not provided
+        const scripture = await elicitScripture(server, params.scripture);
+        if (!scripture) {
+          throw new McpError(ErrorCode.InvalidParams, 'Scripture reference required for scripture search');
+        }
+        result = await client.findByScripture(scripture, tradition);
+        break;
+      }
+      case 'feast': {
+        // Elicit feast name if not provided
+        const feastName = await elicitFeastName(server, params.feastName);
+        if (!feastName) {
+          throw new McpError(ErrorCode.InvalidParams, 'Feast name required for feast day search');
+        }
+        result = await client.findFeastDay(feastName, tradition);
+        break;
+      }
       }
 
-      default:
-        throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+
+    case 'analyze_liturgical_context': {
+      const params = AnalyzeLiturgicalContextSchema.parse(args);
+      const analysis = await client.analyzeLiturgicalContext(params.date, params.depth, params.tradition);
+        
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(analysis, null, 2),
+          },
+        ],
+      };
+    }
+
+    default:
+      throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
   } catch (error) {
     if (error instanceof z.ZodError) {

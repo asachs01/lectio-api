@@ -1,0 +1,16 @@
+# Build artifacts
+dist/
+*.mcpb
+
+# Certificates
+*.pem
+
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+
+# OS files
+.DS_Store

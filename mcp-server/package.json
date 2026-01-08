@@ -11,13 +11,15 @@
     "mcp": "tsx src/index.ts",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "package": "./package-mcpb.sh",
+    "package:validate": "mcpb validate manifest.json"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.7.0",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "axios": "^1.6.2",
     "express": "^4.18.2",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@jest/globals": "^30.1.0",

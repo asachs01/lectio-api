@@ -1,0 +1,80 @@
+{
+  "manifest_version": "0.3",
+  "name": "lectio-api-mcp",
+  "display_name": "Lectionary API",
+  "version": "1.0.0",
+  "description": "Access liturgical readings and calendar data through intelligent, decision tree-based tools",
+  "long_description": "A Model Context Protocol server for the Lectionary API that provides scripture readings, liturgical calendar information, and comprehensive liturgical analysis. Supports multiple traditions including Revised Common Lectionary (RCL), Roman Catholic, Episcopal, and Lutheran. Features interactive elicitation to guide users through search options when parameters are not specified.",
+  "author": {
+    "name": "Aaron Sachs",
+    "url": "https://github.com/asachs01"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asachs01/lectionary-api"
+  },
+  "homepage": "https://github.com/asachs01/lectionary-api",
+  "documentation": "https://github.com/asachs01/lectionary-api/tree/main/mcp-server",
+  "support": "https://github.com/asachs01/lectionary-api/issues",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ],
+      "env": {
+        "LECTIO_API_URL": "${user_config.api_url}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "get_readings",
+      "description": "Get scripture readings for any date. Supports multiple lectionary traditions with interactive tradition selection."
+    },
+    {
+      "name": "explore_calendar",
+      "description": "Explore the liturgical calendar - view current season, full year, seasons list, or special days."
+    },
+    {
+      "name": "search_lectionary",
+      "description": "Search the lectionary by date range, season, scripture reference, or feast day. Interactive guidance available."
+    },
+    {
+      "name": "analyze_liturgical_context",
+      "description": "Get comprehensive liturgical analysis for any date including themes, connections, and practical applications."
+    }
+  ],
+  "keywords": [
+    "lectionary",
+    "liturgical",
+    "scripture",
+    "readings",
+    "church",
+    "calendar",
+    "rcl",
+    "catholic",
+    "episcopal",
+    "lutheran",
+    "worship"
+  ],
+  "license": "MIT",
+  "user_config": {
+    "api_url": {
+      "type": "string",
+      "title": "Lectionary API URL",
+      "description": "Base URL for the Lectionary API. Use the default public API or point to your own instance.",
+      "default": "https://lectio-api.org/api/v1",
+      "required": false
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

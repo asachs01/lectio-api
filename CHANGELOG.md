@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- MCP Elicitation support for interactive user prompts during tool execution
+- Elicitation schemas for tradition selection, search type guidance, and parameter collection
+- Opt-in elicitation behavior - only prompts when parameters are missing
+- Graceful fallback to defaults when client doesn't support elicitation
+- Comprehensive unit tests for elicitation functionality (44 tests)
+- MCPB (MCP Bundle) packaging support for Claude Desktop extensions
+- New `manifest.json` following MCPB specification v0.3
+- `npm run package` script for building .mcpb bundles
+- User-configurable API URL in Claude Desktop settings
+
+### Changed
+- Upgraded @modelcontextprotocol/sdk from 0.7.0 to 1.25.x
+- Upgraded zod from 3.22.4 to 3.25.x
+- Made `searchType` optional in search_lectionary tool (can be elicited)
+
+### Added (previous)
 - Initial project setup with TypeScript, Express, and TypeORM
 - Database schema for lectionary readings with multiple traditions (RCL, Catholic, Episcopal, Lutheran)
 - RESTful API endpoints for readings, calendar, and traditions
