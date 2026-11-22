@@ -62,8 +62,44 @@ describe('API Endpoints Integration Tests', () => {
       expect(robots.text).toContain('Sitemap: https://lectio-api.org/sitemap.xml');
       const sitemap = await request(appInstance).get('/sitemap.xml').expect(200);
       expect(sitemap.text).toContain('https://lectio-api.org/');
+      expect(sitemap.text).toContain('https://lectio-api.org/faq');
+      expect(sitemap.text).not.toContain('buildwithfern');
       const llms = await request(appInstance).get('/llms.txt').expect(200);
       expect(llms.text).toContain('Revised Common Lectionary');
+      expect(llms.text).toContain('https://lectio-api.org/faq');
+      expect(llms.text).not.toContain('buildwithfern');
+    });
+
+    it('GET /faq serves the FAQ with FAQPage structured data', async () => {
+      const response = await request(appInstance).get('/faq').expect(200);
+      expect(response.headers['content-type']).toMatch(/text\/html/);
+      expect(response.text).toContain('Frequently asked questions');
+      expect(response.text).toContain('What are today\'s lectionary readings?');
+      expect(response.text).toContain('What RCL year is it?');
+      expect(response.text).toContain('"@type":"FAQPage"');
+      expect(response.text).toContain('canonical');
+      expect(response.text).toContain('https://lectio-api.org/faq');
+      expect(response.text).not.toContain('buildwithfern');
+    });
+
+    it('GET /api/docs includes SEO metadata', async () => {
+      const previous = process.env.SWAGGER_ENABLED;
+      process.env.SWAGGER_ENABLED = 'true';
+      const docsApp = new App().getApp();
+      try {
+        const response = await request(docsApp).get('/api/docs/').redirects(1).expect(200);
+        expect(response.headers['content-type']).toMatch(/text\/html/);
+        expect(response.text).toContain('Lectio API Documentation');
+        expect(response.text).toContain('og:title');
+        expect(response.text).toContain('https://lectio-api.org/api/docs');
+        expect(response.text).not.toContain('buildwithfern');
+      } finally {
+        if (previous === undefined) {
+          delete process.env.SWAGGER_ENABLED;
+        } else {
+          process.env.SWAGGER_ENABLED = previous;
+        }
+      }
     });
 
     it('GET / should include documentation link and API information', async () => {

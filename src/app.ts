@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
@@ -10,7 +10,7 @@ import { requestLogger } from './middleware/request-logger';
 import { apiRouter } from './routes';
 import path from 'path';
 import { randomBytes } from 'crypto';
-import { FAQ_ITEMS, landingHeadTags, publicBaseUrl } from './utils/seo';
+import { DOCS_TITLE, FAQ_ITEMS, docsHeadTags, landingHeadTags, publicBaseUrl, renderFaqPage } from './utils/seo';
 
 export class App {
   private app: Application;
@@ -97,10 +97,22 @@ export class App {
     // API documentation - enabled by default in production, can be disabled with SWAGGER_ENABLED=false
     const swaggerEnabled = process.env.SWAGGER_ENABLED !== 'false';
     if (swaggerEnabled) {
-      this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+      this.app.use('/api/docs', (req: Request, res: Response, next: NextFunction) => {
+        const originalSend = res.send.bind(res);
+        res.send = ((body: unknown) => {
+          if (typeof body === 'string' && body.includes('</head>')) {
+            const nonce = String(res.locals.cspNonce || '');
+            const tags = docsHeadTags(publicBaseUrl(req), nonce);
+            const withoutTitle = body.replace(/<title>[^<]*<\/title>/i, '');
+            body = withoutTitle.replace('</head>', `${tags}\n</head>`);
+          }
+          return originalSend(body);
+        }) as typeof res.send;
+        next();
+      }, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
         explorer: true,
         customCss: '.swagger-ui .topbar { display: none }',
-        customSiteTitle: 'Lectionary API Documentation',
+        customSiteTitle: DOCS_TITLE,
         swaggerOptions: {
           persistAuthorization: true,
           tryItOutEnabled: true,
@@ -124,6 +136,12 @@ export class App {
 
     // API routes
     this.app.use('/api', apiRouter);
+
+    this.app.get('/faq', (req: Request, res: Response) => {
+      const nonce = String(res.locals.cspNonce || '');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(renderFaqPage(publicBaseUrl(req), nonce));
+    });
 
     // Root endpoint - API welcome page with HTML landing page
     this.app.get('/', (_req: Request, res: Response) => {
@@ -337,9 +355,11 @@ curl "${apiRoot}/traditions"
   <section id="faq">
     <div class="container">
       <h2>Frequently asked questions</h2>
-      ${FAQ_ITEMS.map((item) => `<div class="card" style="margin-bottom: 16px;">
-          <h3>${item.question}</h3>
-          <p>${item.answer}</p>
+      <p style="text-align: center; color: var(--text-light); margin-bottom: 24px;">
+        <a href="${baseUrl}/faq">Read the full FAQ</a> for today's readings, the current RCL year, the Daily Office, and the Catholic lectionary.
+      </p>
+      ${FAQ_ITEMS.map((item, index) => `<div class="card" style="margin-bottom: 16px;">
+          <h3><a href="${baseUrl}/faq#q${index + 1}" style="color: inherit; text-decoration: none;">${item.question}</a></h3>
         </div>`).join('\n')}
     </div>
   </section>
@@ -349,7 +369,7 @@ curl "${apiRoot}/traditions"
       <p><strong>Lectionary API</strong> - Open source scripture readings API</p>
       <p>
         <a href="${docsUrl}">API Documentation</a> &bull;
-        <a href="https://lectio-api.docs.buildwithfern.com">Reference docs</a> &bull;
+        <a href="${baseUrl}/faq">FAQ</a> &bull;
         <a href="https://github.com/asachs01/lectio-api">GitHub</a> &bull;
         <a href="${baseUrl}/llms.txt">llms.txt</a> &bull;
         <a href="${baseUrl}/health">Health Status</a>

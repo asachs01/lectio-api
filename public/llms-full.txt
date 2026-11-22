@@ -28,3 +28,7 @@ Use `tradition=catholic` on the readings and calendar endpoints for the Roman Ca
 ## MCP
 
 A Model Context Protocol server is included in the `mcp-server/` directory of the GitHub repository so assistants can call these endpoints as tools.
+
+## FAQ
+
+Longer answers live at https://lectio-api.org/faq and in docs/FAQ.md in the repository.

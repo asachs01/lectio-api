@@ -6,7 +6,7 @@
 curl "https://lectio-api.org/api/v1/readings/today?tradition=rcl&tz=America/New_York"
 ```
 
-Interactive docs live at [lectio-api.org/api/docs](https://lectio-api.org/api/docs) and [the Fern reference](https://lectio-api.docs.buildwithfern.com). Machine-readable entry points: [OpenAPI](https://lectio-api.org/api/openapi.json), [llms.txt](https://lectio-api.org/llms.txt). A [Model Context Protocol server](./mcp-server) is included for assistants. Built with Node.js, Express, and TypeScript.
+Interactive docs live at [lectio-api.org/api/docs](https://lectio-api.org/api/docs). The [FAQ](https://lectio-api.org/faq) covers today's readings, the current RCL year, and the Daily Office (also in [docs/FAQ.md](docs/FAQ.md)). Machine-readable entry points: [OpenAPI](https://lectio-api.org/api/openapi.json), [llms.txt](https://lectio-api.org/llms.txt). A [Model Context Protocol server](./mcp-server) is included for assistants. Built with Node.js, Express, and TypeScript.
 
 
 ## 🚀 Features
@@ -63,6 +63,7 @@ The API will be available at `http://localhost:3000`
 ### Documentation Location
 
 All detailed documentation is located in the `/docs` directory:
+- **FAQ**: `/docs/FAQ.md` — Today's readings, the current RCL year, Daily Office, and traditions (also at https://lectio-api.org/faq)
 - **Database Documentation**: `/docs/DATABASE_*.md` - Schema, setup, and optimization guides
 - **Observability**: `/docs/OBSERVABILITY.md` - Monitoring and telemetry setup
 - **Migration Guide**: `/docs/MIGRATION_GUIDE.md` - Database migration procedures
