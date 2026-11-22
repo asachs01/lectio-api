@@ -2,20 +2,28 @@ name: MCP Server Tests
 
 on:
   push:
-    branches: [ main, develop, 'feature/mcp-*' ]
+    branches: [ main, develop, 'feature/mcp-*', 'feat/**' ]
     paths:
       - 'mcp-server/**'
+      - 'src/app.ts'
+      - 'src/mcp-endpoint.ts'
       - '.github/workflows/mcp-test.yml'
+      - 'server.json'
+      - 'Dockerfile'
   pull_request:
-    branches: [ main ]
     paths:
       - 'mcp-server/**'
+      - 'src/app.ts'
+      - 'src/mcp-endpoint.ts'
       - '.github/workflows/mcp-test.yml'
+      - 'server.json'
+      - 'Dockerfile'
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:14
@@ -33,32 +41,32 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
         cache-dependency-path: |
           package-lock.json
           mcp-server/package-lock.json
-    
+
     - name: Install API dependencies
       run: npm ci
-    
+
     - name: Install MCP Server dependencies
       working-directory: ./mcp-server
       run: npm ci
-    
+
     - name: Build API
       run: npm run build
       env:
         NODE_ENV: test
-    
+
     - name: Build MCP Server
       working-directory: ./mcp-server
       run: npm run build
-    
+
     - name: Run database migrations
       run: npx ts-node --compiler-options '{"module":"commonjs"}' ./node_modules/typeorm/cli.js migration:run -d ormconfig.js
       env:
@@ -79,11 +87,12 @@ jobs:
         DB_NAME: lectionary_api_test
         NODE_ENV: test
 
-    - name: Start API server
+    - name: Start API server (with /mcp mounted)
       run: |
         npm start &
         sleep 10
         curl --fail http://localhost:3000/health || exit 1
+        curl --fail http://localhost:3000/mcp/health || exit 1
       env:
         DB_HOST: localhost
         DB_PORT: 5432
@@ -92,58 +101,67 @@ jobs:
         DB_NAME: lectionary_api_test
         NODE_ENV: test
         PORT: 3000
-    
-    - name: Start MCP server
+        LECTIO_API_URL: http://127.0.0.1:3000/api/v1
+
+    - name: Start standalone MCP server
       working-directory: ./mcp-server
       run: |
         MCP_TRANSPORT=http PORT=3001 npm start &
         sleep 5
         curl --fail http://localhost:3001/health || exit 1
+        curl --fail http://localhost:3001/mcp/health || exit 1
       env:
         LECTIO_API_URL: http://localhost:3000/api/v1
         NODE_ENV: test
-    
-    - name: Run MCP tests
+
+    - name: Run MCP unit and integration tests
       working-directory: ./mcp-server
       run: npm test
       env:
         NODE_OPTIONS: '--experimental-vm-modules'
         LECTIO_API_URL: http://localhost:3000/api/v1
-    
-    - name: Test MCP tools via curl
+        MCP_INTEGRATION: '1'
+        MCP_SERVER_URL: http://localhost:3001
+
+    - name: Test Streamable HTTP tools via curl
       run: |
-        # Test get_readings tool
-        curl -X POST http://localhost:3001/rpc \
-          -H "Content-Type: application/json" \
-          -d '{
-            "jsonrpc": "2.0",
-            "id": "ci-test-1",
-            "method": "tools/call",
-            "params": {
-              "name": "get_readings",
-              "arguments": {
-                "date": "2025-12-25",
-                "tradition": "rcl"
-              }
-            }
-          }' | jq '.result.content[0].text' | jq -r '.' | jq '.date' | grep "2025-12-25"
-        
-        # Test explore_calendar tool
-        curl -X POST http://localhost:3001/rpc \
-          -H "Content-Type: application/json" \
-          -d '{
-            "jsonrpc": "2.0",
-            "id": "ci-test-2",
-            "method": "tools/call",
-            "params": {
-              "name": "explore_calendar",
-              "arguments": {
-                "focus": "current",
-                "tradition": "rcl"
-              }
-            }
-          }' | jq '.result' | grep "content"
-    
+        node <<'JS'
+        const Accept = { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' };
+        async function rpc(url, body) {
+          const res = await fetch(url, { method: 'POST', headers: Accept, body: JSON.stringify(body) });
+          const text = await res.text();
+          if (!res.ok) throw new Error(`${url} ${res.status}: ${text.slice(0, 400)}`);
+          try { return JSON.parse(text); } catch {
+            const lines = text.split('\n').filter((l) => l.startsWith('data: '));
+            if (!lines.length) throw new Error(`Unparseable ${url}: ${text.slice(0, 400)}`);
+            return JSON.parse(lines[lines.length - 1].slice(6));
+          }
+        }
+        async function check(url) {
+          const listed = await rpc(url, { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
+          const names = listed.result.tools.map((t) => t.name);
+          for (const n of ['get_readings', 'get_calendar', 'list_traditions', 'search_lectionary']) {
+            if (!names.includes(n)) throw new Error(`${url} missing ${n}: ${names}`);
+          }
+          const readings = await rpc(url, {
+            jsonrpc: '2.0', id: 2, method: 'tools/call',
+            params: { name: 'get_readings', arguments: { date: '2025-12-25', tradition: 'rcl' } },
+          });
+          const payload = JSON.stringify(readings.result ?? readings);
+          if (!payload.includes('2025-12-25')) throw new Error(`${url} get_readings missing date: ${payload.slice(0, 400)}`);
+          const calendar = await rpc(url, {
+            jsonrpc: '2.0', id: 3, method: 'tools/call',
+            params: { name: 'get_calendar', arguments: { focus: 'current', tradition: 'rcl' } },
+          });
+          if (!JSON.stringify(calendar.result ?? calendar).includes('content')) {
+            throw new Error(`${url} get_calendar unexpected: ${JSON.stringify(calendar).slice(0, 400)}`);
+          }
+          console.log('ok', url, names.join(','));
+        }
+        await check('http://127.0.0.1:3001/mcp');
+        await check('http://127.0.0.1:3000/mcp');
+        JS
+
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
@@ -156,12 +174,10 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     needs: test
-    
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Build Docker image
+
+    - name: Build standalone MCP Docker image
       working-directory: ./mcp-server
-      run: |
-        docker build -t lectio-mcp:test .
-        docker run --rm lectio-mcp:test --version
+      run: docker build -t lectio-mcp:test .

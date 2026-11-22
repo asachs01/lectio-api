@@ -64,7 +64,7 @@ export const FAQ_ITEMS: { question: string; answer: string }[] = [
   {
     question: 'Is there an MCP server?',
     answer:
-      'Yes. The repository includes a Model Context Protocol server in mcp-server/ so assistants can use Lectio API as tools. The REST API is at https://lectio-api.org and the OpenAPI document is at https://lectio-api.org/api/openapi.json.',
+      'Yes. Assistants can connect over Streamable HTTP at https://lectio-api.org/mcp. Canonical tools are get_readings, get_calendar, list_traditions, and search_lectionary. The package also lives in mcp-server/ for local stdio clients. The REST API is at https://lectio-api.org and the OpenAPI document is at https://lectio-api.org/api/openapi.json.',
   },
 ];
 

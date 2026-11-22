@@ -9,7 +9,10 @@ import { errorHandler } from './middleware/error-handler';
 import { requestLogger } from './middleware/request-logger';
 import { apiRouter } from './routes';
 import path from 'path';
+import fs from 'fs';
+import { pathToFileURL } from 'url';
 import { randomBytes } from 'crypto';
+import { logger } from './utils/logger';
 import { DOCS_TITLE, FAQ_ITEMS, docsHeadTags, landingHeadTags, publicBaseUrl, renderFaqPage } from './utils/seo';
 
 export class App {
@@ -42,13 +45,21 @@ export class App {
       },
     }));
     
-    // CORS configuration
-    this.app.use(cors({
+    // CORS configuration. /mcp has its own CORS (browser MCP clients)
+    // and must not be blocked by the API origin allowlist.
+    const apiCors = cors({
       origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-    }));
+    });
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.path === '/mcp' || req.path.startsWith('/mcp/')) {
+        next();
+        return;
+      }
+      apiCors(req, res, next);
+    });
 
     // Compression middleware
     this.app.use(compression());
@@ -93,6 +104,8 @@ export class App {
     this.app.get('/openapi.json', (_req: Request, res: Response) => {
       res.redirect(301, '/api/openapi.json');
     });
+
+    this.setupMcp();
 
     // API documentation - enabled by default in production, can be disabled with SWAGGER_ENABLED=false
     const swaggerEnabled = process.env.SWAGGER_ENABLED !== 'false';
@@ -372,6 +385,7 @@ curl "${apiRoot}/traditions"
         <a href="${baseUrl}/faq">FAQ</a> &bull;
         <a href="https://github.com/asachs01/lectio-api">GitHub</a> &bull;
         <a href="${baseUrl}/llms.txt">llms.txt</a> &bull;
+        <a href="${baseUrl}/mcp">MCP</a> &bull;
         <a href="${baseUrl}/health">Health Status</a>
       </p>
       <p style="margin-top: 16px; font-size: 0.875rem;">
@@ -402,6 +416,38 @@ curl "${apiRoot}/traditions"
 
   private setupErrorHandling(): void {
     this.app.use(errorHandler);
+  }
+
+
+  private mcpRouterLoader: Promise<express.Router> | null = null;
+
+  /**
+   * Mount the official Streamable HTTP MCP endpoint at /mcp when the
+   * mcp-server package has been built. Disabled when MCP_ENABLED=false.
+   */
+  private setupMcp(): void {
+    if (process.env.MCP_ENABLED === 'false') {
+      return;
+    }
+
+    const mcpDist = path.join(__dirname, '..', 'mcp-server', 'dist', 'http.js');
+    if (!fs.existsSync(mcpDist)) {
+      logger.warn('MCP server build not found; /mcp is disabled. Run npm run build in mcp-server/.');
+      return;
+    }
+
+    const port = process.env.PORT || '3000';
+    const apiBaseUrl = process.env.LECTIO_API_URL || `http://127.0.0.1:${port}/api/v1`;
+
+    this.app.use('/mcp', (req: Request, res: Response, next: NextFunction) => {
+      if (!this.mcpRouterLoader) {
+        this.mcpRouterLoader = import(pathToFileURL(mcpDist).href).then(
+          (mod: { createMcpRouter: (opts: { apiBaseUrl: string }) => express.Router }) =>
+            mod.createMcpRouter({ apiBaseUrl }),
+        );
+      }
+      void this.mcpRouterLoader.then((router) => router(req, res, next)).catch(next);
+    });
   }
 
   public listen(port: number | string, callback?: () => void): void {

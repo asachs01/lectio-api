@@ -6,6 +6,7 @@ config({ path: '.env.test' });
 // Set test environment
 process.env.NODE_ENV = 'test';
 process.env.SWAGGER_ENABLED = 'false';
+process.env.MCP_ENABLED = 'false';
 
 // Global test configuration
 beforeAll(async () => {

@@ -16,6 +16,11 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Build the MCP server mounted at /mcp
+WORKDIR /app/mcp-server
+RUN npm ci --ignore-scripts && npm run build
+WORKDIR /app
+
 # Production stage
 FROM node:20-alpine AS production
 
@@ -35,6 +40,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/src/data ./src/data
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/ormconfig.js ./ormconfig.js
+# MCP server (ESM) and its production dependencies, used by /mcp
+COPY mcp-server/package*.json ./mcp-server/
+RUN cd mcp-server && npm ci --omit=dev --ignore-scripts
+COPY --from=builder /app/mcp-server/dist ./mcp-server/dist
 # Copy startup script
 COPY scripts/start-production.sh ./scripts/start-production.sh
 RUN chmod +x ./scripts/start-production.sh
