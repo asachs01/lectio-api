@@ -56,6 +56,16 @@ describe('API Endpoints Integration Tests', () => {
       expect(response.text).toContain('Lectionary API');
     });
 
+    it('GET /robots.txt, /sitemap.xml, and /llms.txt are crawlable', async () => {
+      const robots = await request(appInstance).get('/robots.txt').expect(200);
+      expect(robots.text).toContain('GPTBot');
+      expect(robots.text).toContain('Sitemap: https://lectio-api.org/sitemap.xml');
+      const sitemap = await request(appInstance).get('/sitemap.xml').expect(200);
+      expect(sitemap.text).toContain('https://lectio-api.org/');
+      const llms = await request(appInstance).get('/llms.txt').expect(200);
+      expect(llms.text).toContain('Revised Common Lectionary');
+    });
+
     it('GET / should include documentation link and API information', async () => {
       const response = await request(appInstance)
         .get('/')

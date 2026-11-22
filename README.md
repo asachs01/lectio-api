@@ -1,6 +1,13 @@
-# Lectionary API
+# Lectio API — Revised Common Lectionary, Daily Office, and Catholic Lectionary API
 
-A modern REST API for serving lectionary readings and liturgical calendar data. Built with Node.js, Express, TypeScript, and designed for high performance and scalability.
+[Lectio API](https://lectio-api.org) is a free, open-source **Revised Common Lectionary API**, **liturgical calendar API**, **Book of Common Prayer Daily Office API**, and **Catholic lectionary API**. Churches, apps, and assistants can fetch today's readings, a date's lectionary, or the current RCL year (A, B, or C) over HTTP.
+
+```bash
+curl "https://lectio-api.org/api/v1/readings/today?tradition=rcl&tz=America/New_York"
+```
+
+Interactive docs live at [lectio-api.org/api/docs](https://lectio-api.org/api/docs) and [the Fern reference](https://lectio-api.docs.buildwithfern.com). Machine-readable entry points: [OpenAPI](https://lectio-api.org/api/openapi.json), [llms.txt](https://lectio-api.org/llms.txt). A [Model Context Protocol server](./mcp-server) is included for assistants. Built with Node.js, Express, and TypeScript.
+
 
 ## 🚀 Features
 
@@ -14,9 +21,13 @@ A modern REST API for serving lectionary readings and liturgical calendar data. 
 - **Performance Optimized**: Built-in caching, compression, and rate limiting
 - **Production Ready**: Logging, monitoring, and deployment configuration
 
+## MCP server
+
+The `mcp-server/` directory packages Lectio API as a Model Context Protocol server so Claude, Cursor, and other MCP clients can call the readings and calendar tools directly.
+
 ## 📋 Prerequisites
 
-- Node.js 18.0.0 or higher
+- Node.js 20.0.0 or higher
 - npm or yarn
 - PostgreSQL 12+ (for production)
 - Redis (for caching, optional)
@@ -25,7 +36,7 @@ A modern REST API for serving lectionary readings and liturgical calendar data. 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/lectionary-api.git
+git clone https://github.com/asachs01/lectio-api.git
 cd lectionary-api
 ```
 

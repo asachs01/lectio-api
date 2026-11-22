@@ -8,6 +8,9 @@ import { swaggerSpec } from './config/swagger';
 import { errorHandler } from './middleware/error-handler';
 import { requestLogger } from './middleware/request-logger';
 import { apiRouter } from './routes';
+import path from 'path';
+import { randomBytes } from 'crypto';
+import { FAQ_ITEMS, landingHeadTags, publicBaseUrl } from './utils/seo';
 
 export class App {
   private app: Application;
@@ -20,13 +23,18 @@ export class App {
   }
 
   private setupMiddleware(): void {
+    this.app.use((_req: Request, res: Response, next) => {
+      res.locals.cspNonce = randomBytes(16).toString('base64');
+      next();
+    });
+
     // Security middleware with CSP configured for Swagger UI
     this.app.use(helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ['\'self\''],
           styleSrc: ['\'self\'', '\'unsafe-inline\''],
-          scriptSrc: ['\'self\''],
+          scriptSrc: ['\'self\'', (_req, res) => `'nonce-${(res as Response).locals.cspNonce}'`],
           imgSrc: ['\'self\'', 'data:'],
           fontSrc: ['\'self\''],
           upgradeInsecureRequests: null, // Disable HTTPS upgrade for development
@@ -78,6 +86,14 @@ export class App {
       });
     });
 
+    this.app.use(express.static(path.join(process.cwd(), 'public'), {
+      fallthrough: true,
+      index: false,
+    }));
+    this.app.get('/openapi.json', (_req: Request, res: Response) => {
+      res.redirect(301, '/api/openapi.json');
+    });
+
     // API documentation - enabled by default in production, can be disabled with SWAGGER_ENABLED=false
     const swaggerEnabled = process.env.SWAGGER_ENABLED !== 'false';
     if (swaggerEnabled) {
@@ -112,9 +128,10 @@ export class App {
     // Root endpoint - API welcome page with HTML landing page
     this.app.get('/', (_req: Request, res: Response) => {
       const version = process.env.API_VERSION || 'v1';
-      const baseUrl = `${_req.protocol}://${_req.get('host')}`;
+      const baseUrl = publicBaseUrl(_req);
       const docsUrl = `${baseUrl}/api/docs`;
       const apiRoot = `${baseUrl}/api/${version}`;
+      const nonce = String(_req.res?.locals.cspNonce || '');
 
       const html = `
 <!DOCTYPE html>
@@ -122,8 +139,7 @@ export class App {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lectionary API - Scripture Readings for Christian Churches</title>
-  <meta name="description" content="A modern REST API providing lectionary readings and liturgical calendar data for Christian churches. Supports RCL, Catholic, and Episcopal traditions.">
+  ${landingHeadTags(baseUrl, nonce)}
   <style>
     :root {
       --primary: #4f46e5;
@@ -317,12 +333,25 @@ curl "${apiRoot}/traditions"
     </div>
   </section>
 
+
+  <section id="faq">
+    <div class="container">
+      <h2>Frequently asked questions</h2>
+      ${FAQ_ITEMS.map((item) => `<div class="card" style="margin-bottom: 16px;">
+          <h3>${item.question}</h3>
+          <p>${item.answer}</p>
+        </div>`).join('\n')}
+    </div>
+  </section>
+
   <footer>
     <div class="container">
       <p><strong>Lectionary API</strong> - Open source scripture readings API</p>
       <p>
         <a href="${docsUrl}">API Documentation</a> &bull;
+        <a href="https://lectio-api.docs.buildwithfern.com">Reference docs</a> &bull;
         <a href="https://github.com/asachs01/lectio-api">GitHub</a> &bull;
+        <a href="${baseUrl}/llms.txt">llms.txt</a> &bull;
         <a href="${baseUrl}/health">Health Status</a>
       </p>
       <p style="margin-top: 16px; font-size: 0.875rem;">
