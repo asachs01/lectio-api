@@ -139,6 +139,72 @@
           }
         },
         {
+          "id": "epiphany-4-b",
+          "name": "Fourth Sunday after Epiphany",
+          "date_pattern": "epiphany_4",
+          "readings": {
+            "first": "Deuteronomy 18:15-20",
+            "psalm": "Psalm 111",
+            "second": "1 Corinthians 8:1-13",
+            "gospel": "Mark 1:21-28"
+          }
+        },
+        {
+          "id": "epiphany-5-b",
+          "name": "Fifth Sunday after Epiphany",
+          "date_pattern": "epiphany_5",
+          "readings": {
+            "first": "Isaiah 40:21-31",
+            "psalm": "Psalm 147:1-11, 20c",
+            "second": "1 Corinthians 9:16-23",
+            "gospel": "Mark 1:29-39"
+          }
+        },
+        {
+          "id": "epiphany-6-b",
+          "name": "Sixth Sunday after Epiphany",
+          "date_pattern": "epiphany_6",
+          "readings": {
+            "first": "2 Kings 5:1-14",
+            "psalm": "Psalm 30",
+            "second": "1 Corinthians 9:24-27",
+            "gospel": "Mark 1:40-45"
+          }
+        },
+        {
+          "id": "epiphany-7-b",
+          "name": "Seventh Sunday after Epiphany",
+          "date_pattern": "epiphany_7",
+          "readings": {
+            "first": "Isaiah 43:18-25",
+            "psalm": "Psalm 41",
+            "second": "2 Corinthians 1:18-22",
+            "gospel": "Mark 2:1-12"
+          }
+        },
+        {
+          "id": "epiphany-8-b",
+          "name": "Eighth Sunday after Epiphany",
+          "date_pattern": "epiphany_8",
+          "readings": {
+            "first": "Hosea 2:14-20",
+            "psalm": "Psalm 103:1-13, 22",
+            "second": "2 Corinthians 3:1-6",
+            "gospel": "Mark 2:13-22"
+          }
+        },
+        {
+          "id": "epiphany-9-b",
+          "name": "Ninth Sunday after Epiphany",
+          "date_pattern": "epiphany_9",
+          "readings": {
+            "first": "Deuteronomy 5:12-15",
+            "psalm": "Psalm 81:1-10",
+            "second": "2 Corinthians 4:5-12",
+            "gospel": "Mark 2:23-3:6"
+          }
+        },
+        {
           "id": "transfiguration-b",
           "name": "Transfiguration Sunday",
           "date_pattern": "transfiguration",
