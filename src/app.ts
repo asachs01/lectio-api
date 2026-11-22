@@ -15,6 +15,14 @@ import { randomBytes } from 'crypto';
 import { logger } from './utils/logger';
 import { DOCS_TITLE, FAQ_ITEMS, docsHeadTags, landingHeadTags, publicBaseUrl, renderFaqPage } from './utils/seo';
 
+
+/** Load an ESM module from compiled CommonJS. TypeScript would otherwise rewrite `import()` to `require()`. */
+function importEsm<T = unknown>(specifier: string): Promise<T> {
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+  const loader = new Function('specifier', 'return import(specifier)') as (id: string) => Promise<T>;
+  return loader(specifier);
+}
+
 export class App {
   private app: Application;
 
@@ -441,7 +449,7 @@ curl "${apiRoot}/traditions"
 
     this.app.use('/mcp', (req: Request, res: Response, next: NextFunction) => {
       if (!this.mcpRouterLoader) {
-        this.mcpRouterLoader = import(pathToFileURL(mcpDist).href).then(
+        this.mcpRouterLoader = importEsm<{ createMcpRouter: (opts: { apiBaseUrl: string }) => express.Router }>(pathToFileURL(mcpDist).href).then(
           (mod: { createMcpRouter: (opts: { apiBaseUrl: string }) => express.Router }) =>
             mod.createMcpRouter({ apiBaseUrl }),
         );
