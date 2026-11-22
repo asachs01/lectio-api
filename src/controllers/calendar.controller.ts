@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { CalendarService } from '../services/calendar.service';
 import { HttpError } from '../middleware/error-handler';
+import { getDefaultTimeZone, isValidTimeZone } from '../utils/time-zone';
 
 export class CalendarController {
   private calendarService: CalendarService;
@@ -72,8 +73,9 @@ export class CalendarController {
     try {
       const tradition = req.query['tradition'] || 'rcl';
       const traditionId = String(tradition);
+      const timeZone = this.resolveTimeZone(req.query['tz']);
 
-      const currentInfo = await this.calendarService.getCurrent(traditionId);
+      const currentInfo = await this.calendarService.getCurrent(traditionId, timeZone);
       
       res.json({
         data: currentInfo,
@@ -85,5 +87,16 @@ export class CalendarController {
       }
       throw new HttpError('Failed to fetch current calendar information', 500, { originalError: error });
     }
+  }
+
+  private resolveTimeZone(raw: unknown): string {
+    if (raw === undefined || raw === null || raw === '') {
+      return getDefaultTimeZone();
+    }
+    const timeZone = String(raw);
+    if (!isValidTimeZone(timeZone)) {
+      throw new HttpError('Invalid tz parameter. Use an IANA time zone such as America/New_York', 400);
+    }
+    return timeZone;
   }
 }

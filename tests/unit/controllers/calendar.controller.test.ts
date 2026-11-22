@@ -336,7 +336,7 @@ describe('CalendarController', () => {
       expect(mockJson).toHaveBeenCalledWith(
         expect.objectContaining({
           year: 2024,
-        })
+        }),
       );
     });
   });
@@ -347,7 +347,7 @@ describe('CalendarController', () => {
 
       await controller.getCurrent(mockRequest as Request, mockResponse as Response);
 
-      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('rcl');
+      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('rcl', 'America/New_York');
       expect(mockJson).toHaveBeenCalledWith({
         data: mockCurrentInfo,
         timestamp: expect.any(String),
@@ -360,7 +360,7 @@ describe('CalendarController', () => {
 
       await controller.getCurrent(mockRequest as Request, mockResponse as Response);
 
-      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('catholic');
+      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('catholic', 'America/New_York');
     });
 
     it('should handle current info with null current season', async () => {
@@ -421,17 +421,17 @@ describe('CalendarController', () => {
       // Test RCL
       mockRequest.query = { tradition: 'rcl' };
       await controller.getCurrent(mockRequest as Request, mockResponse as Response);
-      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('rcl');
+      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('rcl', 'America/New_York');
 
       // Test Catholic
       mockRequest.query = { tradition: 'catholic' };
       await controller.getCurrent(mockRequest as Request, mockResponse as Response);
-      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('catholic');
+      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('catholic', 'America/New_York');
 
       // Test Episcopal
       mockRequest.query = { tradition: 'episcopal' };
       await controller.getCurrent(mockRequest as Request, mockResponse as Response);
-      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('episcopal');
+      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('episcopal', 'America/New_York');
     });
 
     it('should handle tradition parameter type conversion', async () => {
@@ -440,7 +440,7 @@ describe('CalendarController', () => {
 
       await controller.getCurrent(mockRequest as Request, mockResponse as Response);
 
-      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('123');
+      expect(mockCalendarService.getCurrent).toHaveBeenCalledWith('123', 'America/New_York');
     });
   });
 });

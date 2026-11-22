@@ -88,6 +88,12 @@ router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)))
  *         schema:
  *           type: string
  *           default: rcl
+ *       - in: query
+ *         name: tz
+ *         description: IANA time zone used to decide "today" (defaults to LECTIO_TIMEZONE or America/New_York)
+ *         schema:
+ *           type: string
+ *           example: America/New_York
  *     responses:
  *       200:
  *         description: Today's readings (lectionary and/or daily office)
@@ -103,6 +109,9 @@ router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)))
  *                 dayOfWeek:
  *                   type: string
  *                   description: Day of the week (e.g., "Sunday", "Monday")
+ *                 timeZone:
+ *                   type: string
+ *                   description: IANA time zone used to determine today's date
  *                 tradition:
  *                   type: string
  *                   description: The lectionary tradition ID
@@ -139,6 +148,12 @@ router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)))
  *                 timestamp:
  *                   type: string
  *                   format: date-time
+ *       400:
+ *         description: Invalid tz parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: No readings found for today
  *         content:

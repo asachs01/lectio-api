@@ -1,6 +1,7 @@
 import { CalendarService } from '../../../src/services/calendar.service';
 import { LiturgicalSeason, SpecialDay } from '../../../src/types/lectionary.types';
 import { DatabaseService } from '../../../src/services/database.service';
+import { mockNow } from '../../helpers/mock-now';
 
 // Mock the DatabaseService
 jest.mock('../../../src/services/database.service');
@@ -432,14 +433,7 @@ describe('CalendarService', () => {
 
     it('should return current calendar information', async () => {
       // Mock current date to December 15, 2023 (during Advent)
-      const mockDate = new Date('2023-12-15T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-12-15T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('rcl');
 
@@ -456,14 +450,7 @@ describe('CalendarService', () => {
 
     it('should find current season correctly', async () => {
       // Mock date during Christmas season
-      const mockDate = new Date('2023-12-30T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-12-30T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('rcl');
 
@@ -477,14 +464,7 @@ describe('CalendarService', () => {
 
     it('should return null for current season when not in any season', async () => {
       // Mock date outside any season range
-      const mockDate = new Date('2023-06-15T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-06-15T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('rcl');
 
@@ -493,14 +473,7 @@ describe('CalendarService', () => {
 
     it('should return upcoming special days within 30 days', async () => {
       // Mock date to December 10, 2023 (Christmas should be upcoming)
-      const mockDate = new Date('2023-12-10T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-12-10T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('rcl');
 
@@ -519,14 +492,7 @@ describe('CalendarService', () => {
 
     it('should calculate days until special day correctly', async () => {
       // Mock date to December 20, 2023
-      const mockDate = new Date('2023-12-20T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-12-20T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('rcl');
 
@@ -536,14 +502,7 @@ describe('CalendarService', () => {
 
     it('should not return past special days', async () => {
       // Mock date to December 30, 2023 (after Christmas)
-      const mockDate = new Date('2023-12-30T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-12-30T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('rcl');
 
@@ -552,14 +511,7 @@ describe('CalendarService', () => {
     });
 
     it('should return correct year and today date', async () => {
-      const mockDate = new Date('2024-03-15T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2024-03-15T10:00:00.000Z', originalDate);
 
       const currentInfo = await service.getCurrent('episcopal');
 
@@ -568,14 +520,7 @@ describe('CalendarService', () => {
     });
 
     it('should work with different traditions', async () => {
-      const mockDate = new Date('2023-12-15T10:00:00.000Z');
-      jest.spyOn(global, 'Date')
-        .mockImplementation(((...args: any[]) => {
-          if (args.length === 0) {
-            return mockDate;
-          }
-          return new (originalDate as any)(...args);
-        }) as any);
+      mockNow('2023-12-15T10:00:00.000Z', originalDate);
 
       const rclInfo = await service.getCurrent('rcl');
       const catholicInfo = await service.getCurrent('catholic');
