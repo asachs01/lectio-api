@@ -106,7 +106,7 @@
     "eslint": "^8.56.0",
     "husky": "^9.1.7",
     "jest": "^30.5.2",
-    "lint-staged": "^15.5.2",
+    "lint-staged": "^17.6.1",
     "nodemon": "^3.0.2",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
