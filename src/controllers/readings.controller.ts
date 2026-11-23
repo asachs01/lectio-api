@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { ReadingsService } from '../services/readings.service';
 import { HttpError } from '../middleware/error-handler';
+import { compareCivil, parseCivilDate, weekdayOf } from '../utils/civil-date';
+import { formatTodayInTimeZone, getDefaultTimeZone, isValidTimeZone, weekdayName } from '../utils/time-zone';
 
 export class ReadingsController {
   private readingsService: ReadingsService;
@@ -47,10 +49,11 @@ export class ReadingsController {
   public async getToday(req: Request, res: Response): Promise<void> {
     try {
       const tradition = req.query['tradition'] || 'rcl';
-      const today = new Date().toISOString().split('T')[0];
+      const timeZone = this.resolveTimeZone(req.query['tz']);
+      const today = formatTodayInTimeZone(timeZone);
+      const todayCivil = parseCivilDate(today);
       const traditionId = String(tradition);
-      const dayOfWeek = new Date(today).getDay();
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayOfWeek = todayCivil ? weekdayOf(todayCivil) : 0;
 
       // Get Sunday/special readings (RCL only has readings for Sundays and special days)
       const sundayReadings = await this.readingsService.getByDate(today, traditionId as string);
@@ -61,7 +64,8 @@ export class ReadingsController {
       // Build response based on what's available
       const response: any = {
         date: today,
-        dayOfWeek: dayNames[dayOfWeek],
+        dayOfWeek: weekdayName(dayOfWeek),
+        timeZone,
         tradition: traditionId,
         timestamp: new Date().toISOString(),
       };
@@ -124,7 +128,9 @@ export class ReadingsController {
         throw new HttpError('Invalid date format. Use YYYY-MM-DD', 400);
       }
 
-      if (new Date(startDate) > new Date(endDate)) {
+      const startCivil = parseCivilDate(startDate);
+      const endCivil = parseCivilDate(endDate);
+      if (!startCivil || !endCivil || compareCivil(startCivil, endCivil) > 0) {
         throw new HttpError('Start date must be before end date', 400);
       }
 
@@ -202,22 +208,17 @@ export class ReadingsController {
   }
 
   private isValidDate(dateString: string): boolean {
-    const regex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!regex.test(dateString)) {
-      return false;
+    return parseCivilDate(dateString) !== null;
+  }
+
+  private resolveTimeZone(raw: unknown): string {
+    if (raw === undefined || raw === null || raw === '') {
+      return getDefaultTimeZone();
     }
-    
-    const date = new Date(dateString);
-    
-    // Check if date is valid (not NaN) and matches original string
-    if (isNaN(date.getTime())) {
-      return false;
+    const timeZone = String(raw);
+    if (!isValidTimeZone(timeZone)) {
+      throw new HttpError('Invalid tz parameter. Use an IANA time zone such as America/New_York', 400);
     }
-    
-    try {
-      return date.toISOString().split('T')[0] === dateString;
-    } catch {
-      return false;
-    }
+    return timeZone;
   }
 }
