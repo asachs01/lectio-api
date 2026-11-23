@@ -34,9 +34,9 @@ const options: swaggerJSDoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Lectionary API',
+      title: 'Lectio API — Revised Common Lectionary, Daily Office, and Catholic Lectionary',
       version: process.env.API_VERSION || '1.0.0',
-      description: 'A modern REST API for serving lectionary readings and liturgical calendar data',
+      description: 'Lectio API is a Revised Common Lectionary API, liturgical calendar API, Book of Common Prayer Daily Office API, and Catholic lectionary API. Use GET /api/v1/readings/today for today\'s readings and GET /api/v1/calendar/current for the current RCL year.',
       contact: {
         name: 'API Support',
         url: 'https://github.com/asachs01/lectio-api',

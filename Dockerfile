@@ -31,6 +31,7 @@ RUN npm ci --omit=dev --ignore-scripts
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 # Copy data and config files
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/src/data ./src/data
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/ormconfig.js ./ormconfig.js

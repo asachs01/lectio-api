@@ -1,0 +1,21 @@
+# Lectio API
+
+> REST API for Revised Common Lectionary (RCL) readings, Book of Common Prayer Daily Office readings, the Catholic lectionary, and liturgical calendar data.
+
+The public site is https://lectio-api.org. Interactive docs: https://lectio-api.org/api/docs. FAQ: https://lectio-api.org/faq. OpenAPI: https://lectio-api.org/api/openapi.json. Source: https://github.com/asachs01/lectio-api. An MCP server lives in `mcp-server/`.
+
+## Endpoints
+
+- [Today's readings](https://lectio-api.org/api/v1/readings/today?tradition=rcl): Sunday lectionary and Daily Office for today. Optional `tz` (IANA, default America/New_York) and `tradition` (`rcl`, `catholic`, `episcopal`, `bcp`).
+- [Readings by date](https://lectio-api.org/api/v1/readings?date=2025-11-30&tradition=rcl): YYYY-MM-DD civil date.
+- [Date range](https://lectio-api.org/api/v1/readings/range?start=2025-11-30&end=2025-12-25&tradition=rcl)
+- [Daily Office by date](https://lectio-api.org/api/v1/readings/daily?date=2025-11-30)
+- [Traditions](https://lectio-api.org/api/v1/traditions)
+- [Current liturgical calendar](https://lectio-api.org/api/v1/calendar/current?tradition=rcl)
+- [Seasons for a year](https://lectio-api.org/api/v1/calendar/2025/seasons?tradition=rcl)
+- [Health](https://lectio-api.org/health)
+
+## Optional
+
+- [Full llms.txt](https://lectio-api.org/llms-full.txt)
+- [FAQ](https://lectio-api.org/faq)

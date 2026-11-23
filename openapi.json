@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Lectionary API",
+    "title": "Lectio API \u2014 Revised Common Lectionary, Daily Office, and Catholic Lectionary",
     "version": "1.0.0",
-    "description": "A modern REST API for serving lectionary readings and liturgical calendar data",
+    "description": "Lectio API is a Revised Common Lectionary API, liturgical calendar API, Book of Common Prayer Daily Office API, and Catholic lectionary API. Use GET /api/v1/readings/today for today's readings, GET /api/v1/calendar/current for the current RCL year (A, B, or C), and tradition=catholic or tradition=bcp for the Catholic lectionary and Daily Office.",
     "contact": {
       "name": "API Support",
       "url": "https://github.com/asachs01/lectio-api",

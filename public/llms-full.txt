@@ -1,0 +1,34 @@
+# Lectio API (full)
+
+Lectio API is a Revised Common Lectionary API, liturgical calendar API, Book of Common Prayer Daily Office API, and Catholic lectionary API. It is a free, open-source REST service at https://lectio-api.org (MIT license). Repository: https://github.com/asachs01/lectio-api.
+
+## What are today's lectionary readings?
+
+Call `GET https://lectio-api.org/api/v1/readings/today?tradition=rcl`. Add `tz=America/New_York` (the default) or another IANA time zone so "today" is the civil date in that zone, not UTC. The response includes Sunday or special-day lectionary readings when they exist, plus Morning and Evening Prayer readings from the BCP Daily Office.
+
+Example:
+`curl "https://lectio-api.org/api/v1/readings/today?tradition=rcl&tz=America/New_York"`
+
+## What RCL year is it?
+
+The Revised Common Lectionary uses a three-year Sunday cycle (A, B, C) that changes on the First Sunday of Advent, not on January 1. Mid-2025 is Year C; Advent 1 on 30 November 2025 begins Year A. Ask `GET https://lectio-api.org/api/v1/calendar/current?tradition=rcl` or pass a date to `/api/v1/readings`.
+
+## Book of Common Prayer Daily Office
+
+The BCP 1979 two-year Daily Office lectionary (Year One and Year Two) also flips at Advent 1. Year One begins at the Advent 1 preceding odd-numbered civil years. Use `tradition=bcp` or the daily office endpoints.
+
+## Catholic lectionary
+
+Use `tradition=catholic` on the readings and calendar endpoints for the Roman Catholic lectionary.
+
+## Episcopal / Anglican
+
+`tradition=episcopal` combines RCL Sunday readings with the BCP Daily Office on weekdays.
+
+## MCP
+
+A Model Context Protocol server is included in the `mcp-server/` directory of the GitHub repository so assistants can call these endpoints as tools.
+
+## FAQ
+
+Longer answers live at https://lectio-api.org/faq and in docs/FAQ.md in the repository.
