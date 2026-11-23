@@ -27,7 +27,16 @@ Use `tradition=catholic` on the readings and calendar endpoints for the Roman Ca
 
 ## MCP
 
-A Model Context Protocol server is included in the `mcp-server/` directory of the GitHub repository so assistants can call these endpoints as tools.
+Connect over Streamable HTTP at https://lectio-api.org/mcp (health check: https://lectio-api.org/mcp/health). The source package is `mcp-server/` in the GitHub repository.
+
+Canonical tools (shared params: `date` as YYYY-MM-DD, `tz` as an IANA zone defaulting to America/New_York, `tradition` as `rcl`, `catholic`, `episcopal`, or `bcp`):
+
+- `get_readings` — today (omit date), a single date, or a startDate/endDate range
+- `get_calendar` — current season and cycle, a civil year, seasons, special days, upcoming holy days, feast lookup, or factual context for a date
+- `list_traditions` — tradition metadata
+- `search_lectionary` — search by season or feast name (there is no scripture-reference search)
+
+`explore_calendar` and `analyze_liturgical_context` are deprecated aliases for one release. Resources: `lectionary://today`, `lectionary://readings/{tradition}/{date}`, `lectionary://calendar/current`, `lectionary://traditions`. Prompts: `prepare_sermon_readings`, `prepare_daily_office`, `explain_liturgical_day`.
 
 ## FAQ
 

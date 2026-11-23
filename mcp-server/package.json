@@ -1,31 +1,32 @@
 {
   "name": "@lectio-api/mcp-server",
-  "version": "1.0.0",
-  "description": "MCP server for Lectionary API with decision tree-based tools",
+  "version": "1.1.0",
+  "description": "MCP server for Lectio API: lectionary readings, liturgical calendar, traditions, and search tools, plus a hosted Streamable HTTP endpoint.",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 tsc",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "mcp": "tsx src/index.ts",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "NODE_OPTIONS=--max-old-space-size=8192 tsc --noEmit",
     "package": "./package-mcpb.sh",
     "package:validate": "mcpb validate manifest.json"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "axios": "^1.6.2",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.7.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@jest/globals": "^30.1.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.10.5",
+    "@types/node": "^22.20.5",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
@@ -35,16 +36,26 @@
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "keywords": [
     "mcp",
     "lectionary",
-    "liturgical",
-    "api",
-    "church",
+    "liturgical-calendar",
+    "rcl",
+    "daily-office",
+    "catholic-lectionary",
     "readings"
   ],
   "author": "Aaron Sachs",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asachs01/lectio-api",
+    "directory": "mcp-server"
+  },
+  "homepage": "https://lectio-api.org/mcp",
+  "bugs": {
+    "url": "https://github.com/asachs01/lectio-api/issues"
+  }
 }

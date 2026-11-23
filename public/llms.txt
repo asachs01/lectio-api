@@ -2,7 +2,7 @@
 
 > REST API for Revised Common Lectionary (RCL) readings, Book of Common Prayer Daily Office readings, the Catholic lectionary, and liturgical calendar data.
 
-The public site is https://lectio-api.org. Interactive docs: https://lectio-api.org/api/docs. FAQ: https://lectio-api.org/faq. OpenAPI: https://lectio-api.org/api/openapi.json. Source: https://github.com/asachs01/lectio-api. An MCP server lives in `mcp-server/`.
+The public site is https://lectio-api.org. Interactive docs: https://lectio-api.org/api/docs. FAQ: https://lectio-api.org/faq. OpenAPI: https://lectio-api.org/api/openapi.json. Source: https://github.com/asachs01/lectio-api. Hosted MCP (Streamable HTTP): https://lectio-api.org/mcp (health: https://lectio-api.org/mcp/health). The Node package is in `mcp-server/`.
 
 ## Endpoints
 
@@ -14,6 +14,7 @@ The public site is https://lectio-api.org. Interactive docs: https://lectio-api.
 - [Current liturgical calendar](https://lectio-api.org/api/v1/calendar/current?tradition=rcl)
 - [Seasons for a year](https://lectio-api.org/api/v1/calendar/2025/seasons?tradition=rcl)
 - [Health](https://lectio-api.org/health)
+- [MCP endpoint](https://lectio-api.org/mcp): Streamable HTTP. Tools: `get_readings`, `get_calendar`, `list_traditions`, `search_lectionary`.
 
 ## Optional
 

@@ -67,6 +67,7 @@ describe('API Endpoints Integration Tests', () => {
       const llms = await request(appInstance).get('/llms.txt').expect(200);
       expect(llms.text).toContain('Revised Common Lectionary');
       expect(llms.text).toContain('https://lectio-api.org/faq');
+      expect(llms.text).toContain('https://lectio-api.org/mcp');
       expect(llms.text).not.toContain('buildwithfern');
     });
 

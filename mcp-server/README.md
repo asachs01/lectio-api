@@ -1,60 +1,62 @@
 # Lectio API MCP Server
 
-A Model Context Protocol (MCP) server that provides decision tree-based tools for accessing liturgical readings and calendar data from the Lectionary API.
+Model Context Protocol server for [Lectio API](https://lectio-api.org). It exposes a small, consistent set of tools for lectionary readings, the liturgical calendar, tradition metadata, and search, plus resources and prompts. The official Streamable HTTP transport is designed to be hosted at `https://lectio-api.org/mcp`.
 
-## Features
+- Server name (registry): `io.github.asachs01/lectio-api`
+- Package version: 1.1.0
+- Runtime: Node.js 22+
+- SDK: `@modelcontextprotocol/sdk` 1.32.x
 
-- **Decision Tree-Based Tools**: Instead of multiple endpoints, use intelligent tools that guide you to the right data
-- **Interactive Elicitation**: When parameters are missing, the server can interactively prompt users for input (requires client support)
-- **Multiple Transport Options**: Supports both stdio and HTTP streaming transports
-- **Docker Ready**: Fully containerized with health checks and production configurations
-- **Comprehensive Liturgical Data**: Access readings, calendar information, and liturgical analysis
+This package is **not** published to the official MCP Registry until you run `mcp-publisher` after the `/mcp` endpoint is live. A `server.json` is included at the repository root and in this directory.
 
-## Installation
+## Connect
 
-### Option 1: Claude Desktop Extension (Recommended)
+### Hosted Streamable HTTP
 
-Download the `.mcpb` file from the [releases page](https://github.com/asachs01/lectionary-api/releases) and either:
-- **Double-click** the file to install automatically, or
-- Go to **Claude Desktop > Settings > Extensions > Install Extension**
-
-### Option 2: Build from Source
-
-```bash
-# Clone and build
-git clone https://github.com/asachs01/lectionary-api.git
-cd lectionary-api/mcp-server
-npm install
-npm run package
-
-# Install the generated .mcpb file
-# Double-click lectio-api-mcp-*.mcpb
-```
-
-### Option 3: NPM Package
-
-```bash
-npm install @lectio-api/mcp-server
-```
-
-### Option 4: Docker
-
-```bash
-docker-compose up -d
-```
-
-## Configuration
-
-### For Claude Desktop or Similar MCP Clients
-
-Add to your MCP configuration:
+Once deployed:
 
 ```json
 {
   "mcpServers": {
     "lectio-api": {
-      "command": "npx",
-      "args": ["@lectio-api/mcp-server"],
+      "url": "https://lectio-api.org/mcp"
+    }
+  }
+}
+```
+
+Health check: `https://lectio-api.org/mcp/health`.
+
+The same router is mounted on the main Express app at `/mcp` (CORS, rate limits, and `/mcp/health`). A standalone process also listens on `PORT` (default 3001) when `MCP_TRANSPORT=http`:
+
+```bash
+cd mcp-server
+npm install && npm run build
+MCP_TRANSPORT=http PORT=3001 LECTIO_API_URL=https://lectio-api.org/api/v1 npm start
+```
+
+That standalone server serves `/health`, `/mcp/health`, and the protocol endpoint at `/mcp`. To front it with a reverse proxy instead of the in-process mount:
+
+```nginx
+location /mcp/ {
+  proxy_pass http://127.0.0.1:3001/mcp/;
+  proxy_http_version 1.1;
+  proxy_set_header Host $host;
+  proxy_set_header Accept $http_accept;
+  proxy_buffering off;
+}
+```
+
+### Local stdio (Claude Desktop, Cursor, MCPB)
+
+The default `LECTIO_API_URL` for this package is `https://lectio-api.org/api/v1`. Point it at a local API if you are developing.
+
+```json
+{
+  "mcpServers": {
+    "lectio-api": {
+      "command": "node",
+      "args": ["/path/to/lectio-api/mcp-server/dist/index.js"],
       "env": {
         "LECTIO_API_URL": "https://lectio-api.org/api/v1"
       }
@@ -63,245 +65,109 @@ Add to your MCP configuration:
 }
 ```
 
-### For HTTP Streaming
+Or install the package and run `npx @lectio-api/mcp-server` when it is published to npm.
 
-```json
-{
-  "mcpServers": {
-    "lectio-api": {
-      "transport": "http",
-      "url": "http://localhost:3001",
-      "endpoints": {
-        "rpc": "/rpc",
-        "batch": "/rpc/batch",
-        "sse": "/sse"
-      }
-    }
-  }
-}
-```
+## Tools
 
-## Available Tools
+All canonical names are `snake_case` verb_noun. Shared parameters:
 
-### 1. `get_readings`
-Get scripture readings for worship services.
+| Param | Used by | Meaning |
+| --- | --- | --- |
+| `date` | readings, calendar, search | Civil date, `YYYY-MM-DD` (not a UTC timestamp) |
+| `startDate` / `endDate` | readings (and a deprecated search alias) | Inclusive civil date range |
+| `tz` | readings (today), calendar (current/upcoming), search | IANA zone; default `America/New_York` or `LECTIO_TIMEZONE` |
+| `tradition` | all tools except `list_traditions` (which uses `id`) | `rcl` (default), `catholic`, `episcopal`, or `bcp` |
+| `year` | calendar, search | Civil year 1900–2100 |
 
-**Parameters:**
-- `date` (optional): Date in YYYY-MM-DD format (defaults to today)
-- `tradition` (optional): Lectionary tradition (rcl, catholic, episcopal)
-- `includeText` (optional): Include full scripture text
+Every successful tool result is a JSON object with a consistent shape:
 
-**Example:**
 ```json
 {
   "tool": "get_readings",
-  "arguments": {
-    "date": "2025-12-25",
-    "tradition": "rcl",
-    "includeText": true
-  }
+  "query": { "date": "2026-02-18", "tradition": "rcl", "tz": "America/New_York" },
+  "data": {}
 }
 ```
 
-### 2. `explore_calendar`
-Explore the liturgical calendar with different focus areas.
+Deprecated aliases also set `calledAs` and `deprecated`.
 
-**Parameters:**
-- `focus`: What to explore (current, year, seasons, special_days)
-- `year` (optional): Year to explore
-- `tradition` (optional): Lectionary tradition
+| Tool | Purpose |
+| --- | --- |
+| `get_readings` | Today's readings (omit `date`), a single day, or a `startDate`/`endDate` range |
+| `get_calendar` | `focus`: `current`, `year`, `seasons`, `special_days`, `upcoming`, `feast`, `context` |
+| `list_traditions` | List tradition metadata, or pass `id` for one tradition |
+| `search_lectionary` | `searchType`: `season` or `feast`. There is no scripture-reference search |
 
-**Example:**
-```json
-{
-  "tool": "explore_calendar",
-  "arguments": {
-    "focus": "seasons",
-    "year": 2025,
-    "tradition": "rcl"
-  }
-}
-```
+`get_calendar` with `focus=context` returns factual season and reading data plus generic `seasonThemes` labels. It does **not** invent typological connections, significance, or applications.
 
-### 3. `search_lectionary`
-Search the lectionary using various criteria.
+All tools are annotated `readOnlyHint`, `idempotentHint`, `openWorldHint` (they call the live API), and `destructiveHint: false`.
 
-**Parameters:**
-- `searchType`: Type of search (date_range, season, scripture, feast)
-- Additional parameters based on search type
+### One-release aliases
 
-**Example:**
-```json
-{
-  "tool": "search_lectionary",
-  "arguments": {
-    "searchType": "season",
-    "season": "advent",
-    "tradition": "rcl"
-  }
-}
-```
+These names still work in 1.1.0 and will be removed in the next major release:
 
-### 4. `analyze_liturgical_context`
-Get comprehensive liturgical analysis for a date.
+| Deprecated name | Canonical equivalent |
+| --- | --- |
+| `explore_calendar` | `get_calendar` (same `focus` values) |
+| `analyze_liturgical_context` | `get_calendar` with `focus=context` |
+| `search_lectionary` `searchType=date_range` | `get_readings` with `startDate` and `endDate` |
 
-**Parameters:**
-- `date`: Date to analyze (YYYY-MM-DD)
-- `depth`: Analysis depth (basic, detailed, comprehensive)
-- `tradition` (optional): Lectionary tradition
+The pre-1.1 names `explore_calendar` and `analyze_liturgical_context` overlapped with each other and with `search_lectionary` (date ranges, feast lookup, and "analysis" that was canned prose). `get_liturgical_context` was never published.
 
-**Example:**
-```json
-{
-  "tool": "analyze_liturgical_context",
-  "arguments": {
-    "date": "2025-08-25",
-    "depth": "comprehensive",
-    "tradition": "rcl"
-  }
-}
-```
+## Resources
 
-## Interactive Elicitation
+| URI | Contents |
+| --- | --- |
+| `lectionary://today` | Today's RCL readings in the default time zone |
+| `lectionary://readings/{tradition}/{date}` | Readings for a tradition and `today` or `YYYY-MM-DD` |
+| `lectionary://calendar/current` | Current season and cycle (RCL, default zone) |
+| `lectionary://traditions` | All traditions |
+| `lectionary://traditions/{id}` | One tradition |
 
-This MCP server supports [MCP Elicitation](https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation), enabling interactive user prompts when parameters are missing. This feature requires an MCP client that declares elicitation support.
+For other time zones or calendar focuses, use the tools.
 
-### How It Works
+## Prompts
 
-When you invoke a tool without required parameters, the server can prompt you interactively:
+| Prompt | What it asks the model to do |
+| --- | --- |
+| `prepare_sermon_readings` | Build a preaching brief from `get_readings` and `get_calendar` (`focus=context`) without inventing citations |
+| `prepare_daily_office` | Collect Morning and Evening Prayer readings with `tradition=bcp` |
+| `explain_liturgical_day` | Summarize season, cycle, feast name, and readings using only API data |
 
-1. **Tradition Selection**: If you don't specify a lectionary tradition, you'll be prompted to choose from:
-   - Revised Common Lectionary (RCL)
-   - Roman Catholic
-   - Episcopal
-   - Lutheran (ELW)
+## Environment
 
-2. **Search Type Guidance**: The `search_lectionary` tool can guide you through search options:
-   - Search by date range
-   - Search by liturgical season
-   - Search by scripture reference
-   - Search by feast or holy day
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `LECTIO_API_URL` | `https://lectio-api.org/api/v1` (standalone) or `http://127.0.0.1:$PORT/api/v1` (in-process mount) | API base URL |
+| `LECTIO_TIMEZONE` | `America/New_York` | Default IANA zone for "today" |
+| `MCP_TRANSPORT` | `stdio` | `stdio` or `http` |
+| `PORT` | `3001` | Standalone HTTP port |
+| `MCP_ENABLED` | unset (enabled) | Set to `false` to skip mounting `/mcp` on the main app |
+| `MCP_ELICITATION` | unset (off) | Set to `true` to allow stdio elicitation of missing args |
+| `MCP_RATE_LIMIT_WINDOW_MS` | `60000` | Rate-limit window |
+| `MCP_RATE_LIMIT_MAX` | `60` | Max requests per IP per window |
 
-3. **Parameter Collection**: After choosing a search type, you may be prompted for additional parameters (dates, season name, scripture reference, etc.)
-
-### Fallback Behavior
-
-If your MCP client doesn't support elicitation:
-- Default values are used where available (e.g., 'rcl' for tradition)
-- Required parameters still need to be provided in the tool call
-- Clear error messages explain what parameters are needed
-
-### Example Flow
-
-```
-User: Search the lectionary
-Server: [prompts] What would you like to search for?
-         - Search by date range
-         - Search by liturgical season
-         - Search by scripture reference
-         - Search by feast or holy day
-User: [selects] Search by liturgical season
-Server: [prompts] Which liturgical season?
-         - Advent
-         - Christmas
-         - Lent
-         - Easter
-         ...
-User: [selects] Advent
-Server: [returns Advent readings]
-```
-
-## Running the Server
-
-### Stdio Transport (Default)
-```bash
-npm start
-```
-
-### HTTP Streaming Transport
-```bash
-MCP_TRANSPORT=http PORT=3001 npm start
-```
-
-### Docker
-```bash
-docker-compose up
-```
-
-## API Requirements
-
-This MCP server requires access to a running Lectionary API instance. By default, it connects to `http://localhost:3000/api/v1`.
-
-To point to a different API:
-- Set the `LECTIO_API_URL` environment variable
-- Or update the Docker Compose configuration
+The `tz` query parameter is passed through to `/readings/today` and `/calendar/current`. It takes effect once the API changes in pull request #5 are deployed; until then the API ignores unknown query params.
 
 ## Development
 
 ```bash
-# Install dependencies
+cd mcp-server
 npm install
-
-# Run in development mode
-npm run dev
-
-# Build TypeScript
-npm run build
-
-# Run tests
-npm test
-
-# Type check
+npm run lint
 npm run typecheck
+npm test
 ```
 
-## Packaging for Distribution
+`MCP_INTEGRATION=1` enables live tests against a running API and MCP server (used in CI).
 
-This server can be packaged as an `.mcpb` (MCP Bundle) file for easy installation in Claude Desktop.
+## Registry publishing (do not run until /mcp is live)
 
-### Prerequisites
+From the repository root, after you have installed [`mcp-publisher`](https://github.com/modelcontextprotocol/publisher):
 
 ```bash
-# Install mcpb CLI globally
-npm install -g @anthropic-ai/mcpb
+mcp-publisher login github
+mcp-publisher publish
 ```
 
-### Create Bundle
-
-```bash
-# Build and package
-npm run package
-
-# Or manually
-npm run build
-mcpb pack . lectio-api-mcp.mcpb
-```
-
-### Validate Manifest
-
-```bash
-npm run package:validate
-```
-
-### Bundle Contents
-
-The `.mcpb` file is a zip archive containing:
-- `manifest.json` - Extension metadata and configuration
-- `dist/` - Compiled JavaScript
-- `node_modules/` - Production dependencies
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `LECTIO_API_URL` | Base URL for Lectionary API | `http://localhost:3000/api/v1` |
-| `MCP_TRANSPORT` | Transport type (stdio or http) | `stdio` |
-| `PORT` | Port for HTTP transport | `3001` |
-
-## License
-
-MIT © Aaron Sachs
-
-## Support
-
-For issues and questions, please visit: https://github.com/asachs01/lectio-api
+GitHub login grants the `io.github.asachs01/*` namespace that matches `server.json`.

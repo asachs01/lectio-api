@@ -34,4 +34,4 @@ Yes. Pass `tradition=catholic` on the readings and calendar endpoints.
 
 ## Is there an MCP server?
 
-Yes. The repository includes a Model Context Protocol server in `mcp-server/` so assistants can use Lectio API as tools. The REST API remains at https://lectio-api.org and the OpenAPI document is at https://lectio-api.org/api/openapi.json.
+Yes. Assistants can connect over Streamable HTTP at https://lectio-api.org/mcp (health check: https://lectio-api.org/mcp/health). The package also lives in `mcp-server/` for local stdio clients. Canonical tools are `get_readings`, `get_calendar`, `list_traditions`, and `search_lectionary`. The REST API remains at https://lectio-api.org and the OpenAPI document is at https://lectio-api.org/api/openapi.json.

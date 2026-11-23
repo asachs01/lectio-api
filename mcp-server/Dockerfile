@@ -1,5 +1,5 @@
 # Multi-stage build for MCP server
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src ./src
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -36,14 +36,14 @@ RUN addgroup -g 1001 -S nodejs && \
 
 USER nodejs
 
-# Expose ports for HTTP streaming
+# Expose Streamable HTTP port
 EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
 
-# Default to HTTP transport for Docker
+# Default to official Streamable HTTP for Docker
 ENV MCP_TRANSPORT=http
 ENV PORT=3001
 ENV LECTIO_API_URL=http://lectio-api:3000/api/v1

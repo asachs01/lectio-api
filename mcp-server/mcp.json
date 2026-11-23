@@ -1,7 +1,7 @@
 {
   "name": "lectio-api-mcp",
-  "version": "1.0.0",
-  "description": "MCP server for Lectionary API - Access liturgical readings and calendar data through decision tree-based tools",
+  "version": "1.1.0",
+  "description": "MCP server for Lectio API \u2014 readings, calendar, traditions, and search over stdio or Streamable HTTP.",
   "author": "Aaron Sachs",
   "license": "MIT",
   "runtime": "node",
@@ -10,46 +10,42 @@
     {
       "type": "stdio",
       "command": "node",
-      "args": ["dist/index.js"]
+      "args": [
+        "dist/index.js"
+      ]
     },
     {
-      "type": "http",
-      "url": "http://localhost:3001",
-      "endpoints": {
-        "rpc": "/rpc",
-        "batch": "/rpc/batch",
-        "sse": "/sse",
-        "health": "/health",
-        "tools": "/tools"
-      }
+      "type": "streamable-http",
+      "url": "http://localhost:3001/mcp",
+      "health": "/health"
     }
   ],
   "tools": [
     {
       "name": "get_readings",
-      "description": "Get scripture readings for any date or today",
+      "description": "Readings for today, a date, or a range",
       "category": "readings"
     },
     {
-      "name": "explore_calendar",
-      "description": "Explore liturgical calendar - seasons, years, special days",
+      "name": "get_calendar",
+      "description": "Season, cycle, year, feast, upcoming, context",
       "category": "calendar"
     },
     {
-      "name": "search_lectionary",
-      "description": "Search by date range, season, scripture, or feast day",
-      "category": "search"
+      "name": "list_traditions",
+      "description": "Tradition metadata",
+      "category": "metadata"
     },
     {
-      "name": "analyze_liturgical_context",
-      "description": "Get comprehensive liturgical analysis for any date",
-      "category": "analysis"
+      "name": "search_lectionary",
+      "description": "Search by season or feast name",
+      "category": "search"
     }
   ],
   "environment": {
     "LECTIO_API_URL": {
       "description": "Base URL for the Lectionary API",
-      "default": "http://localhost:3000/api/v1",
+      "default": "https://lectio-api.org/api/v1",
       "required": false
     },
     "MCP_TRANSPORT": {

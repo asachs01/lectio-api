@@ -6,7 +6,7 @@
 curl "https://lectio-api.org/api/v1/readings/today?tradition=rcl&tz=America/New_York"
 ```
 
-Interactive docs live at [lectio-api.org/api/docs](https://lectio-api.org/api/docs). The [FAQ](https://lectio-api.org/faq) covers today's readings, the current RCL year, and the Daily Office (also in [docs/FAQ.md](docs/FAQ.md)). Machine-readable entry points: [OpenAPI](https://lectio-api.org/api/openapi.json), [llms.txt](https://lectio-api.org/llms.txt). A [Model Context Protocol server](./mcp-server) is included for assistants. Built with Node.js, Express, and TypeScript.
+Interactive docs live at [lectio-api.org/api/docs](https://lectio-api.org/api/docs). The [FAQ](https://lectio-api.org/faq) covers today's readings, the current RCL year, and the Daily Office (also in [docs/FAQ.md](docs/FAQ.md)). Machine-readable entry points: [OpenAPI](https://lectio-api.org/api/openapi.json), [llms.txt](https://lectio-api.org/llms.txt). A [Model Context Protocol server](https://lectio-api.org/mcp) is included for assistants ([package](./mcp-server)). Built with Node.js, Express, and TypeScript.
 
 
 ## 🚀 Features
@@ -23,7 +23,18 @@ Interactive docs live at [lectio-api.org/api/docs](https://lectio-api.org/api/do
 
 ## MCP server
 
-The `mcp-server/` directory packages Lectio API as a Model Context Protocol server so Claude, Cursor, and other MCP clients can call the readings and calendar tools directly.
+A Model Context Protocol server is included in [`mcp-server/`](./mcp-server) and is served over official Streamable HTTP at [https://lectio-api.org/mcp](https://lectio-api.org/mcp) once this change is deployed. The health check is at `/mcp/health`. Local stdio (Claude Desktop, Cursor, MCPB) still works from the `mcp-server` package.
+
+Canonical tools, all `snake_case` verb_noun, sharing `date`, `tz`, and `tradition` where they apply:
+
+| Tool | Purpose |
+| --- | --- |
+| `get_readings` | Readings for today, a YYYY-MM-DD date, or a `startDate`/`endDate` range |
+| `get_calendar` | Season, cycle, year overview, feast lookup, upcoming holy days, or factual context for a date |
+| `list_traditions` | Metadata for `rcl`, `catholic`, `episcopal`, and `bcp` |
+| `search_lectionary` | Find readings by season or feast name (not by scripture reference) |
+
+Deprecated aliases kept for one release: `explore_calendar` → `get_calendar`, `analyze_liturgical_context` → `get_calendar` with `focus=context`. Resources include `lectionary://today` and `lectionary://traditions`. Prompts include `prepare_sermon_readings`. See [mcp-server/README.md](./mcp-server/README.md) for configuration, the tool mapping, and the registry `server.json` (not published until you run `mcp-publisher`).
 
 ## 📋 Prerequisites
 
