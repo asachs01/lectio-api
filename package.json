@@ -67,7 +67,7 @@
     "@opentelemetry/instrumentation-http": "^0.203.0",
     "@opentelemetry/resources": "^2.2.0",
     "@opentelemetry/sdk-metrics": "^2.0.1",
-    "@opentelemetry/sdk-node": "^0.203.0",
+    "@opentelemetry/sdk-node": "^0.301.2",
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "cls-hooked": "^4.2.2",
     "compression": "^1.7.4",
