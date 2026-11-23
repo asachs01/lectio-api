@@ -466,7 +466,21 @@ describe('ReadingsService', () => {
       expect(reading?.liturgicalColor).toBe('purple');
     });
 
+    it('does not use importer notes as the day name on an ordinary weekday', async () => {
+      mockGetMany.mockResolvedValue([
+        readingFor('2026-02-19', {
+          season: null,
+          notes: 'BCP 1979 Daily Office, thursday-last-epiphany, Year Two — Evening Prayer',
+        }),
+      ]);
+      const reading = await service.getByDate('2026-02-19', 'bcp');
+      expect(reading?.dayName).toBeNull();
+      expect(reading?.season).toBe('Lent');
+      expect(reading?.liturgicalColor).toBe('purple');
+    });
+
     it('names Ascension Day on a Thursday', async () => {
+
       mockGetMany.mockResolvedValue([
         readingFor('2026-05-14', { season: { name: 'Easter', color: 'white' } }),
       ]);

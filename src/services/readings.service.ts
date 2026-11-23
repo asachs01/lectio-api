@@ -230,7 +230,7 @@ export class ReadingsService {
     const specialDay = firstReading?.specialDay;
     const dbSeason = firstReading?.season;
 
-    const dayName = observance.name || specialDay?.name || firstReading?.notes || null;
+    const dayName = observance.name || specialDay?.name || null;
     const baseSeason = observance.season || calendarSeason?.name || dbSeason?.name || null;
     const season = baseSeason ? seasonNameForTradition(baseSeason, traditionId) : null;
     const liturgicalColor = observance.color || specialDay?.liturgicalColor || calendarSeason?.color || dbSeason?.color || null;
