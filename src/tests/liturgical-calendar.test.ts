@@ -5,9 +5,12 @@
 
 import {
   LiturgicalCalendar,
+  LiturgicalColor,
   getLiturgicalCycleForDate,
   getProperNumberForDate,
+  getObservanceForDate,
   getSundayObservance,
+  seasonNameForTradition,
   calculateBaptismOfTheLordCivil,
   calculateHolyFamilyCivil,
   calculateChristTheKingCivil,
@@ -416,3 +419,59 @@ describe('LiturgicalCalendarService uses the same calendar', () => {
   });
 });
 
+describe('Day names and tradition-specific seasons', () => {
+  test('Ash Wednesday, Advent 1, and Trinity Sunday have the right names, seasons, and colors', () => {
+    const ash = getObservanceForDate(new Date(2026, 1, 18));
+    expect(ash.name).toBe('Ash Wednesday');
+    expect(ash.season).toBe('Lent');
+    expect(ash.color).toBe(LiturgicalColor.PURPLE);
+
+    const advent1 = getObservanceForDate(new Date(2025, 10, 30));
+    expect(advent1.name).toBe('First Sunday of Advent');
+    expect(advent1.season).toBe('Advent');
+    expect(advent1.color).toBe(LiturgicalColor.PURPLE);
+    expect(getSundayObservance(new Date(2025, 10, 30))?.name).toBe('First Sunday of Advent');
+
+    const trinity = getObservanceForDate(new Date(2026, 4, 31));
+    expect(trinity.name).toBe('Trinity Sunday');
+    expect(trinity.season).toBe('Ordinary Time');
+    expect(trinity.color).toBe(LiturgicalColor.WHITE);
+    expect(trinity.properNumber).toBeNull();
+    expect(trinity.omittedProperNumber).toBe(4);
+  });
+
+  test('Sunday series names cover Advent, Lent, Epiphany, Easter, and Propers', () => {
+    expect(getObservanceForDate(new Date(2025, 11, 7)).name).toBe('Second Sunday of Advent');
+    expect(getObservanceForDate(new Date(2026, 1, 22)).name).toBe('First Sunday in Lent');
+    expect(getObservanceForDate(new Date(2025, 1, 2)).name).toBe('Fourth Sunday after Epiphany');
+    expect(getObservanceForDate(new Date(2026, 3, 12)).name).toBe('Second Sunday of Easter');
+    expect(getObservanceForDate(new Date(2026, 5, 7)).name).toBe('Proper 5');
+    expect(getObservanceForDate(new Date(2026, 0, 11)).name).toBe('Baptism of the Lord');
+    expect(getObservanceForDate(new Date(2026, 1, 15)).name).toBe('Transfiguration Sunday');
+    expect(getObservanceForDate(new Date(2026, 10, 22)).name).toBe('Christ the King');
+  });
+
+  test('ordinary weekdays have a season and color but no feast name', () => {
+    const thursday = getObservanceForDate(new Date(2026, 1, 19));
+    expect(thursday.name).toBeNull();
+    expect(thursday.season).toBe('Lent');
+    expect(thursday.color).toBe(LiturgicalColor.PURPLE);
+
+    const ascension = getObservanceForDate(new Date(2026, 4, 14));
+    expect(ascension.name).toBe('Ascension Day');
+    expect(ascension.season).toBe('Easter');
+    expect(ascension.color).toBe(LiturgicalColor.WHITE);
+  });
+
+  test('seasonNameForTradition distinguishes Catholic Ordinary Time from the Season after Pentecost', () => {
+    expect(seasonNameForTradition('Ordinary Time', 'rcl')).toBe('Season after Pentecost');
+    expect(seasonNameForTradition('Ordinary Time', 'episcopal')).toBe('Season after Pentecost');
+    expect(seasonNameForTradition('Ordinary Time', 'bcp')).toBe('Season after Pentecost');
+    expect(seasonNameForTradition('Ordinary Time', 'rc')).toBe('Ordinary Time');
+    expect(seasonNameForTradition('Ordinary Time', 'catholic')).toBe('Ordinary Time');
+    expect(seasonNameForTradition('Epiphany', 'rcl')).toBe('Epiphany');
+    expect(seasonNameForTradition('Epiphany', 'rc')).toBe('Ordinary Time');
+    expect(seasonNameForTradition('Lent', 'rcl')).toBe('Lent');
+    expect(seasonNameForTradition('Lent', 'rc')).toBe('Lent');
+  });
+});
