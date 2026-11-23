@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    groups:
+      opentelemetry:
+        patterns:
+          - "@opentelemetry/*"
   - package-ecosystem: npm
     directory: /mcp-server
     schedule:
@@ -18,3 +22,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Stay on the Node LTS line used in production
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
