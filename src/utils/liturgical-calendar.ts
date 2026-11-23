@@ -1,10 +1,25 @@
 /**
- * Comprehensive Liturgical Calendar Date Calculator
- * 
- * This module provides utilities to calculate liturgical dates using the Computus algorithm
- * for Easter calculation and proper date mapping for all liturgical seasons following
- * the Revised Common Lectionary (RCL) and other traditions.
+ * Unified, timezone-safe liturgical calendar.
+ *
+ * Date arithmetic uses civil year-month-day values (see civil-date.ts).
+ * Public Date returns are local midnights so getFullYear/getMonth/getDate
+ * and getDay stay correct in any timezone.
  */
+
+import {
+  CivilDate,
+  addCivilDays,
+  civilDate,
+  compareCivil,
+  daysBetweenCivil,
+  formatCivilDate,
+  fromLocalDate,
+  isCivilInRange,
+  isSameCivil,
+  sundayClosestTo,
+  toLocalDate,
+  weekdayOf,
+} from './civil-date';
 
 // =============================================================================
 // INTERFACES AND TYPES
@@ -48,7 +63,7 @@ export enum LiturgicalColor {
   VIOLET = 'violet',
   ROSE = 'rose',
   BLACK = 'black',
-  GOLD = 'gold'
+  GOLD = 'gold',
 }
 
 export enum FeastRank {
@@ -56,20 +71,62 @@ export enum FeastRank {
   FEAST = 'feast',
   LESSER_FEAST = 'lesser_feast',
   COMMEMORATION = 'commemoration',
-  ORDINARY = 'ordinary'
+  ORDINARY = 'ordinary',
 }
 
-// =============================================================================
-// CORE DATE CALCULATION UTILITIES
-// =============================================================================
+export type CycleLetter = 'A' | 'B' | 'C';
+
+export interface SundayObservance {
+  date: Date;
+  name: string;
+  /** RCL Proper number (1–28), 29 for Christ the King, or null for other Sundays. */
+  properNumber: number | null;
+  /** When a Proper is omitted because a principal feast falls on the same Sunday. */
+  omittedProperNumber: number | null;
+  rank: FeastRank;
+}
 
 /**
- * Calculate Easter date using the Computus algorithm (Western/Gregorian calendar)
- * @param year The calendar year
- * @returns Date object for Easter Sunday
+ * RCL "Sunday closest to" anchors for Propers 1–28.
+ * Month is 1-based.
  */
-export function calculateEaster(year: number): Date {
-  // Anonymous Gregorian algorithm (most accurate for years 1583-4099)
+export const RCL_PROPER_ANCHORS: Readonly<Record<number, { month: number; day: number }>> = {
+  1: { month: 5, day: 11 },
+  2: { month: 5, day: 18 },
+  3: { month: 5, day: 25 },
+  4: { month: 6, day: 1 },
+  5: { month: 6, day: 8 },
+  6: { month: 6, day: 15 },
+  7: { month: 6, day: 22 },
+  8: { month: 6, day: 29 },
+  9: { month: 7, day: 6 },
+  10: { month: 7, day: 13 },
+  11: { month: 7, day: 20 },
+  12: { month: 7, day: 27 },
+  13: { month: 8, day: 3 },
+  14: { month: 8, day: 10 },
+  15: { month: 8, day: 17 },
+  16: { month: 8, day: 24 },
+  17: { month: 8, day: 31 },
+  18: { month: 9, day: 7 },
+  19: { month: 9, day: 14 },
+  20: { month: 9, day: 21 },
+  21: { month: 9, day: 28 },
+  22: { month: 10, day: 5 },
+  23: { month: 10, day: 12 },
+  24: { month: 10, day: 19 },
+  25: { month: 10, day: 26 },
+  26: { month: 11, day: 2 },
+  27: { month: 11, day: 9 },
+  28: { month: 11, day: 16 },
+};
+
+// =============================================================================
+// CORE DATE CALCULATION
+// =============================================================================
+
+export function calculateEasterCivil(year: number): CivilDate {
+  // Anonymous Gregorian algorithm (accurate for years 1583-4099)
   const a = year % 19;
   const b = Math.floor(year / 100);
   const c = year % 100;
@@ -84,208 +141,214 @@ export function calculateEaster(year: number): Date {
   const m = Math.floor((a + 11 * h + 22 * l) / 451);
   const month = Math.floor((h + l - 7 * m + 114) / 31);
   const day = ((h + l - 7 * m + 114) % 31) + 1;
-  
-  return new Date(year, month - 1, day);
+  return civilDate(year, month, day);
+}
+
+export function calculateEaster(year: number): Date {
+  return toLocalDate(calculateEasterCivil(year));
 }
 
 /**
- * Calculate the first Sunday of Advent (4th Sunday before Christmas)
- * @param year The calendar year
- * @returns Date object for the first Sunday of Advent
+ * First Sunday of Advent is the Sunday falling on or between
+ * November 27 and December 3. Equivalently: 28 days before Christmas
+ * when Christmas is Sunday, otherwise 21 + weekday(Christmas) days before.
  */
+export function calculateAdvent1Civil(year: number): CivilDate {
+  const christmas = civilDate(year, 12, 25);
+  const christmasWeekday = weekdayOf(christmas);
+  const daysBack = christmasWeekday === 0 ? 28 : 21 + christmasWeekday;
+  return addCivilDays(christmas, -daysBack);
+}
+
 export function calculateAdvent1(year: number): Date {
-  const christmas = new Date(year, 11, 25); // December 25
-  const christmasDay = christmas.getDay(); // 0 = Sunday, 6 = Saturday
-  
-  // Calculate days to subtract to get to the 4th Sunday before
-  // The first Sunday of Advent is always between November 27 and December 3
-  let daysToSubtract: number;
-  if (christmasDay === 0) {
-    daysToSubtract = 21; // 3 weeks exactly
-  } else {
-    daysToSubtract = 21 + christmasDay; // Adjust for day of week
-  }
-  
-  const advent1 = new Date(year, 11, 25 - daysToSubtract);
-  return advent1;
+  return toLocalDate(calculateAdvent1Civil(year));
 }
 
-/**
- * Calculate Ash Wednesday (46 days before Easter, ensuring it falls on Wednesday)
- * @param easter Date object for Easter Sunday
- * @returns Date object for Ash Wednesday
- */
+export function calculateAshWednesdayCivil(easter: CivilDate): CivilDate {
+  return addCivilDays(easter, -46);
+}
+
 export function calculateAshWednesday(easter: Date): Date {
-  // Start 46 days before Easter
-  const ashWednesday = new Date(easter.getTime() - (46 * 24 * 60 * 60 * 1000));
-  
-  // Adjust to ensure it's a Wednesday (day 3)
-  while (ashWednesday.getDay() !== 3) {
-    if (ashWednesday.getDay() > 3) {
-      // If it's Thursday, Friday, Saturday, go back
-      ashWednesday.setDate(ashWednesday.getDate() - 1);
-    } else {
-      // If it's Sunday, Monday, Tuesday, go forward
-      ashWednesday.setDate(ashWednesday.getDate() + 1);
-    }
-  }
-  
-  return ashWednesday;
+  return toLocalDate(calculateAshWednesdayCivil(fromLocalDate(easter)));
 }
 
-/**
- * Calculate Palm Sunday (Sunday before Easter)
- * @param easter Date object for Easter Sunday
- * @returns Date object for Palm Sunday
- */
+export function calculatePalmSundayCivil(easter: CivilDate): CivilDate {
+  return addCivilDays(easter, -7);
+}
+
 export function calculatePalmSunday(easter: Date): Date {
-  const palmSunday = new Date(easter);
-  palmSunday.setDate(easter.getDate() - 7);
-  return palmSunday;
+  return toLocalDate(calculatePalmSundayCivil(fromLocalDate(easter)));
 }
 
-/**
- * Calculate Pentecost (50 days after Easter)
- * @param easter Date object for Easter Sunday
- * @returns Date object for Pentecost
- */
+export function calculatePentecostCivil(easter: CivilDate): CivilDate {
+  return addCivilDays(easter, 49);
+}
+
 export function calculatePentecost(easter: Date): Date {
-  const pentecost = new Date(easter);
-  pentecost.setDate(easter.getDate() + 49); // 49 days = 7 weeks
-  return pentecost;
+  return toLocalDate(calculatePentecostCivil(fromLocalDate(easter)));
+}
+
+export function calculateTrinitySundayCivil(easter: CivilDate): CivilDate {
+  return addCivilDays(easter, 56);
+}
+
+export function calculateChristTheKingCivil(adventYear: number): CivilDate {
+  return addCivilDays(calculateAdvent1Civil(adventYear), -7);
 }
 
 /**
- * Calculate the date for a specific Sunday after Pentecost
- * @param pentecost Date object for Pentecost
- * @param weekNumber Week number after Pentecost (1-based)
- * @returns Date object for the specified Sunday
+ * First Sunday after the Epiphany (January 6). If January 6 is already
+ * Sunday, Baptism of the Lord is the following Sunday.
  */
-export function calculateSundayAfterPentecost(pentecost: Date, weekNumber: number): Date {
-  const sunday = new Date(pentecost);
-  sunday.setDate(pentecost.getDate() + (weekNumber * 7));
-  return sunday;
-}
-
-/**
- * Get the liturgical year cycle (A, B, or C) for a given calendar year
- * The cycle is determined by the year modulo 3, with adjustments for the liturgical calendar
- * @param year Calendar year (the year in which the liturgical year ends)
- * @returns Liturgical cycle letter
- */
-export function getLiturgicalCycle(year: number): 'A' | 'B' | 'C' {
-  // Based on RCL pattern from web research:
-  // The liturgical year that STARTS with Advent in a calendar year determines the cycle:
-  // Advent 2024 starts Year C (2024-2025)
-  // Advent 2025 starts Year A (2025-2026)
-  // Advent 2026 starts Year B (2026-2027)
-  // But the liturgical year is NAMED by its ending calendar year
-  
-  // So when we ask for cycle of liturgical year 2025 (which started Advent 2024),
-  // we need to check the start year (2024) to get the cycle (C)
-  const adventStartYear = year - 1;
-  const cycle = adventStartYear % 3;
-  switch (cycle) {
-  case 0: return 'C'; // Advent 2024->Year C (liturgical year 2025)
-  case 1: return 'A'; // Advent 2025->Year A (liturgical year 2026)
-  case 2: return 'B'; // Advent 2026->Year B (liturgical year 2027)
-  default: return 'A'; // fallback
+export function calculateBaptismOfTheLordCivil(year: number): CivilDate {
+  const epiphany = civilDate(year, 1, 6);
+  const weekday = weekdayOf(epiphany);
+  if (weekday === 0) {
+    return addCivilDays(epiphany, 7);
   }
+  return addCivilDays(epiphany, 7 - weekday);
+}
+
+/**
+ * Holy Family: the Sunday after Christmas, or December 30 when
+ * Christmas itself is Sunday.
+ */
+export function calculateHolyFamilyCivil(christmasYear: number): CivilDate {
+  const christmas = civilDate(christmasYear, 12, 25);
+  const weekday = weekdayOf(christmas);
+  if (weekday === 0) {
+    return civilDate(christmasYear, 12, 30);
+  }
+  return addCivilDays(christmas, 7 - weekday);
+}
+
+export function calculateSundayAfterPentecost(pentecost: Date, weekNumber: number): Date {
+  return toLocalDate(addCivilDays(fromLocalDate(pentecost), weekNumber * 7));
+}
+
+/**
+ * RCL Sunday cycle for the liturgical year that begins at Advent 1 of
+ * the given civil year. Advent 2024 starts Year C, 2025 starts A, 2026 starts B.
+ */
+export function getLiturgicalCycle(adventYear: number): CycleLetter {
+  // 2022, 2025, 2028 (% 3 === 0) start Year A;
+  // 2023, 2026, 2029 (% 3 === 1) start Year B;
+  // 2024, 2027, 2030 (% 3 === 2) start Year C.
+  const remainder = ((adventYear % 3) + 3) % 3;
+  return (['A', 'B', 'C'] as const)[remainder];
+}
+
+/**
+ * Cycle letter in effect on a given civil date (most recent Advent 1).
+ */
+export function getLiturgicalCycleForDate(date: Date): CycleLetter {
+  const civil = fromLocalDate(date);
+  const adventThisYear = calculateAdvent1Civil(civil.year);
+  const adventYear = compareCivil(civil, adventThisYear) >= 0 ? civil.year : civil.year - 1;
+  return getLiturgicalCycle(adventYear);
+}
+
+/**
+ * BCP Daily Office Year One begins at Advent 1 preceding odd-numbered
+ * civil years (Advent 2024 → Year One). Year Two precedes even years.
+ */
+export function getDailyOfficeYear(adventYear: number): 1 | 2 {
+  return adventYear % 2 === 0 ? 1 : 2;
+}
+
+export function getDailyOfficeYearForDate(date: Date): 1 | 2 {
+  const civil = fromLocalDate(date);
+  const adventThisYear = calculateAdvent1Civil(civil.year);
+  const adventYear = compareCivil(civil, adventThisYear) >= 0 ? civil.year : civil.year - 1;
+  return getDailyOfficeYear(adventYear);
+}
+
+export function getLiturgicalYearStartYear(date: Date): number {
+  const civil = fromLocalDate(date);
+  const adventThisYear = calculateAdvent1Civil(civil.year);
+  return compareCivil(civil, adventThisYear) >= 0 ? civil.year : civil.year - 1;
 }
 
 // =============================================================================
-// SEASON CALCULATION FUNCTIONS
+// SEASONS
 // =============================================================================
 
+function seasonDatesFromCivil(
+  name: string,
+  start: CivilDate,
+  end: CivilDate,
+  color: LiturgicalColor,
+  weekCount?: number,
+): SeasonDates {
+  const season: SeasonDates = {
+    name,
+    startDate: toLocalDate(start),
+    endDate: toLocalDate(end),
+    color,
+  };
+  if (weekCount !== undefined) {
+    season.weekCount = weekCount;
+  }
+  return season;
+}
+
 /**
- * Calculate all liturgical seasons for a given year
- * @param year Calendar year
- * @returns Array of season date ranges
+ * Seasons of the liturgical year that begins at Advent 1 of `year`.
+ * Christmas runs through the Baptism of the Lord. The season after the
+ * Epiphany (called "Epiphany" here for API compatibility) runs from the
+ * following day through the day before Ash Wednesday. Easter runs through
+ * Pentecost. Ordinary Time after Pentecost starts the next day and ends
+ * the day before the following Advent 1.
  */
 export function calculateSeasons(year: number): SeasonDates[] {
-  // For liturgical seasons, Easter and other moveable feasts are in the following calendar year
-  const easter = calculateEaster(year + 1);
-  const advent1 = calculateAdvent1(year);
-  const ashWednesday = calculateAshWednesday(easter);
-  const pentecost = calculatePentecost(easter);
-  
-  // Calculate next year's Advent to determine end of current liturgical year
-  const nextAdvent1 = calculateAdvent1(year + 1);
-  
-  const seasons: SeasonDates[] = [
-    // Advent
-    {
-      name: 'Advent',
-      startDate: advent1,
-      endDate: new Date(year, 11, 24), // Christmas Eve
-      color: LiturgicalColor.PURPLE,
-      weekCount: 4,
-    },
-    
-    // Christmas Season
-    {
-      name: 'Christmas',
-      startDate: new Date(year, 11, 25), // Christmas Day
-      endDate: new Date(year + 1, 0, 5), // January 5 (Epiphany Eve)
-      color: LiturgicalColor.WHITE,
-    },
-    
-    // Epiphany Season
-    {
-      name: 'Epiphany',
-      startDate: new Date(year + 1, 0, 6), // January 6
-      endDate: new Date(ashWednesday.getTime() - 24 * 60 * 60 * 1000), // Day before Ash Wednesday
-      color: LiturgicalColor.GREEN,
-    },
-    
-    // Lent
-    {
-      name: 'Lent',
-      startDate: ashWednesday,
-      endDate: new Date(easter.getTime() - 24 * 60 * 60 * 1000), // Easter Eve
-      color: LiturgicalColor.PURPLE,
-      weekCount: 6,
-    },
-    
-    // Easter Season
-    {
-      name: 'Easter',
-      startDate: easter,
-      endDate: new Date(pentecost.getTime() + 6 * 24 * 60 * 60 * 1000), // Saturday after Pentecost
-      color: LiturgicalColor.WHITE,
-      weekCount: 7,
-    },
-    
-    // Ordinary Time (after Pentecost until Advent)
-    {
-      name: 'Ordinary Time',
-      startDate: new Date(pentecost.getTime() + 7 * 24 * 60 * 60 * 1000), // Sunday after Pentecost
-      endDate: new Date(nextAdvent1.getTime() - 24 * 60 * 60 * 1000), // Day before next Advent
-      color: LiturgicalColor.GREEN,
-    },
+  const easter = calculateEasterCivil(year + 1);
+  const advent1 = calculateAdvent1Civil(year);
+  const ashWednesday = calculateAshWednesdayCivil(easter);
+  const pentecost = calculatePentecostCivil(easter);
+  const nextAdvent1 = calculateAdvent1Civil(year + 1);
+  const baptism = calculateBaptismOfTheLordCivil(year + 1);
+
+  return [
+    seasonDatesFromCivil('Advent', advent1, civilDate(year, 12, 24), LiturgicalColor.PURPLE, 4),
+    seasonDatesFromCivil(
+      'Christmas',
+      civilDate(year, 12, 25),
+      baptism,
+      LiturgicalColor.WHITE,
+    ),
+    seasonDatesFromCivil(
+      'Epiphany',
+      addCivilDays(baptism, 1),
+      addCivilDays(ashWednesday, -1),
+      LiturgicalColor.GREEN,
+    ),
+    seasonDatesFromCivil(
+      'Lent',
+      ashWednesday,
+      addCivilDays(easter, -1),
+      LiturgicalColor.PURPLE,
+      6,
+    ),
+    seasonDatesFromCivil('Easter', easter, pentecost, LiturgicalColor.WHITE, 7),
+    seasonDatesFromCivil(
+      'Ordinary Time',
+      addCivilDays(pentecost, 1),
+      addCivilDays(nextAdvent1, -1),
+      LiturgicalColor.GREEN,
+    ),
   ];
-  
-  return seasons;
 }
 
-// =============================================================================
-// SPECIAL DAYS AND FEAST CALCULATIONS
-// =============================================================================
-
-/**
- * Calculate major moveable feasts (Easter-dependent)
- * @param year Calendar year
- * @returns Array of liturgical dates for moveable feasts
- */
 export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
-  const easter = calculateEaster(year);
-  const ashWednesday = calculateAshWednesday(easter);
-  const palmSunday = calculatePalmSunday(easter);
-  const pentecost = calculatePentecost(easter);
-  
-  const moveableFeasts: LiturgicalDate[] = [
+  const easter = calculateEasterCivil(year);
+  const ashWednesday = calculateAshWednesdayCivil(easter);
+  const palmSunday = calculatePalmSundayCivil(easter);
+  const pentecost = calculatePentecostCivil(easter);
+  const trinity = calculateTrinitySundayCivil(easter);
+
+  return [
     {
-      date: ashWednesday,
+      date: toLocalDate(ashWednesday),
       name: 'Ash Wednesday',
       season: 'Lent',
       color: LiturgicalColor.PURPLE,
@@ -293,7 +356,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: palmSunday,
+      date: toLocalDate(palmSunday),
       name: 'Palm Sunday',
       season: 'Lent',
       color: LiturgicalColor.RED,
@@ -301,7 +364,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: new Date(easter.getTime() - 3 * 24 * 60 * 60 * 1000),
+      date: toLocalDate(addCivilDays(easter, -3)),
       name: 'Maundy Thursday',
       season: 'Lent',
       color: LiturgicalColor.WHITE,
@@ -309,7 +372,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: new Date(easter.getTime() - 2 * 24 * 60 * 60 * 1000),
+      date: toLocalDate(addCivilDays(easter, -2)),
       name: 'Good Friday',
       season: 'Lent',
       color: LiturgicalColor.RED,
@@ -317,7 +380,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: easter,
+      date: toLocalDate(easter),
       name: 'Easter Sunday',
       season: 'Easter',
       color: LiturgicalColor.WHITE,
@@ -325,7 +388,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: new Date(easter.getTime() + 39 * 24 * 60 * 60 * 1000),
+      date: toLocalDate(addCivilDays(easter, 39)),
       name: 'Ascension Day',
       season: 'Easter',
       color: LiturgicalColor.WHITE,
@@ -333,7 +396,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: pentecost,
+      date: toLocalDate(pentecost),
       name: 'Pentecost',
       season: 'Easter',
       color: LiturgicalColor.RED,
@@ -341,7 +404,7 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
     {
-      date: new Date(pentecost.getTime() + 7 * 24 * 60 * 60 * 1000),
+      date: toLocalDate(trinity),
       name: 'Trinity Sunday',
       season: 'Ordinary Time',
       color: LiturgicalColor.WHITE,
@@ -349,19 +412,13 @@ export function calculateMoveableFeasts(year: number): LiturgicalDate[] {
       isMoveable: true,
     },
   ];
-  
-  return moveableFeasts;
 }
 
-/**
- * Calculate fixed feasts (calendar-dependent)
- * @param year Calendar year
- * @returns Array of liturgical dates for fixed feasts
- */
 export function calculateFixedFeasts(year: number): LiturgicalDate[] {
-  const fixedFeasts: LiturgicalDate[] = [
+  const holyFamily = calculateHolyFamilyCivil(year);
+  return [
     {
-      date: new Date(year, 0, 1),
+      date: toLocalDate(civilDate(year, 1, 1)),
       name: 'New Year\'s Day / Holy Name of Jesus',
       season: 'Christmas',
       color: LiturgicalColor.WHITE,
@@ -369,7 +426,7 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
     {
-      date: new Date(year, 0, 6),
+      date: toLocalDate(civilDate(year, 1, 6)),
       name: 'Epiphany',
       season: 'Epiphany',
       color: LiturgicalColor.WHITE,
@@ -377,7 +434,7 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
     {
-      date: new Date(year, 1, 2),
+      date: toLocalDate(civilDate(year, 2, 2)),
       name: 'Presentation of our Lord',
       season: 'Epiphany',
       color: LiturgicalColor.WHITE,
@@ -385,7 +442,7 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
     {
-      date: new Date(year, 2, 25),
+      date: toLocalDate(civilDate(year, 3, 25)),
       name: 'Annunciation',
       season: 'Lent',
       color: LiturgicalColor.WHITE,
@@ -393,7 +450,7 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
     {
-      date: new Date(year, 7, 15),
+      date: toLocalDate(civilDate(year, 8, 15)),
       name: 'Mary, Mother of our Lord',
       season: 'Ordinary Time',
       color: LiturgicalColor.WHITE,
@@ -401,7 +458,7 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
     {
-      date: new Date(year, 10, 1),
+      date: toLocalDate(civilDate(year, 11, 1)),
       name: 'All Saints\' Day',
       season: 'Ordinary Time',
       color: LiturgicalColor.WHITE,
@@ -409,7 +466,15 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
     {
-      date: new Date(year, 11, 25),
+      date: toLocalDate(holyFamily),
+      name: 'Holy Family',
+      season: 'Christmas',
+      color: LiturgicalColor.WHITE,
+      rank: FeastRank.FEAST,
+      isMoveable: false,
+    },
+    {
+      date: toLocalDate(civilDate(year, 12, 25)),
       name: 'Christmas Day',
       season: 'Christmas',
       color: LiturgicalColor.WHITE,
@@ -417,148 +482,286 @@ export function calculateFixedFeasts(year: number): LiturgicalDate[] {
       isMoveable: false,
     },
   ];
-  
-  return fixedFeasts;
 }
 
-// =============================================================================
-// COMPREHENSIVE LITURGICAL YEAR GENERATOR
-// =============================================================================
-
 /**
- * Generate a complete liturgical year with all dates, seasons, and feast days
- * @param year Calendar year (the year in which the liturgical year begins)
- * @returns Complete LiturgicalYear object
+ * Generate a complete liturgical year beginning at Advent 1 of `year`.
+ * The returned `year` is the ending civil year (year + 1), matching the
+ * historical API.
  */
 export function generateLiturgicalYear(year: number): LiturgicalYear {
-  const easter = calculateEaster(year + 1); // Easter is in the next calendar year
-  const advent1 = calculateAdvent1(year);
-  const christmas = new Date(year, 11, 25);
-  const epiphany = new Date(year + 1, 0, 6);
-  const ashWednesday = calculateAshWednesday(easter);
-  const palmSunday = calculatePalmSunday(easter);
-  const pentecost = calculatePentecost(easter);
-  const seasons = calculateSeasons(year);
-  const cycle = getLiturgicalCycle(year + 1); // Cycle is based on the ending year
-  
+  const easter = calculateEasterCivil(year + 1);
   return {
-    year: year + 1, // Liturgical year is named by its ending calendar year
-    cycle,
-    advent1,
-    christmas,
-    epiphany,
-    ashWednesday,
-    palmSunday,
-    easter,
-    pentecost,
-    seasons,
+    year: year + 1,
+    cycle: getLiturgicalCycle(year),
+    advent1: toLocalDate(calculateAdvent1Civil(year)),
+    christmas: toLocalDate(civilDate(year, 12, 25)),
+    epiphany: toLocalDate(civilDate(year + 1, 1, 6)),
+    ashWednesday: toLocalDate(calculateAshWednesdayCivil(easter)),
+    palmSunday: toLocalDate(calculatePalmSundayCivil(easter)),
+    easter: toLocalDate(easter),
+    pentecost: toLocalDate(calculatePentecostCivil(easter)),
+    seasons: calculateSeasons(year),
   };
 }
 
 /**
- * Get the liturgical season for a specific date
- * @param date The date to check
- * @param year The liturgical year
- * @returns Season information
+ * Season containing `date`. The optional `year` argument is ignored when
+ * choosing the liturgical year; the date itself determines it, so Advent
+ * and Christmas of the civil year are not missed.
  */
-export function getSeasonForDate(date: Date, year: number): SeasonDates | null {
-  const seasons = calculateSeasons(year - 1); // Liturgical year starts in previous calendar year
-  
+export function getSeasonForDate(date: Date, _year?: number): SeasonDates | null {
+  const startYear = getLiturgicalYearStartYear(date);
+  const seasons = calculateSeasons(startYear);
+  const civil = fromLocalDate(date);
   for (const season of seasons) {
-    if (date >= season.startDate && date <= season.endDate) {
+    if (isCivilInRange(civil, fromLocalDate(season.startDate), fromLocalDate(season.endDate))) {
       return season;
     }
   }
-  
   return null;
 }
 
 /**
- * Get all Sundays in Ordinary Time for a liturgical year
- * @param year Calendar year
- * @returns Array of Sunday dates with their proper numbers
+ * Civil date of the Sunday observed for a given Proper number in `easterYear`,
+ * or null if that Proper is omitted (before Trinity, on or after Advent 1,
+ * or colliding with Trinity or Christ the King).
  */
-export function getOrdinaryTimeSundays(year: number): Array<{ date: Date; properNumber: number }> {
-  const pentecost = calculatePentecost(calculateEaster(year));
-  const nextAdvent = calculateAdvent1(year);
-  const sundays: Array<{ date: Date; properNumber: number }> = [];
-  
-  // First Sunday after Pentecost is Trinity Sunday, then we start counting Ordinary Time
-  const currentDate = new Date(pentecost);
-  currentDate.setDate(currentDate.getDate() + 14); // Two weeks after Pentecost (avoiding DST issues)
-  let properNumber = 2; // Start with Proper 2 (first after Trinity)
-  
-  while (currentDate < nextAdvent) {
-    // Ensure we're always on Sunday
-    while (currentDate.getDay() !== 0) {
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    if (currentDate < nextAdvent) {
-      sundays.push({
-        date: new Date(currentDate),
-        properNumber: properNumber,
-      });
-      
-      currentDate.setDate(currentDate.getDate() + 7); // Add exactly 7 days
-      properNumber++;
+export function getProperSundayCivil(easterYear: number, properNumber: number): CivilDate | null {
+  const anchor = RCL_PROPER_ANCHORS[properNumber];
+  if (!anchor) {
+    return null;
+  }
+  const candidate = sundayClosestTo(easterYear, anchor.month, anchor.day);
+  const easter = calculateEasterCivil(easterYear);
+  const trinity = calculateTrinitySundayCivil(easter);
+  const advent1 = calculateAdvent1Civil(easterYear);
+  const christTheKing = calculateChristTheKingCivil(easterYear);
+
+  if (compareCivil(candidate, trinity) <= 0) {
+    return null;
+  }
+  if (compareCivil(candidate, advent1) >= 0) {
+    return null;
+  }
+  if (isSameCivil(candidate, christTheKing)) {
+    return null;
+  }
+  return candidate;
+}
+
+/**
+ * Proper number observed on a given date, or null when the date is not an
+ * ordinary Proper Sunday (Trinity, Christ the King, or outside the window).
+ */
+export function getProperNumberForDate(date: Date): number | null {
+  const civil = fromLocalDate(date);
+  if (weekdayOf(civil) !== 0) {
+    return null;
+  }
+  const easterYear = civil.month === 12 && civil.day >= 1 && compareCivil(civil, calculateAdvent1Civil(civil.year)) < 0
+    ? civil.year
+    : (compareCivil(civil, calculateAdvent1Civil(civil.year)) >= 0 ? civil.year + 1 : civil.year);
+
+  for (const properNumber of Object.keys(RCL_PROPER_ANCHORS).map(Number)) {
+    const observed = getProperSundayCivil(easterYear, properNumber);
+    if (observed && isSameCivil(observed, civil)) {
+      return properNumber;
     }
   }
-  
+  return null;
+}
+
+/**
+ * After-Pentecost Sundays of civil year `year`, with RCL Proper numbers.
+ * Trinity Sunday is omitted from the list (it precedes numbered Propers).
+ * Christ the King is included as properNumber 29. A Proper that lands on
+ * Trinity or Christ the King is recorded on that feast as omittedProperNumber.
+ */
+export function getOrdinaryTimeSundays(year: number): Array<{ date: Date; properNumber: number; omittedProperNumber?: number }> {
+  const easter = calculateEasterCivil(year);
+  const trinity = calculateTrinitySundayCivil(easter);
+  const advent1 = calculateAdvent1Civil(year);
+  const christTheKing = calculateChristTheKingCivil(year);
+  const sundays: Array<{ date: Date; properNumber: number; omittedProperNumber?: number }> = [];
+
+  const properByDate = new Map<string, number>();
+  for (const key of Object.keys(RCL_PROPER_ANCHORS)) {
+    const properNumber = Number(key);
+    const anchor = RCL_PROPER_ANCHORS[properNumber];
+    const candidate = sundayClosestTo(year, anchor.month, anchor.day);
+    if (compareCivil(candidate, trinity) <= 0 || compareCivil(candidate, advent1) >= 0) {
+      continue;
+    }
+    properByDate.set(formatCivilDate(candidate), properNumber);
+  }
+
+  let cursor = addCivilDays(trinity, 7);
+  while (compareCivil(cursor, advent1) < 0) {
+    const key = formatCivilDate(cursor);
+    const collidingProper = properByDate.get(key) ?? null;
+    if (isSameCivil(cursor, christTheKing)) {
+      const entry: { date: Date; properNumber: number; omittedProperNumber?: number } = {
+        date: toLocalDate(cursor),
+        properNumber: 29,
+      };
+      if (collidingProper !== null) {
+        entry.omittedProperNumber = collidingProper;
+      }
+      sundays.push(entry);
+    } else if (collidingProper !== null) {
+      sundays.push({
+        date: toLocalDate(cursor),
+        properNumber: collidingProper,
+      });
+    }
+    cursor = addCivilDays(cursor, 7);
+  }
+
   return sundays;
 }
 
 /**
- * Calculate the number of weeks in a liturgical season
- * @param startDate Start date of the season
- * @param endDate End date of the season
- * @returns Number of complete weeks
+ * Observance on a Sunday, applying feast precedence. Trinity (and other
+ * principal feasts) win over a numbered Proper on the same date.
  */
+export function getSundayObservance(date: Date): SundayObservance | null {
+  const civil = fromLocalDate(date);
+  if (weekdayOf(civil) !== 0) {
+    return null;
+  }
+
+  const easterYear = getLiturgicalYearStartYear(date) + 1;
+  const easter = calculateEasterCivil(easterYear);
+  const trinity = calculateTrinitySundayCivil(easter);
+  const advent1 = calculateAdvent1Civil(civil.year);
+  const christTheKingThisYear = calculateChristTheKingCivil(civil.year);
+
+  if (isSameCivil(civil, calculateEasterCivil(civil.year))) {
+    return {
+      date: toLocalDate(civil),
+      name: 'Easter Sunday',
+      properNumber: null,
+      omittedProperNumber: null,
+      rank: FeastRank.PRINCIPAL_FEAST,
+    };
+  }
+  if (isSameCivil(civil, calculatePentecostCivil(calculateEasterCivil(civil.year)))) {
+    return {
+      date: toLocalDate(civil),
+      name: 'Pentecost',
+      properNumber: null,
+      omittedProperNumber: null,
+      rank: FeastRank.PRINCIPAL_FEAST,
+    };
+  }
+  if (isSameCivil(civil, trinity)) {
+    const omitted = properNumberClosestTo(civil, easterYear);
+    return {
+      date: toLocalDate(civil),
+      name: 'Trinity Sunday',
+      properNumber: null,
+      omittedProperNumber: omitted,
+      rank: FeastRank.PRINCIPAL_FEAST,
+    };
+  }
+  if (isSameCivil(civil, advent1)) {
+    return {
+      date: toLocalDate(civil),
+      name: 'First Sunday of Advent',
+      properNumber: null,
+      omittedProperNumber: null,
+      rank: FeastRank.PRINCIPAL_FEAST,
+    };
+  }
+  if (isSameCivil(civil, christTheKingThisYear)) {
+    const omitted = properNumberClosestTo(civil, civil.year);
+    return {
+      date: toLocalDate(civil),
+      name: 'Christ the King',
+      properNumber: 29,
+      omittedProperNumber: omitted,
+      rank: FeastRank.PRINCIPAL_FEAST,
+    };
+  }
+
+  const properNumber = getProperNumberForDate(date);
+  if (properNumber !== null) {
+    return {
+      date: toLocalDate(civil),
+      name: `Proper ${properNumber}`,
+      properNumber,
+      omittedProperNumber: null,
+      rank: FeastRank.ORDINARY,
+    };
+  }
+
+  return {
+    date: toLocalDate(civil),
+    name: getSeasonForDate(date)?.name || 'Sunday',
+    properNumber: null,
+    omittedProperNumber: null,
+    rank: FeastRank.ORDINARY,
+  };
+}
+
+function properNumberClosestTo(date: CivilDate, year: number): number | null {
+  for (const key of Object.keys(RCL_PROPER_ANCHORS)) {
+    const properNumber = Number(key);
+    const anchor = RCL_PROPER_ANCHORS[properNumber];
+    const candidate = sundayClosestTo(year, anchor.month, anchor.day);
+    if (isSameCivil(candidate, date)) {
+      return properNumber;
+    }
+  }
+  return null;
+}
+
 export function calculateWeeksInSeason(startDate: Date, endDate: Date): number {
-  const diffTime = endDate.getTime() - startDate.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = daysBetweenCivil(fromLocalDate(startDate), fromLocalDate(endDate));
   return Math.floor(diffDays / 7);
 }
 
-/**
- * Validate Easter calculation accuracy
- * @param year Year to validate
- * @returns True if calculation appears correct
- */
 export function validateEasterCalculation(year: number): boolean {
-  const easter = calculateEaster(year);
-  const month = easter.getMonth() + 1; // getMonth() is 0-indexed
-  const day = easter.getDate();
-  
-  // Easter must be between March 22 and April 25
-  if (month === 3 && day >= 22) {
+  const easter = calculateEasterCivil(year);
+  if (easter.month === 3 && easter.day >= 22) {
     return true;
   }
-  if (month === 4 && day <= 25) {
+  if (easter.month === 4 && easter.day <= 25) {
     return true;
   }
-  
   return false;
 }
 
-// =============================================================================
-// EXPORT DEFAULT CALCULATOR INSTANCE
-// =============================================================================
-
 export const LiturgicalCalendar = {
   calculateEaster,
+  calculateEasterCivil,
   calculateAdvent1,
+  calculateAdvent1Civil,
   calculateAshWednesday,
+  calculateAshWednesdayCivil,
   calculatePalmSunday,
   calculatePentecost,
+  calculatePentecostCivil,
+  calculateTrinitySundayCivil,
+  calculateChristTheKingCivil,
+  calculateBaptismOfTheLordCivil,
+  calculateHolyFamilyCivil,
   calculateSundayAfterPentecost,
   getLiturgicalCycle,
+  getLiturgicalCycleForDate,
+  getDailyOfficeYear,
+  getDailyOfficeYearForDate,
+  getLiturgicalYearStartYear,
   calculateSeasons,
   calculateMoveableFeasts,
   calculateFixedFeasts,
   generateLiturgicalYear,
   getSeasonForDate,
   getOrdinaryTimeSundays,
+  getProperSundayCivil,
+  getProperNumberForDate,
+  getSundayObservance,
   calculateWeeksInSeason,
   validateEasterCalculation,
 };
