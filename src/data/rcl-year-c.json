@@ -139,6 +139,72 @@
           }
         },
         {
+          "id": "epiphany-4-c",
+          "name": "Fourth Sunday after Epiphany",
+          "date_pattern": "epiphany_4",
+          "readings": {
+            "first": "Jeremiah 1:4-10",
+            "psalm": "Psalm 71:1-6",
+            "second": "1 Corinthians 13:1-13",
+            "gospel": "Luke 4:21-30"
+          }
+        },
+        {
+          "id": "epiphany-5-c",
+          "name": "Fifth Sunday after Epiphany",
+          "date_pattern": "epiphany_5",
+          "readings": {
+            "first": "Isaiah 6:1-8 (9-13)",
+            "psalm": "Psalm 138",
+            "second": "1 Corinthians 15:1-11",
+            "gospel": "Luke 5:1-11"
+          }
+        },
+        {
+          "id": "epiphany-6-c",
+          "name": "Sixth Sunday after Epiphany",
+          "date_pattern": "epiphany_6",
+          "readings": {
+            "first": "Jeremiah 17:5-10",
+            "psalm": "Psalm 1",
+            "second": "1 Corinthians 15:12-20",
+            "gospel": "Luke 6:17-26"
+          }
+        },
+        {
+          "id": "epiphany-7-c",
+          "name": "Seventh Sunday after Epiphany",
+          "date_pattern": "epiphany_7",
+          "readings": {
+            "first": "Genesis 45:3-11, 15",
+            "psalm": "Psalm 37:1-11, 39-40",
+            "second": "1 Corinthians 15:35-38, 42-50",
+            "gospel": "Luke 6:27-38"
+          }
+        },
+        {
+          "id": "epiphany-8-c",
+          "name": "Eighth Sunday after Epiphany",
+          "date_pattern": "epiphany_8",
+          "readings": {
+            "first": "Sirach 27:4-7 OR Isaiah 55:10-13",
+            "psalm": "Psalm 92:1-4, 12-15",
+            "second": "1 Corinthians 15:51-58",
+            "gospel": "Luke 6:39-49"
+          }
+        },
+        {
+          "id": "epiphany-9-c",
+          "name": "Ninth Sunday after Epiphany",
+          "date_pattern": "epiphany_9",
+          "readings": {
+            "first": "1 Kings 8:22-23, 41-43",
+            "psalm": "Psalm 96:1-9",
+            "second": "Galatians 1:1-12",
+            "gospel": "Luke 7:1-10"
+          }
+        },
+        {
           "id": "transfiguration-c",
           "name": "Transfiguration Sunday",
           "date_pattern": "transfiguration",

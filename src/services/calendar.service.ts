@@ -5,6 +5,8 @@ import { SpecialDay as SpecialDayEntity } from '../models/special-day.entity';
 import { Tradition } from '../models/tradition.entity';
 import { LiturgicalYear } from '../models/liturgical-year.entity';
 import { Repository } from 'typeorm';
+import { addCivilDays, daysBetweenCivil, formatCivilDate, parseCivilDate } from '../utils/civil-date';
+import { getDefaultTimeZone, todayInTimeZone } from '../utils/time-zone';
 
 export class CalendarService {
 
@@ -112,10 +114,10 @@ export class CalendarService {
     }));
   }
 
-  public async getCurrent(traditionId: string): Promise<CurrentCalendarInfo> {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const todayStr = today.toISOString().split('T')[0];
+  public async getCurrent(traditionId: string, timeZone: string = getDefaultTimeZone()): Promise<CurrentCalendarInfo> {
+    const todayCivil = todayInTimeZone(timeZone);
+    const currentYear = todayCivil.year;
+    const todayStr = formatCivilDate(todayCivil);
     
     const tradition = await this.findTraditionByAbbreviation(traditionId);
     if (!tradition) {
@@ -174,17 +176,21 @@ export class CalendarService {
     });
 
     // Find upcoming special days (next 30 days)
-    const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const horizon = formatCivilDate(addCivilDays(todayCivil, 30));
     const upcomingSpecialDays = specialDays
       .filter(day => {
-        const dayDate = new Date(day.date);
-        return dayDate >= today && dayDate <= thirtyDaysFromNow;
+        const dayStr = this.formatDate(day.date);
+        return dayStr >= todayStr && dayStr <= horizon;
       })
-      .map(day => ({
-        name: day.name,
-        date: this.formatDate(day.date),
-        daysUntil: Math.ceil((new Date(day.date).getTime() - today.getTime()) / (24 * 60 * 60 * 1000)),
-      }));
+      .map(day => {
+        const dayStr = this.formatDate(day.date);
+        const dayCivil = parseCivilDate(dayStr);
+        return {
+          name: day.name,
+          date: dayStr,
+          daysUntil: dayCivil ? daysBetweenCivil(todayCivil, dayCivil) : 0,
+        };
+      });
 
     return {
       currentSeason: currentSeason ? {

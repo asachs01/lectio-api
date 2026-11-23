@@ -4,7 +4,7 @@
   "description": "A modern REST API for serving lectionary readings and liturgical calendar data",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.js || npx ts-node src/index.ts",
+    "start": "node dist/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "test": "jest",
@@ -27,8 +27,8 @@
     "db:drop": "typeorm schema:drop -d ormconfig.js",
     "db:sync": "typeorm schema:sync -d ormconfig.js",
     "db:seed": "ts-node src/scripts/import-rcl-with-dates.ts",
-    "db:seed:prod": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/add-missing-seasons-migration.js && node dist/scripts/fix-rcl-proper-readings.js",
-    "db:seed-production-alt": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/add-missing-seasons-migration.js && node dist/scripts/fix-rcl-proper-readings.js",
+    "db:seed:prod": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/import-catholic-lectionary.js",
+    "db:seed-production-alt": "node dist/scripts/import-rcl-with-dates.js && node dist/scripts/import-daily-lectionary.js && node dist/scripts/import-catholic-lectionary.js",
     "db:fix-seasons": "node dist/scripts/add-missing-seasons-migration.js",
     "db:fix-rcl-proper": "node src/scripts/production-fix-runner.js",
     "entities:validate": "ts-node src/scripts/validate-entities.ts",
@@ -38,6 +38,7 @@
     "data:import-rcl": "ts-node src/scripts/import-rcl-with-dates.ts",
     "data:import-rcl:prod": "node dist/scripts/import-rcl-with-dates.js",
     "data:import-daily": "ts-node src/scripts/import-daily-lectionary.ts",
+    "data:generate-daily": "ts-node src/scripts/generate-daily-lectionary.ts",
     "data:import-catholic": "ts-node src/scripts/import-catholic-lectionary.ts",
     "data:import-catholic:prod": "node dist/scripts/import-catholic-lectionary.js",
     "db:seed-production": "sh scripts/seed-production.sh"
@@ -84,7 +85,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "typeorm": "^0.3.17",
-    "uuid": "^9.0.1",
+    "uuid": "^11.1.1",
     "winston": "^3.11.0",
     "winston-loki": "^6.1.3"
   },
@@ -121,6 +122,6 @@
     ]
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

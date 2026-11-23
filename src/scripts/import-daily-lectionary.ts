@@ -14,6 +14,7 @@ import { Scripture } from '../models/scripture.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 import { config } from 'dotenv';
+import { parseCivilDate, toLocalDate } from '../utils/civil-date';
 
 // Load environment variables
 config();
@@ -38,7 +39,7 @@ interface DailyReadingData {
   office: string;
   readings: {
     oldTestament?: string;
-    psalm: string;
+    psalm?: string;
     newTestament?: string;
     gospel?: string;
   };
@@ -123,7 +124,12 @@ async function importDailyLectionary() {
     let processedCount = 0;
 
     for (const dailyData of dailyReadings) {
-      const date = new Date(dailyData.date);
+      const civil = parseCivilDate(dailyData.date);
+      if (!civil) {
+        console.warn(`Skipping invalid date ${dailyData.date}`);
+        continue;
+      }
+      const date = toLocalDate(civil);
       const office = dailyData.office === 'morning' ? ReadingOffice.MORNING : ReadingOffice.EVENING;
       
       // Create reading entries for each scripture reference
@@ -224,7 +230,7 @@ async function importDailyLectionary() {
     const sampleReadings = await readingRepo.find({
       where: { 
         traditionId: dailyTradition.id,
-        date: new Date('2025-08-29'),
+        date: toLocalDate(parseCivilDate('2025-08-29')!),
       },
       order: { readingOffice: 'ASC', readingOrder: 'ASC' },
     });

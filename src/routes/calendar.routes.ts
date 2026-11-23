@@ -29,6 +29,12 @@ function getController(): CalendarController {
  *         schema:
  *           type: string
  *           default: rcl
+ *       - in: query
+ *         name: tz
+ *         description: IANA time zone used to decide "today" (defaults to LECTIO_TIMEZONE or America/New_York)
+ *         schema:
+ *           type: string
+ *           example: America/New_York
  *     responses:
  *       200:
  *         description: Current liturgical calendar information
@@ -59,6 +65,12 @@ function getController(): CalendarController {
  *                             format: date
  *                           daysUntil:
  *                             type: integer
+ *       400:
+ *         description: Invalid tz parameter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
  *         content:

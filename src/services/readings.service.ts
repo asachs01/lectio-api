@@ -110,8 +110,10 @@ export class ReadingsService {
         return null;
       }
 
-      // Get liturgical information for this date
-      const liturgicalInfo = this.calendarService.getLiturgicalYearInfo(year);
+      // Get liturgical information for this date. Cycle and season must be
+      // computed from the date itself so Advent/Christmas use the new year's
+      // letter and mid-year dates keep the cycle that started last Advent.
+      const cycle = this.calendarService.getCycleForDate(dateObj);
       const season = this.calendarService.getSeasonForDate(dateObj, year);
       const properNumber = this.calendarService.getProperNumber(dateObj, year);
 
@@ -136,7 +138,7 @@ export class ReadingsService {
         const alternateReadings = await this.findReadingsByLiturgicalContext(
           dateObj,
           traditionUuid,
-          liturgicalInfo.cycle,
+          cycle,
           season,
           properNumber,
         );

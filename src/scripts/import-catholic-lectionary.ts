@@ -16,6 +16,8 @@ import { Tradition } from '../models/tradition.entity';
 import { Scripture } from '../models/scripture.entity';
 import { SpecialDay } from '../models/special-day.entity';
 import { LiturgicalCalendar } from '../utils/liturgical-calendar';
+import { addCivilDays, toLocalDate } from '../utils/civil-date';
+import { cycleForAdventYear, resolveLectionaryDate } from '../utils/lectionary-dates';
 
 interface ReadingData {
   first: string;
@@ -47,237 +49,12 @@ interface CatholicYearData {
 /**
  * Map date patterns to actual liturgical dates for Catholic calendar
  */
-function calculateCatholicLiturgicalDate(datePattern: string, liturgicalYear: number, cycle: string): Date {
-
-  // Fixed dates
-  if (datePattern === 'december_24') {
-    return new Date(liturgicalYear, 11, 24);
-  }
-  if (datePattern === 'december_25') {
-    return new Date(liturgicalYear, 11, 25);
-  }
-  if (datePattern === 'january_1') {
-    return new Date(liturgicalYear + 1, 0, 1);
-  }
-  if (datePattern === 'january_6') {
-    return new Date(liturgicalYear + 1, 0, 6);
-  }
-  if (datePattern === 'february_2') {
-    return new Date(liturgicalYear + 1, 1, 2);
-  }
-  if (datePattern === 'march_25') {
-    return new Date(liturgicalYear + 1, 2, 25);
-  }
-  if (datePattern === 'august_14') {
-    return new Date(liturgicalYear + 1, 7, 14);
-  }
-  if (datePattern === 'august_15') {
-    return new Date(liturgicalYear + 1, 7, 15);
-  }
-  if (datePattern === 'november_1') {
-    return new Date(liturgicalYear + 1, 10, 1);
-  }
-  if (datePattern === 'november_2') {
-    return new Date(liturgicalYear + 1, 10, 2);
-  }
-  if (datePattern === 'december_8') {
-    return new Date(liturgicalYear, 11, 8);
-  }
-
-  // Advent Sundays
-  if (datePattern === 'advent_1') {
-    return LiturgicalCalendar.calculateAdvent1(liturgicalYear);
-  }
-  if (datePattern === 'advent_2') {
-    const advent1 = LiturgicalCalendar.calculateAdvent1(liturgicalYear);
-    return new Date(advent1.getTime() + 7 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'advent_3') {
-    const advent1 = LiturgicalCalendar.calculateAdvent1(liturgicalYear);
-    return new Date(advent1.getTime() + 14 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'advent_4') {
-    const advent1 = LiturgicalCalendar.calculateAdvent1(liturgicalYear);
-    return new Date(advent1.getTime() + 21 * 24 * 60 * 60 * 1000);
-  }
-
-  // Christmas Season
-  if (datePattern === 'christmas_1') {
-    // First Sunday after Christmas (Holy Family)
-    const christmas = new Date(liturgicalYear, 11, 25);
-    const daysUntilSunday = (7 - christmas.getDay()) % 7 || 7;
-    return new Date(christmas.getTime() + daysUntilSunday * 24 * 60 * 60 * 1000);
-  }
-
-  // Calculate Easter for the liturgical year (which starts in Advent of previous calendar year)
-  const easterYear = liturgicalYear + 1; // Easter is in the calendar year after liturgical year starts
-  const easter = LiturgicalCalendar.calculateEaster(easterYear);
-
-  // Epiphany Season
-  if (datePattern === 'baptism_lord') {
-    // Sunday after Epiphany (in US, or January 6 in other countries)
-    const epiphany = new Date(easterYear, 0, 6);
-    const daysUntilSunday = (7 - epiphany.getDay()) % 7 || 7;
-    return new Date(epiphany.getTime() + daysUntilSunday * 24 * 60 * 60 * 1000);
-  }
-
-  // Lent
-  if (datePattern === 'ash_wednesday') {
-    return new Date(easter.getTime() - 46 * 24 * 60 * 60 * 1000);
-  }
-
-  if (datePattern === 'lent_1') {
-    const ashWednesday = new Date(easter.getTime() - 46 * 24 * 60 * 60 * 1000);
-    return new Date(ashWednesday.getTime() + 4 * 24 * 60 * 60 * 1000);
-  }
-
-  if (datePattern === 'lent_2') {
-    return new Date(easter.getTime() - 35 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'lent_3') {
-    return new Date(easter.getTime() - 28 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'lent_4') {
-    return new Date(easter.getTime() - 21 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'lent_5') {
-    return new Date(easter.getTime() - 14 * 24 * 60 * 60 * 1000);
-  }
-
-  // Holy Week
-  if (datePattern === 'palm_sunday') {
-    return new Date(easter.getTime() - 7 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'holy_thursday') {
-    return new Date(easter.getTime() - 3 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'good_friday') {
-    return new Date(easter.getTime() - 2 * 24 * 60 * 60 * 1000);
-  }
-
-  // Easter Season
-  if (datePattern === 'easter_vigil') {
-    return new Date(easter.getTime() - 1 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'easter_sunday') {
-    return easter;
-  }
-  if (datePattern === 'easter_2') {
-    return new Date(easter.getTime() + 7 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'easter_3') {
-    return new Date(easter.getTime() + 14 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'easter_4') {
-    return new Date(easter.getTime() + 21 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'easter_5') {
-    return new Date(easter.getTime() + 28 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'easter_6') {
-    return new Date(easter.getTime() + 35 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'ascension') {
-    return new Date(easter.getTime() + 39 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'easter_7') {
-    return new Date(easter.getTime() + 42 * 24 * 60 * 60 * 1000);
-  }
-
-  // Pentecost
-  if (datePattern === 'pentecost_vigil') {
-    return new Date(easter.getTime() + 48 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'pentecost') {
-    return new Date(easter.getTime() + 49 * 24 * 60 * 60 * 1000);
-  }
-
-  // Post-Pentecost Solemnities
-  if (datePattern === 'trinity_sunday') {
-    return new Date(easter.getTime() + 56 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'corpus_christi') {
-    return new Date(easter.getTime() + 63 * 24 * 60 * 60 * 1000);
-  }
-  if (datePattern === 'sacred_heart') {
-    // Friday after Corpus Christi (19 days after Pentecost)
-    return new Date(easter.getTime() + 68 * 24 * 60 * 60 * 1000);
-  }
-
-  // Ordinary Time Sundays (Catholic uses numbers, not Propers)
-  const ordinaryTimeMap: { [key: string]: number } = {
-    ordinary_2: 2,
-    ordinary_3: 3,
-    ordinary_4: 4,
-    ordinary_5: 5,
-    ordinary_6: 6,
-    ordinary_7: 7,
-    ordinary_8: 8,
-    ordinary_9: 9,
-    ordinary_10: 10,
-    ordinary_11: 11,
-    ordinary_12: 12,
-    ordinary_13: 13,
-    ordinary_14: 14,
-    ordinary_15: 15,
-    ordinary_16: 16,
-    ordinary_17: 17,
-    ordinary_18: 18,
-    ordinary_19: 19,
-    ordinary_20: 20,
-    ordinary_21: 21,
-    ordinary_22: 22,
-    ordinary_23: 23,
-    ordinary_24: 24,
-    ordinary_25: 25,
-    ordinary_26: 26,
-    ordinary_27: 27,
-    ordinary_28: 28,
-    ordinary_29: 29,
-    ordinary_30: 30,
-    ordinary_31: 31,
-    ordinary_32: 32,
-    ordinary_33: 33,
-  };
-
-  if (ordinaryTimeMap[datePattern] !== undefined) {
-    const weekNum = ordinaryTimeMap[datePattern];
-
-    // Calculate the start of Ordinary Time after Baptism of the Lord
-    const baptismOfLord = calculateCatholicLiturgicalDate('baptism_lord', liturgicalYear, cycle);
-
-    // First part of Ordinary Time (before Lent)
-    // Week 1 starts the day after Baptism of the Lord
-    const ashWednesday = new Date(easter.getTime() - 46 * 24 * 60 * 60 * 1000);
-
-    // Calculate how many weeks until Ash Wednesday
-    const weeksBeforeLent = Math.floor((ashWednesday.getTime() - baptismOfLord.getTime()) / (7 * 24 * 60 * 60 * 1000));
-
-    if (weekNum <= weeksBeforeLent) {
-      // In the first part of Ordinary Time (before Lent)
-      const daysAfterBaptism = (weekNum - 1) * 7;
-      const nextSunday = new Date(baptismOfLord.getTime() + daysAfterBaptism * 24 * 60 * 60 * 1000);
-      // Find the Sunday
-      const daysUntilSunday = (7 - nextSunday.getDay()) % 7;
-      return new Date(nextSunday.getTime() + daysUntilSunday * 24 * 60 * 60 * 1000);
-    } else {
-      // In the second part of Ordinary Time (after Pentecost)
-      // Calculate from Christ the King backwards
-      const christKing = calculateCatholicLiturgicalDate('christ_king', liturgicalYear, cycle);
-      const weeksFromEnd = 34 - weekNum;
-      return new Date(christKing.getTime() - weeksFromEnd * 7 * 24 * 60 * 60 * 1000);
-    }
-  }
-
-  // Christ the King is the last Sunday before Advent
-  if (datePattern === 'christ_king') {
-    const advent1 = LiturgicalCalendar.calculateAdvent1(easterYear);
-    return new Date(advent1.getTime() - 7 * 24 * 60 * 60 * 1000);
-  }
-
-  // Default to a Sunday in the middle of the year if pattern not recognized
-  console.warn(`Unknown date pattern: ${datePattern}`);
-  return new Date(easterYear, 5, 15); // June 15 as fallback
+function calculateCatholicLiturgicalDate(datePattern: string, liturgicalYear: number, _cycle: string): Date | null {
+  // Christmas 1 in the Catholic files is Holy Family: the Sunday after
+  // Christmas, or December 30 when Christmas itself is Sunday.
+  const pattern = datePattern === 'christmas_1' ? 'holy_family' : datePattern;
+  const civil = resolveLectionaryDate(pattern, liturgicalYear);
+  return civil ? toLocalDate(civil) : null;
 }
 
 /**
@@ -398,7 +175,10 @@ async function importLiturgicalYear(
     // Calculate liturgical year dates (Advent to Advent)
     const advent1 = LiturgicalCalendar.calculateAdvent1(liturgicalYear);
     const nextAdvent = LiturgicalCalendar.calculateAdvent1(liturgicalYear + 1);
-    const endDate = new Date(nextAdvent.getTime() - 24 * 60 * 60 * 1000); // Day before next Advent
+    const endDate = toLocalDate(addCivilDays(
+      { year: nextAdvent.getFullYear(), month: nextAdvent.getMonth() + 1, day: nextAdvent.getDate() },
+      -1,
+    ));
 
     litYear = yearRepo.create({
       name: `Year ${cycle}`,
@@ -446,6 +226,10 @@ async function importLiturgicalYear(
     if (seasonData.sundays) {
       for (const sunday of seasonData.sundays) {
         const date = calculateCatholicLiturgicalDate(sunday.date_pattern, liturgicalYear, cycle);
+        if (!date) {
+          console.log(`    ${sunday.name}: omitted (precedence or out of season)`);
+          continue;
+        }
 
         // Process each reading type
         const readings = [
@@ -499,6 +283,10 @@ async function importLiturgicalYear(
     if (seasonData.feast_days) {
       for (const feast of seasonData.feast_days) {
         const date = calculateCatholicLiturgicalDate(feast.date_pattern, liturgicalYear, cycle);
+        if (!date) {
+          console.log(`    ${feast.name}: omitted (precedence or out of season)`);
+          continue;
+        }
 
         // Process each reading type
         const readings = [
@@ -598,27 +386,20 @@ async function importCatholicData(): Promise<void> {
 
     let totalReadings = 0;
 
-    // Import data for 2024-2027
-    // Catholic follows same 3-year cycle as RCL:
-    // Year C: 2024-2025 (starts Advent 2024)
-    // Year A: 2025-2026 (starts Advent 2025)
-    // Year B: 2026-2027 (starts Advent 2026)
+    // Default coverage is Advent 2024 through Advent 2030. Override with
+    // LECTIO_SEED_START_YEAR and LECTIO_SEED_END_YEAR (inclusive advent years).
+    const startYear = parseInt(process.env.LECTIO_SEED_START_YEAR || '2024', 10);
+    const endYear = parseInt(process.env.LECTIO_SEED_END_YEAR || '2030', 10);
 
-    const yearMapping: { [key: number]: string } = {
-      2024: 'C',
-      2025: 'A',
-      2026: 'B',
-    };
-
-    for (const [liturgicalYear, expectedCycle] of Object.entries(yearMapping)) {
-      const yearNum = parseInt(liturgicalYear);
+    for (let adventYear = startYear; adventYear <= endYear; adventYear++) {
+      const expectedCycle = cycleForAdventYear(adventYear);
       const yearData = availableYears.find(y => y.cycle === expectedCycle);
 
       if (yearData) {
-        console.log(`\nImporting Year ${expectedCycle} (${yearNum}-${yearNum + 1})...`);
-        totalReadings += await importLiturgicalYear(yearData.data, yearNum, tradition);
+        console.log(`\nImporting Year ${expectedCycle} (Advent ${adventYear})...`);
+        totalReadings += await importLiturgicalYear(yearData.data, adventYear, tradition);
       } else {
-        console.log(`\nSkipping Year ${expectedCycle} (${yearNum}-${yearNum + 1}) - data file not available`);
+        console.log(`\nSkipping Year ${expectedCycle} (Advent ${adventYear}) - data file not available`);
       }
     }
 
@@ -637,7 +418,7 @@ async function importCatholicData(): Promise<void> {
     console.log('📊 Import Summary:');
     console.log(`   Total Readings: ${count}`);
     console.log(`   Unique Dates: ${uniqueDates.count}`);
-    console.log('   Years Covered: 2024-2027');
+    console.log(`   Years Covered: Advent ${startYear}–${endYear}`);
 
     // Test a specific date
     const testDate = new Date('2025-12-25'); // Christmas Day

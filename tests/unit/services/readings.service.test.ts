@@ -117,6 +117,7 @@ jest.mock('../../../src/services/liturgical-calendar.service', () => ({
       startDate: new Date('2022-11-27'),
       endDate: new Date('2023-11-26'),
     }),
+    getCycleForDate: jest.fn().mockReturnValue('A'),
     getSeasonForDate: jest.fn().mockReturnValue('advent'),
     getProperNumber: jest.fn().mockReturnValue(null),
   })),
