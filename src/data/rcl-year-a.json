@@ -139,6 +139,72 @@
           }
         },
         {
+          "id": "epiphany-4-a",
+          "name": "Fourth Sunday after Epiphany",
+          "date_pattern": "epiphany_4",
+          "readings": {
+            "first": "Micah 6:1-8",
+            "psalm": "Psalm 15",
+            "second": "1 Corinthians 1:18-31",
+            "gospel": "Matthew 5:1-12"
+          }
+        },
+        {
+          "id": "epiphany-5-a",
+          "name": "Fifth Sunday after Epiphany",
+          "date_pattern": "epiphany_5",
+          "readings": {
+            "first": "Isaiah 58:1-9a (9b-12)",
+            "psalm": "Psalm 112:1-9 (10)",
+            "second": "1 Corinthians 2:1-12 (13-16)",
+            "gospel": "Matthew 5:13-20"
+          }
+        },
+        {
+          "id": "epiphany-6-a",
+          "name": "Sixth Sunday after Epiphany",
+          "date_pattern": "epiphany_6",
+          "readings": {
+            "first": "Deuteronomy 30:15-20 OR Sirach 15:15-20",
+            "psalm": "Psalm 119:1-8",
+            "second": "1 Corinthians 3:1-9",
+            "gospel": "Matthew 5:21-37"
+          }
+        },
+        {
+          "id": "epiphany-7-a",
+          "name": "Seventh Sunday after Epiphany",
+          "date_pattern": "epiphany_7",
+          "readings": {
+            "first": "Leviticus 19:1-2, 9-18",
+            "psalm": "Psalm 119:33-40",
+            "second": "1 Corinthians 3:10-11, 16-23",
+            "gospel": "Matthew 5:38-48"
+          }
+        },
+        {
+          "id": "epiphany-8-a",
+          "name": "Eighth Sunday after Epiphany",
+          "date_pattern": "epiphany_8",
+          "readings": {
+            "first": "Isaiah 49:8-16a",
+            "psalm": "Psalm 131",
+            "second": "1 Corinthians 4:1-5",
+            "gospel": "Matthew 6:24-34"
+          }
+        },
+        {
+          "id": "epiphany-9-a",
+          "name": "Ninth Sunday after Epiphany",
+          "date_pattern": "epiphany_9",
+          "readings": {
+            "first": "Deuteronomy 11:18-21, 26-28",
+            "psalm": "Psalm 31:1-5, 19-24",
+            "second": "Romans 1:16-17, 3:22b-28 (29-31)",
+            "gospel": "Matthew 7:21-29"
+          }
+        },
+        {
           "id": "transfiguration-a",
           "name": "Transfiguration Sunday",
           "date_pattern": "transfiguration",
