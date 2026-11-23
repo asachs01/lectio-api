@@ -6,6 +6,7 @@ const mockTraditions = [
   { id: 'rcl-uuid', abbreviation: 'RCL', name: 'Revised Common Lectionary' },
   { id: 'catholic-uuid', abbreviation: 'CATHOLIC', name: 'Roman Catholic Lectionary' },
   { id: 'episcopal-uuid', abbreviation: 'EPISCOPAL', name: 'Episcopal/Anglican Lectionary' },
+  { id: 'bcp-uuid', abbreviation: 'BCP', name: 'Book of Common Prayer Daily Office' },
 ];
 
 // Mock data
@@ -398,6 +399,81 @@ describe('ReadingsService', () => {
 
       expect(result.readings).toHaveLength(0);
       expect(result.total).toBe(0); // With no readings found, total is 0
+    });
+  });
+
+  describe('liturgical metadata from the unified calendar', () => {
+    const readingFor = (date: string, extras: Record<string, unknown> = {}) => ({
+      id: `reading-${date}`,
+      date: new Date(`${date}T12:00:00`),
+      readingType: 'gospel',
+      scriptureReference: 'Matthew 28:16-20',
+      text: 'Now the eleven disciples went to Galilee...',
+      isAlternative: false,
+      notes: null as string | null,
+      specialDay: null as { name: string; liturgicalColor?: string } | null,
+      liturgicalYear: { cycle: 'A' },
+      traditionId: 'rcl-uuid',
+      tradition: { abbreviation: 'RCL' },
+      createdAt: new Date(date),
+      updatedAt: new Date(date),
+      ...extras,
+    });
+
+    it('names Ash Wednesday, Advent 1, and Trinity Sunday even without special days in the database', async () => {
+      mockGetMany.mockResolvedValue([
+        readingFor('2026-02-18', { season: { name: 'Lent', color: 'purple' } }),
+      ]);
+      const ash = await service.getByDate('2026-02-18', 'rcl');
+      expect(ash?.dayName).toBe('Ash Wednesday');
+      expect(ash?.season).toBe('Lent');
+      expect(ash?.liturgicalColor).toBe('purple');
+
+      mockGetMany.mockResolvedValue([
+        readingFor('2025-11-30', { season: { name: 'Advent', color: 'purple' } }),
+      ]);
+      const advent = await service.getByDate('2025-11-30', 'rcl');
+      expect(advent?.dayName).toBe('First Sunday of Advent');
+      expect(advent?.season).toBe('Advent');
+      expect(advent?.liturgicalColor).toBe('purple');
+
+      mockGetMany.mockResolvedValue([
+        readingFor('2026-05-31', { season: { name: 'Ordinary Time', color: 'green' } }),
+      ]);
+      const trinity = await service.getByDate('2026-05-31', 'rcl');
+      expect(trinity?.dayName).toBe('Trinity Sunday');
+      expect(trinity?.season).toBe('Season after Pentecost');
+      expect(trinity?.liturgicalColor).toBe('white');
+    });
+
+    it('keeps Ordinary Time as the Catholic season on Trinity Sunday and still names the feast', async () => {
+      mockGetMany.mockResolvedValue([
+        readingFor('2026-05-31', { season: { name: 'Ordinary Time', color: 'green' } }),
+      ]);
+      const reading = await service.getByDate('2026-05-31', 'catholic');
+      expect(reading?.dayName).toBe('Trinity Sunday');
+      expect(reading?.season).toBe('Ordinary Time');
+      expect(reading?.liturgicalColor).toBe('white');
+    });
+
+    it('fills season and color on an ordinary weekday that has no feast name', async () => {
+      mockGetMany.mockResolvedValue([
+        readingFor('2026-02-19', { season: null, liturgicalYear: { cycle: 'A' } }),
+      ]);
+      const reading = await service.getByDate('2026-02-19', 'bcp');
+      expect(reading?.dayName).toBeNull();
+      expect(reading?.season).toBe('Lent');
+      expect(reading?.liturgicalColor).toBe('purple');
+    });
+
+    it('names Ascension Day on a Thursday', async () => {
+      mockGetMany.mockResolvedValue([
+        readingFor('2026-05-14', { season: { name: 'Easter', color: 'white' } }),
+      ]);
+      const reading = await service.getByDate('2026-05-14', 'rcl');
+      expect(reading?.dayName).toBe('Ascension Day');
+      expect(reading?.season).toBe('Easter');
+      expect(reading?.liturgicalColor).toBe('white');
     });
   });
 });

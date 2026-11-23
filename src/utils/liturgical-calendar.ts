@@ -622,6 +622,217 @@ export function getOrdinaryTimeSundays(year: number): Array<{ date: Date; proper
 }
 
 /**
+ * Named observance on any civil date: principal feasts, Sunday series
+ * (Advent, Lent, Easter, Sundays after Epiphany, Propers), or an unnamed
+ * weekday that still carries the season and its color.
+ */
+export interface DayObservance {
+  date: Date;
+  name: string | null;
+  season: string;
+  color: LiturgicalColor;
+  rank: FeastRank;
+  properNumber: number | null;
+  omittedProperNumber: number | null;
+}
+
+const CATHOLIC_TRADITIONS = new Set([
+  'rc',
+  'catholic',
+  'cat',
+  'roman-catholic',
+]);
+
+/**
+ * Map the unified calendar's season name to the name used by a tradition.
+ * After Pentecost the RCL, Episcopal, and BCP calendars say "Season after
+ * Pentecost"; the Roman Catholic calendar keeps "Ordinary Time". The green
+ * season after the Epiphany is "Epiphany" in the unified calendar and
+ * "Ordinary Time" for Catholic use.
+ */
+export function seasonNameForTradition(
+  seasonName: string,
+  traditionId?: string | null,
+): string {
+  const tradition = (traditionId || 'rcl').toLowerCase();
+  const isCatholic = CATHOLIC_TRADITIONS.has(tradition);
+  if (seasonName === 'Ordinary Time' && !isCatholic) {
+    return 'Season after Pentecost';
+  }
+  if (seasonName === 'Epiphany' && isCatholic) {
+    return 'Ordinary Time';
+  }
+  return seasonName;
+}
+
+function ordinalWord(n: number): string {
+  const words = [
+    '',
+    'First',
+    'Second',
+    'Third',
+    'Fourth',
+    'Fifth',
+    'Sixth',
+    'Seventh',
+    'Eighth',
+    'Ninth',
+  ];
+  return words[n] || `${n}th`;
+}
+
+function feastOnCivilDate(civil: CivilDate): LiturgicalDate | undefined {
+  const feasts = [
+    ...calculateMoveableFeasts(civil.year),
+    ...calculateFixedFeasts(civil.year),
+  ];
+  return feasts.find((feast) => isSameCivil(fromLocalDate(feast.date), civil));
+}
+
+/**
+ * Observance on any date, applying feast precedence. Trinity Sunday (and
+ * other principal feasts) win over a numbered Proper on the same date.
+ * Ordinary weekdays have a null name but still report season and color.
+ */
+export function getObservanceForDate(date: Date): DayObservance {
+  const civil = fromLocalDate(date);
+  const season = getSeasonForDate(date);
+  const seasonName = season?.name || 'Ordinary Time';
+  const seasonColor = season?.color || LiturgicalColor.GREEN;
+  const isSunday = weekdayOf(civil) === 0;
+
+  const startYear = getLiturgicalYearStartYear(date);
+  const easterYear = startYear + 1;
+  const easter = calculateEasterCivil(easterYear);
+  const advent1 = calculateAdvent1Civil(startYear);
+  const baptism = calculateBaptismOfTheLordCivil(easterYear);
+  const ashWednesday = calculateAshWednesdayCivil(easter);
+  const transfiguration = addCivilDays(ashWednesday, -3);
+  const christTheKing = calculateChristTheKingCivil(easterYear);
+  const trinity = calculateTrinitySundayCivil(easter);
+
+  const base = (overrides: Partial<DayObservance>): DayObservance => ({
+    date: toLocalDate(civil),
+    name: null,
+    season: seasonName,
+    color: seasonColor,
+    rank: FeastRank.ORDINARY,
+    properNumber: null,
+    omittedProperNumber: null,
+    ...overrides,
+  });
+
+  const feast = feastOnCivilDate(civil);
+  // On Sundays the lectionary series name (Advent, Lent, Proper, and so
+  // on) wins over a lesser fixed feast such as the Presentation. Principal
+  // feasts still take precedence, which is how Trinity Sunday replaces
+  // Proper 4 when they coincide.
+  if (feast && (!isSunday || feast.rank === FeastRank.PRINCIPAL_FEAST)) {
+    const omitted = isSunday && isSameCivil(civil, trinity)
+      ? properNumberClosestTo(civil, easterYear)
+      : null;
+    return base({
+      name: feast.name,
+      season: feast.season,
+      color: feast.color,
+      rank: feast.rank,
+      omittedProperNumber: omitted,
+    });
+  }
+
+  if (isSameCivil(civil, baptism)) {
+    return base({
+      name: 'Baptism of the Lord',
+      color: LiturgicalColor.WHITE,
+      rank: FeastRank.FEAST,
+    });
+  }
+
+  if (isSameCivil(civil, transfiguration)) {
+    return base({
+      name: 'Transfiguration Sunday',
+      color: LiturgicalColor.WHITE,
+      rank: FeastRank.FEAST,
+    });
+  }
+
+  if (isSameCivil(civil, christTheKing)) {
+    return base({
+      name: 'Christ the King',
+      color: LiturgicalColor.WHITE,
+      rank: FeastRank.PRINCIPAL_FEAST,
+      properNumber: 29,
+      omittedProperNumber: properNumberClosestTo(civil, easterYear),
+    });
+  }
+
+  if (!isSunday) {
+    return base({});
+  }
+
+  const christmas = civilDate(startYear, 12, 25);
+  if (compareCivil(civil, advent1) >= 0 && compareCivil(civil, christmas) < 0) {
+    const week = Math.floor(daysBetweenCivil(advent1, civil) / 7) + 1;
+    return base({
+      name: `${ordinalWord(week)} Sunday of Advent`,
+      rank: week === 1 ? FeastRank.PRINCIPAL_FEAST : FeastRank.FEAST,
+    });
+  }
+
+  const firstSundayAfterChristmas = (() => {
+    const weekday = weekdayOf(christmas);
+    return weekday === 0 ? addCivilDays(christmas, 7) : addCivilDays(christmas, 7 - weekday);
+  })();
+  if (isSameCivil(civil, firstSundayAfterChristmas) && !isSameCivil(civil, christmas)) {
+    return base({
+      name: 'First Sunday after Christmas',
+      color: LiturgicalColor.WHITE,
+      rank: FeastRank.FEAST,
+    });
+  }
+
+  if (
+    compareCivil(civil, baptism) > 0
+    && compareCivil(civil, transfiguration) < 0
+  ) {
+    // Baptism is the First Sunday after the Epiphany; this Sunday is the
+    // next one or later, so add one to the week count from Baptism.
+    const week = Math.floor(daysBetweenCivil(baptism, civil) / 7) + 1;
+    return base({
+      name: `${ordinalWord(week)} Sunday after Epiphany`,
+    });
+  }
+
+  const lent1 = addCivilDays(ashWednesday, 4);
+  const palmSunday = calculatePalmSundayCivil(easter);
+  if (compareCivil(civil, lent1) >= 0 && compareCivil(civil, palmSunday) < 0) {
+    const week = Math.floor(daysBetweenCivil(lent1, civil) / 7) + 1;
+    return base({
+      name: `${ordinalWord(week)} Sunday in Lent`,
+    });
+  }
+
+  if (compareCivil(civil, easter) > 0 && compareCivil(civil, calculatePentecostCivil(easter)) < 0) {
+    const week = Math.floor(daysBetweenCivil(easter, civil) / 7) + 1;
+    return base({
+      name: `${ordinalWord(week)} Sunday of Easter`,
+    });
+  }
+
+  const properNumber = getProperNumberForDate(date);
+  if (properNumber !== null) {
+    return base({
+      name: `Proper ${properNumber}`,
+      properNumber,
+    });
+  }
+
+  return base({
+    name: seasonName || 'Sunday',
+  });
+}
+
+/**
  * Observance on a Sunday, applying feast precedence. Trinity (and other
  * principal feasts) win over a numbered Proper on the same date.
  */
@@ -631,77 +842,13 @@ export function getSundayObservance(date: Date): SundayObservance | null {
     return null;
   }
 
-  const easterYear = getLiturgicalYearStartYear(date) + 1;
-  const easter = calculateEasterCivil(easterYear);
-  const trinity = calculateTrinitySundayCivil(easter);
-  const advent1 = calculateAdvent1Civil(civil.year);
-  const christTheKingThisYear = calculateChristTheKingCivil(civil.year);
-
-  if (isSameCivil(civil, calculateEasterCivil(civil.year))) {
-    return {
-      date: toLocalDate(civil),
-      name: 'Easter Sunday',
-      properNumber: null,
-      omittedProperNumber: null,
-      rank: FeastRank.PRINCIPAL_FEAST,
-    };
-  }
-  if (isSameCivil(civil, calculatePentecostCivil(calculateEasterCivil(civil.year)))) {
-    return {
-      date: toLocalDate(civil),
-      name: 'Pentecost',
-      properNumber: null,
-      omittedProperNumber: null,
-      rank: FeastRank.PRINCIPAL_FEAST,
-    };
-  }
-  if (isSameCivil(civil, trinity)) {
-    const omitted = properNumberClosestTo(civil, easterYear);
-    return {
-      date: toLocalDate(civil),
-      name: 'Trinity Sunday',
-      properNumber: null,
-      omittedProperNumber: omitted,
-      rank: FeastRank.PRINCIPAL_FEAST,
-    };
-  }
-  if (isSameCivil(civil, advent1)) {
-    return {
-      date: toLocalDate(civil),
-      name: 'First Sunday of Advent',
-      properNumber: null,
-      omittedProperNumber: null,
-      rank: FeastRank.PRINCIPAL_FEAST,
-    };
-  }
-  if (isSameCivil(civil, christTheKingThisYear)) {
-    const omitted = properNumberClosestTo(civil, civil.year);
-    return {
-      date: toLocalDate(civil),
-      name: 'Christ the King',
-      properNumber: 29,
-      omittedProperNumber: omitted,
-      rank: FeastRank.PRINCIPAL_FEAST,
-    };
-  }
-
-  const properNumber = getProperNumberForDate(date);
-  if (properNumber !== null) {
-    return {
-      date: toLocalDate(civil),
-      name: `Proper ${properNumber}`,
-      properNumber,
-      omittedProperNumber: null,
-      rank: FeastRank.ORDINARY,
-    };
-  }
-
+  const observance = getObservanceForDate(date);
   return {
-    date: toLocalDate(civil),
-    name: getSeasonForDate(date)?.name || 'Sunday',
-    properNumber: null,
-    omittedProperNumber: null,
-    rank: FeastRank.ORDINARY,
+    date: observance.date,
+    name: observance.name || observance.season || 'Sunday',
+    properNumber: observance.properNumber,
+    omittedProperNumber: observance.omittedProperNumber,
+    rank: observance.rank,
   };
 }
 
@@ -761,7 +908,9 @@ export const LiturgicalCalendar = {
   getOrdinaryTimeSundays,
   getProperSundayCivil,
   getProperNumberForDate,
+  getObservanceForDate,
   getSundayObservance,
+  seasonNameForTradition,
   calculateWeeksInSeason,
   validateEasterCalculation,
 };

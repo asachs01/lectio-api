@@ -5,6 +5,11 @@ import { Tradition } from '../models/tradition.entity';
 import { Repository } from 'typeorm';
 import { logger } from '../utils/logger';
 import { LiturgicalCalendarService } from './liturgical-calendar.service';
+import {
+  getObservanceForDate,
+  getSeasonForDate,
+  seasonNameForTradition,
+} from '../utils/liturgical-calendar';
 
 /**
  * Composite traditions that map to underlying real traditions
@@ -204,37 +209,52 @@ export class ReadingsService {
     }
   }
 
+  /**
+   * Day name, season, and color come from the unified calendar so feast
+   * days (Trinity Sunday, Ash Wednesday, and the rest) are labeled even
+   * when the database has no special_days row. Database values remain a
+   * fallback. Season names are tradition-specific: after Pentecost the
+   * RCL and BCP calendars say "Season after Pentecost", while Catholic
+   * calendars keep "Ordinary Time".
+   */
+  private liturgicalMetadata(
+    date: string,
+    traditionId: string,
+    readings: Reading[],
+  ): { dayName: string | null; season: string | null; liturgicalColor: string | null; year: string | null } {
+    const firstReading = readings[0];
+    const [yearStr, monthStr, dayStr] = date.split('-');
+    const dateObj = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, parseInt(dayStr, 10), 12, 0, 0);
+    const observance = getObservanceForDate(dateObj);
+    const calendarSeason = getSeasonForDate(dateObj);
+    const specialDay = firstReading?.specialDay;
+    const dbSeason = firstReading?.season;
+
+    const dayName = observance.name || specialDay?.name || firstReading?.notes || null;
+    const baseSeason = observance.season || calendarSeason?.name || dbSeason?.name || null;
+    const season = baseSeason ? seasonNameForTradition(baseSeason, traditionId) : null;
+    const liturgicalColor = observance.color || specialDay?.liturgicalColor || calendarSeason?.color || dbSeason?.color || null;
+    const year = firstReading?.liturgicalYear?.cycle || null;
+
+    return { dayName, season, liturgicalColor, year };
+  }
+
   private formatDailyReading(
     readings: Reading[],
     date: string,
     traditionId: string,
     seasonId: string,
   ): DailyReading {
-    // Extract liturgical metadata from the first reading's relations
-    const firstReading = readings[0];
-    const season = firstReading?.season;
-    const liturgicalYear = firstReading?.liturgicalYear;
-    const specialDay = firstReading?.specialDay;
-
-    // Determine liturgical color: specialDay > season > null
-    const liturgicalColor = specialDay?.liturgicalColor || season?.color || null;
-
-    // Determine day name from specialDay or notes (for "Proper X" etc.)
-    let dayName: string | null = null;
-    if (specialDay?.name) {
-      dayName = specialDay.name;
-    } else if (firstReading?.notes) {
-      // Check if notes contain a proper name like "Proper 16"
-      dayName = firstReading.notes;
-    }
+    const liturgicalYear = readings[0]?.liturgicalYear;
+    const { dayName, season, liturgicalColor, year } = this.liturgicalMetadata(date, traditionId, readings);
 
     return {
       id: `${traditionId}-${date}`,
       date,
       traditionId,
       // Liturgical metadata
-      season: season?.name || null,
-      year: liturgicalYear?.cycle || null,
+      season,
+      year: year || liturgicalYear?.cycle || null,
       dayName,
       liturgicalColor,
       // Legacy field for backwards compatibility
@@ -472,13 +492,11 @@ export class ReadingsService {
         return null;
       }
 
-      // Extract liturgical metadata from the first reading
-      const firstReading = readings[0];
-      const season = firstReading?.season;
-      const liturgicalYear = firstReading?.liturgicalYear;
-      const specialDay = firstReading?.specialDay;
-      const liturgicalColor = specialDay?.liturgicalColor || season?.color || null;
-      const dayName = specialDay?.name || firstReading?.notes || null;
+      const { dayName, season, liturgicalColor, year } = this.liturgicalMetadata(
+        date,
+        'bcp',
+        readings,
+      );
 
       // Group by office (morning/evening)
       const morningReadings = readings.filter(r => r.readingOffice === ReadingOffice.MORNING);
@@ -490,12 +508,12 @@ export class ReadingsService {
         date,
         traditionId: 'bcp-daily-office',
         // Liturgical metadata
-        season: season?.name || null,
-        year: liturgicalYear?.cycle || null,
+        season,
+        year,
         dayName,
         liturgicalColor,
         // Legacy field
-        seasonId: season?.id || null,
+        seasonId: readings[0]?.season?.id || null,
         readings: [
           ...morningReadings.map(r => ({
             type: r.readingType as any,
