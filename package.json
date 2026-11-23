@@ -64,7 +64,7 @@
     "@opentelemetry/exporter-metrics-otlp-http": "^0.203.0",
     "@opentelemetry/exporter-prometheus": "^0.203.0",
     "@opentelemetry/instrumentation-express": "^0.52.0",
-    "@opentelemetry/instrumentation-http": "^0.203.0",
+    "@opentelemetry/instrumentation-http": "^0.301.2",
     "@opentelemetry/resources": "^2.2.0",
     "@opentelemetry/sdk-metrics": "^2.0.1",
     "@opentelemetry/sdk-node": "^0.203.0",
