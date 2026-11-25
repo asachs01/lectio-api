@@ -67,7 +67,7 @@ export class CalendarService {
         year,
         traditionId: tradition.id,
       },
-      relations: ['seasons'],
+      relations: { seasons: true },
     });
 
     if (!liturgicalYear || !liturgicalYear.seasons) {
@@ -137,7 +137,7 @@ export class CalendarService {
         { year: currentYear, traditionId: tradition.id },
         { year: currentYear - 1, traditionId: tradition.id },
       ],
-      relations: ['seasons'],
+      relations: { seasons: true },
     });
 
     // Find which liturgical year contains today's date

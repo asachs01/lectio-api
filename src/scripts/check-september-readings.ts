@@ -13,7 +13,7 @@ async function checkReadings() {
     // Check for Sept 7, 2025
     const readings = await readingRepo.find({
       where: { date: new Date('2025-09-07') },
-      relations: ['tradition'],
+      relations: { tradition: true },
     });
     
     console.log(`Readings for 2025-09-07: ${readings.length}`);

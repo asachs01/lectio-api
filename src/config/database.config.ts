@@ -53,9 +53,6 @@ export const getDatabaseConfig = (): DataSourceOptions => {
     // Entity and migration paths
     migrationsRun: isProduction && process.env.DB_AUTO_MIGRATE === 'true',
     dropSchema: false, // Never automatically drop schema
-    
-    // Connection naming for debugging
-    name: process.env.DB_CONNECTION_NAME || 'default',
   };
 };
 

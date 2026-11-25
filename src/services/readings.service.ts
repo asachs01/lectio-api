@@ -196,7 +196,7 @@ export class ReadingsService {
       // Note: scripture relation removed due to schema mismatch in production
       const readings = await repository.find({
         where: conditions,
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay'],
+        relations: { tradition: true, season: true, liturgicalYear: true, specialDay: true },
         order: {
           readingOrder: 'ASC',
         },
@@ -392,7 +392,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay'],
+        relations: { tradition: true, season: true, liturgicalYear: true, specialDay: true },
         order: {
           readingOrder: 'ASC',
         },
@@ -441,7 +441,7 @@ export class ReadingsService {
             cycle: cycle as any,
           },
         },
-        relations: ['tradition', 'season', 'liturgicalYear', 'specialDay'],
+        relations: { tradition: true, season: true, liturgicalYear: true, specialDay: true },
         order: {
           date: 'ASC',
           readingOrder: 'ASC',
