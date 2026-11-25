@@ -335,6 +335,70 @@ describe('API Endpoints Integration Tests', () => {
     });
   });
 
+
+  describe('GET /api/v1/readings/search', () => {
+    it('should return readings matching the query', async () => {
+      const response = await request(app.getApp())
+        .get('/api/v1/readings/search?q=Isaiah')
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            citation: 'Isaiah 52:7-10',
+          }),
+        ]),
+      );
+      expect(response.body.query).toBe('Isaiah');
+      expect(response.body.pagination.total).toBeGreaterThan(0);
+    });
+
+    it('is not captured as a reading id', async () => {
+      const response = await request(app.getApp())
+        .get('/api/v1/readings/search?q=John')
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ citation: 'John 1:1-14' }),
+        ]),
+      );
+      expect(response.body.error).toBeUndefined();
+    });
+
+    it('should return 400 when q is missing', async () => {
+      const response = await request(app.getApp())
+        .get('/api/v1/readings/search')
+        .expect(400);
+
+      expect(response.body.error.message).toMatch(/q is required/);
+    });
+
+    it('should return 400 when q is too short', async () => {
+      await request(app.getApp())
+        .get('/api/v1/readings/search?q=a')
+        .expect(400);
+    });
+
+    it('should return an empty list when nothing matches', async () => {
+      const response = await request(app.getApp())
+        .get('/api/v1/readings/search?q=xyzzy-no-such-reading')
+        .expect(200);
+
+      expect(response.body.data).toEqual([]);
+      expect(response.body.pagination.total).toBe(0);
+    });
+
+    it('should accept a tradition parameter', async () => {
+      const response = await request(app.getApp())
+        .get('/api/v1/readings/search?q=Isaiah&tradition=rcl')
+        .expect(200);
+
+      expect(response.body.tradition).toBe('rcl');
+      expect(response.body.data.length).toBeGreaterThan(0);
+    });
+  });
+
   describe('Calendar API Endpoints', () => {
     describe('GET /api/v1/calendar/current', () => {
       it('should return current calendar information', async () => {

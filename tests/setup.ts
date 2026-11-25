@@ -151,17 +151,43 @@ jest.mock('../src/services/database.service', () => {
           // Return different mock repos based on entity type
           if (entity && entity.name === 'Reading') {
             const createQueryBuilder = () => {
+              const state: { params: Record<string, string>; skip: number; take: number } = { params: {}, skip: 0, take: mockReadings.length };
+              const applyParams = (_clause: string, params?: Record<string, string>) => {
+                if (params) {
+                  Object.assign(state.params, params);
+                }
+                return qb;
+              };
+              const matching = () => {
+                const raw = (state.params.q || '').replace(/^%/, '').replace(/%$/, '').replace(/\\/g, '').toLowerCase();
+                if (!raw) {
+                  return mockReadings;
+                }
+                return mockReadings.filter((reading) =>
+                  reading.scriptureReference.toLowerCase().includes(raw) ||
+                  (reading.text || '').toLowerCase().includes(raw),
+                );
+              };
               const qb: any = {
                 leftJoinAndSelect: jest.fn().mockReturnThis(),
-                where: jest.fn().mockReturnThis(),
-                andWhere: jest.fn().mockReturnThis(),
+                where: jest.fn().mockImplementation(applyParams),
+                andWhere: jest.fn().mockImplementation(applyParams),
+                orWhere: jest.fn().mockImplementation(applyParams),
                 orderBy: jest.fn().mockReturnThis(),
                 addOrderBy: jest.fn().mockReturnThis(),
-                skip: jest.fn().mockReturnThis(),
-                take: jest.fn().mockReturnThis(),
-                getMany: jest.fn().mockResolvedValue(mockReadings),
+                skip: jest.fn().mockImplementation((n: number) => {
+                  state.skip = n; return qb; 
+                }),
+                take: jest.fn().mockImplementation((n: number) => {
+                  state.take = n; return qb; 
+                }),
+                getMany: jest.fn().mockImplementation(() => Promise.resolve(matching().slice(state.skip, state.skip + state.take))),
                 getOne: jest.fn().mockResolvedValue(mockReadings[0] || null),
-                getCount: jest.fn().mockResolvedValue(mockReadings.length),
+                getCount: jest.fn().mockImplementation(() => Promise.resolve(matching().length)),
+                getManyAndCount: jest.fn().mockImplementation(() => {
+                  const rows = matching();
+                  return Promise.resolve([rows.slice(state.skip, state.skip + state.take), rows.length]);
+                }),
               };
               return qb;
             };

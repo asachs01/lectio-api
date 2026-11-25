@@ -1,4 +1,4 @@
-import { DailyReading, ReadingType } from '../types/lectionary.types';
+import { DailyReading, ReadingSearchHit, ReadingSearchResult, ReadingType } from '../types/lectionary.types';
 import { DatabaseService } from './database.service';
 import { Reading, ReadingOffice } from '../models/reading.entity';
 import { Tradition } from '../models/tradition.entity';
@@ -537,5 +537,83 @@ export class ReadingsService {
       logger.error(`Error fetching daily office readings for ${date}:`, error);
       return null;
     }
+  }
+
+  private escapeIlike(raw: string): string {
+    return raw.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+  }
+
+  private formatEntityDate(value: Date | string): string {
+    if (typeof value === 'string') {
+      return value.slice(0, 10);
+    }
+    return value.toISOString().split('T')[0];
+  }
+
+  /**
+   * Search readings by scripture reference, text, notes, season name, or feast name.
+   * The /search route must be registered before any /:id route so "search" is
+   * never treated as a reading id.
+   */
+  public async search(
+    query: string,
+    traditionIdentifier: string | undefined,
+    page: number,
+    limit: number,
+  ): Promise<ReadingSearchResult> {
+    const repository = this.ensureRepository();
+    const pattern = `%${this.escapeIlike(query.trim())}%`;
+    const take = Math.min(Math.max(limit, 1), 100);
+    const currentPage = Math.max(page, 1);
+    const skip = (currentPage - 1) * take;
+
+    const qb = repository.createQueryBuilder('reading')
+      .leftJoinAndSelect('reading.tradition', 'tradition')
+      .leftJoinAndSelect('reading.season', 'season')
+      .leftJoinAndSelect('reading.specialDay', 'specialDay')
+      .leftJoinAndSelect('reading.liturgicalYear', 'liturgicalYear')
+      .where(
+        '(reading.scriptureReference ILIKE :q ESCAPE :esc' +
+        ' OR COALESCE(reading.text, \'\') ILIKE :q ESCAPE :esc' +
+        ' OR COALESCE(reading.notes, \'\') ILIKE :q ESCAPE :esc' +
+        ' OR COALESCE(season.name, \'\') ILIKE :q ESCAPE :esc' +
+        ' OR COALESCE(specialDay.name, \'\') ILIKE :q ESCAPE :esc)',
+        { q: pattern, esc: '\\' },
+      )
+      .orderBy('reading.date', 'ASC')
+      .addOrderBy('reading.readingOrder', 'ASC')
+      .skip(skip)
+      .take(take);
+
+    if (traditionIdentifier) {
+      const traditionUuid = await this.getTraditionId(traditionIdentifier);
+      if (!traditionUuid) {
+        return { results: [], total: 0 };
+      }
+      qb.andWhere('reading.traditionId = :traditionUuid', { traditionUuid });
+    }
+
+    const [rows, total] = await qb.getManyAndCount();
+    const results: ReadingSearchHit[] = rows.map((reading) => {
+      const date = this.formatEntityDate(reading.date);
+      const traditionId = reading.tradition?.abbreviation?.toLowerCase()
+        || traditionIdentifier
+        || reading.traditionId;
+      const { dayName, season, liturgicalColor } = this.liturgicalMetadata(date, traditionId, [reading]);
+      return {
+        id: reading.id,
+        date,
+        traditionId,
+        type: reading.readingType as ReadingType,
+        citation: reading.scriptureReference,
+        text: reading.text || '',
+        isAlternative: reading.isAlternative || false,
+        office: reading.readingOffice || undefined,
+        season,
+        dayName,
+        liturgicalColor,
+      };
+    });
+    return { results, total };
   }
 }
