@@ -121,7 +121,7 @@ export class HealthCheckService {
         status: 'pass',
         message: 'File system is accessible',
       };
-    } catch (error) {
+    } catch {
       checks.filesystem = {
         status: 'fail',
         message: 'File system is not accessible',
@@ -240,7 +240,7 @@ export class HealthCheckService {
           duration,
         };
         dependencies[apiName] = response.ok;
-      } catch (error) {
+      } catch {
         checks[`external_${apiName}`] = {
           status: 'fail',
           message: `External API ${apiName} unreachable`,
