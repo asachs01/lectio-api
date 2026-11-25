@@ -13,12 +13,13 @@ import fs from 'fs';
 import { pathToFileURL } from 'url';
 import { randomBytes } from 'crypto';
 import { logger } from './utils/logger';
+import { getClientIp, TRUST_PROXY_HOPS } from './utils/client-ip';
 import { DOCS_TITLE, FAQ_ITEMS, docsHeadTags, landingHeadTags, publicBaseUrl, renderFaqPage } from './utils/seo';
 
 
 /** Load an ESM module from compiled CommonJS. TypeScript would otherwise rewrite `import()` to `require()`. */
 function importEsm<T = unknown>(specifier: string): Promise<T> {
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+   
   const loader = new Function('specifier', 'return import(specifier)') as (id: string) => Promise<T>;
   return loader(specifier);
 }
@@ -34,6 +35,9 @@ export class App {
   }
 
   private setupMiddleware(): void {
+    // DigitalOcean App Platform terminates TLS at one ingress hop.
+    this.app.set('trust proxy', TRUST_PROXY_HOPS);
+
     this.app.use((_req: Request, res: Response, next) => {
       res.locals.cspNonce = randomBytes(16).toString('base64');
       next();
@@ -82,6 +86,7 @@ export class App {
       },
       standardHeaders: true,
       legacyHeaders: false,
+      keyGenerator: (req: Request): string => getClientIp(req),
     });
     this.app.use('/api/', limiter);
 
