@@ -3,6 +3,7 @@ import { RateLimiterRedis, RateLimiterMemory, RateLimiterRes, IRateLimiterOption
 import Redis from 'ioredis';
 import { metrics } from '../observability/metrics';
 import { logger } from '../observability/logger';
+import { getClientIp } from '../utils/client-ip';
 
 interface RateLimitConfig {
   points: number;        // Number of requests
@@ -286,13 +287,7 @@ function getClientKey(req: Request): string {
     return `user:${(req as Request & { user?: { id: string } }).user.id}`;
   }
   
-  // Use IP address as fallback
-  const ip = req.ip || 
-             req.headers['x-forwarded-for']?.toString().split(',')[0] || 
-             req.connection.remoteAddress || 
-             'unknown';
-  
-  return `ip:${ip}`;
+  return `ip:${getClientIp(req)}`;
 }
 
 function getUserTier(req: Request): string | null {

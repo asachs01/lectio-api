@@ -18,9 +18,15 @@ describe('Request Logger Middleware', () => {
       originalUrl: '/api/test',
       ip: '127.0.0.1',
       get: jest.fn().mockImplementation((header: string) => {
-        if (header === 'User-Agent') return 'test-user-agent';
-        if (header === 'Content-Type') return 'application/json';
-        if (header === 'Content-Length') return undefined;
+        if (header === 'User-Agent') {
+          return 'test-user-agent';
+        }
+        if (header === 'Content-Type') {
+          return 'application/json';
+        }
+        if (header === 'Content-Length') {
+          return undefined;
+        }
         return undefined;
       }),
       connection: { remoteAddress: '127.0.0.1' } as any,
@@ -29,7 +35,9 @@ describe('Request Logger Middleware', () => {
     mockResponse = {
       statusCode: 200,
       get: jest.fn().mockImplementation((header: string) => {
-        if (header === 'Content-Length') return 'application/json';
+        if (header === 'Content-Length') {
+          return 'application/json';
+        }
         return undefined;
       }),
       on: jest.fn().mockImplementation((event: string, callback: () => void) => {
@@ -113,7 +121,7 @@ describe('Request Logger Middleware', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('Incoming Request', 
       expect.objectContaining({
         method: 'POST',
-      })
+      }),
     );
   });
 
@@ -134,7 +142,7 @@ describe('Request Logger Middleware', () => {
       expect.objectContaining({
         status: 404,
         duration: '100ms',
-      })
+      }),
     );
   });
 
@@ -155,7 +163,7 @@ describe('Request Logger Middleware', () => {
       expect.objectContaining({
         status: 500,
         duration: '250ms',
-      })
+      }),
     );
   });
 
@@ -167,7 +175,7 @@ describe('Request Logger Middleware', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('Incoming Request', 
       expect.objectContaining({
         ip: '127.0.0.1', // Should fall back to connection.remoteAddress
-      })
+      }),
     );
   });
 
@@ -179,8 +187,8 @@ describe('Request Logger Middleware', () => {
     
     expect(mockLogger.info).toHaveBeenCalledWith('Incoming Request', 
       expect.objectContaining({
-        ip: undefined,
-      })
+        ip: 'unknown',
+      }),
     );
   });
 });
