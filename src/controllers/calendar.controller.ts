@@ -12,7 +12,7 @@ export class CalendarController {
 
   public async getByYear(req: Request, res: Response): Promise<void> {
     try {
-      const { year } = req.params;
+      const { year } = req.params as { year: string };
       const tradition = req.query['tradition'] || 'rcl';
       
       const liturgicalYear = parseInt(year, 10);
@@ -42,7 +42,7 @@ export class CalendarController {
 
   public async getSeasonsByYear(req: Request, res: Response): Promise<void> {
     try {
-      const { year } = req.params;
+      const { year } = req.params as { year: string };
       const tradition = req.query['tradition'] || 'rcl';
       
       const liturgicalYear = parseInt(year, 10);

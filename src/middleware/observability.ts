@@ -238,14 +238,14 @@ export function businessMetricsMiddleware(req: TrackedRequest, res: Response, ne
       
       // Track tradition access
       if (route.includes('/traditions')) {
-        const traditionId = req.params.id || 'list';
+        const traditionId = String(req.params.id || 'list');
         const operation = req.method.toLowerCase();
         metrics.recordTraditionAccess(traditionId, operation);
       }
       
       // Track calendar queries
       if (route.includes('/calendar')) {
-        const year = req.params.year || new Date().getFullYear().toString();
+        const year = String(req.params.year || new Date().getFullYear());
         const season = req.query.season as string || 'all';
         const tradition = req.query.tradition as string || 'default';
         metrics.recordCalendarQuery(year, season, tradition);

@@ -25,7 +25,7 @@ export class TraditionsController {
 
   public async getById(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       
       if (!id) {
         throw new HttpError('Tradition ID is required', 400);
@@ -51,7 +51,7 @@ export class TraditionsController {
 
   public async getSeasons(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const { year } = req.query;
       
       if (!id) {
