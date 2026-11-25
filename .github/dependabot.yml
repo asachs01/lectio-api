@@ -13,6 +13,9 @@ updates:
       # TypeScript 7 (native compiler) is not yet supported by ts-jest / typescript-eslint
       - dependency-name: typescript
         update-types: ["version-update:semver-major"]
+      # Keep @types/node on the runtime's major (Node 22)
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
       # typeorm declares ioredis ^5 as a peer; ioredis 6 can't be installed alongside it
       - dependency-name: ioredis
         update-types: ["version-update:semver-major"]
@@ -24,6 +27,9 @@ updates:
     ignore:
       # TypeScript 7 (native compiler) is not yet supported by ts-jest / typescript-eslint
       - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # Keep @types/node on the runtime's major (Node 22)
+      - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
