@@ -72,7 +72,7 @@ async function debugApiQuery(): Promise<void> {
           abbreviation: traditionId.toUpperCase(),
         },
       },
-      relations: ['tradition', 'season', 'liturgicalYear', 'specialDay', 'scripture'],
+      relations: { tradition: true, season: true, liturgicalYear: true, specialDay: true, scripture: true },
       order: {
         readingOrder: 'ASC',
       },

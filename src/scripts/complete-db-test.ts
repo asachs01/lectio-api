@@ -147,7 +147,7 @@ async function runCompleteTest(): Promise<void> {
     // Test finding with relations
     const traditionWithRelations = await traditionRepo.findOne({
       where: { id: savedTradition.id },
-      relations: ['liturgicalYears', 'specialDays', 'readings'],
+      relations: { liturgicalYears: true, specialDays: true, readings: true },
     });
     
     if (traditionWithRelations) {
@@ -157,7 +157,7 @@ async function runCompleteTest(): Promise<void> {
     // Test queries
     const recentReadings = await readingRepo.find({
       where: { tradition: { id: savedTradition.id } },
-      relations: ['scripture', 'season'],
+      relations: { scripture: true, season: true },
       take: 5,
     });
     
