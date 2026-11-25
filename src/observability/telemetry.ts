@@ -65,10 +65,12 @@ export class TelemetryService {
       resource: resource as any,
       // Disable span processors due to type incompatibility - traces will still work through auto-instrumentation
       // spanProcessors: [new BatchSpanProcessor(traceExporter as any)],
-      metricReader: new PeriodicExportingMetricReader({
-        exporter: metricExporter,
-        exportIntervalMillis: 10000, // Export metrics every 10 seconds
-      }),
+      metricReaders: [
+        new PeriodicExportingMetricReader({
+          exporter: metricExporter,
+          exportIntervalMillis: 10000, // Export metrics every 10 seconds
+        }),
+      ],
       instrumentations: [
         getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-fs': {
