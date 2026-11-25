@@ -86,7 +86,7 @@
     "swagger-ui-express": "^5.0.0",
     "typeorm": "^0.3.17",
     "uuid": "^14.0.3",
-    "winston": "^3.11.0",
+    "winston": "^3.19.0",
     "winston-loki": "^6.1.3"
   },
   "devDependencies": {
