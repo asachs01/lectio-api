@@ -9,11 +9,19 @@ updates:
       opentelemetry:
         patterns:
           - "@opentelemetry/*"
+    ignore:
+      # TypeScript 7 (native compiler) is not yet supported by ts-jest / typescript-eslint
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
     directory: /mcp-server
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 (native compiler) is not yet supported by ts-jest / typescript-eslint
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
