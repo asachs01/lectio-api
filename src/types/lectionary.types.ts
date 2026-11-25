@@ -113,3 +113,21 @@ export interface ErrorResponse {
     details?: unknown;
   };
 }
+export interface ReadingSearchHit {
+  id: string;
+  date: string;
+  traditionId: string;
+  type: ReadingType | string;
+  citation: string;
+  text: string;
+  isAlternative?: boolean;
+  office?: string;
+  season: string | null;
+  dayName: string | null;
+  liturgicalColor: string | null;
+}
+
+export interface ReadingSearchResult {
+  results: ReadingSearchHit[];
+  total: number;
+}

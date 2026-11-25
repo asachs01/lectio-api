@@ -207,6 +207,53 @@ export class ReadingsController {
     }
   }
 
+
+  public async search(req: Request, res: Response): Promise<void> {
+    try {
+      const rawQuery = req.query['q'];
+      const query = rawQuery === undefined || rawQuery === null ? '' : String(rawQuery).trim();
+      if (!query) {
+        throw new HttpError('Query parameter q is required', 400);
+      }
+      if (query.length < 2) {
+        throw new HttpError('Query parameter q must be at least 2 characters', 400);
+      }
+      if (query.length > 200) {
+        throw new HttpError('Query parameter q must be 200 characters or fewer', 400);
+      }
+
+      const tradition = req.query['tradition'] ? String(req.query['tradition']) : undefined;
+      const page = parseInt(String(req.query['page'] || '1'), 10);
+      const limit = parseInt(String(req.query['limit'] || '20'), 10);
+      if (Number.isNaN(page) || page < 1) {
+        throw new HttpError('Invalid page parameter', 400);
+      }
+      if (Number.isNaN(limit) || limit < 1) {
+        throw new HttpError('Invalid limit parameter', 400);
+      }
+
+      const result = await this.readingsService.search(query, tradition, page, limit);
+
+      res.json({
+        data: result.results,
+        pagination: {
+          page,
+          limit: Math.min(limit, 100),
+          total: result.total,
+          totalPages: Math.ceil(result.total / Math.min(Math.max(limit, 1), 100)) || 0,
+        },
+        query,
+        tradition: tradition || null,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      if (error instanceof HttpError) {
+        throw error;
+      }
+      throw new HttpError('Failed to search readings', 500, { originalError: error });
+    }
+  }
+
   private isValidDate(dateString: string): boolean {
     return parseCivilDate(dateString) !== null;
   }

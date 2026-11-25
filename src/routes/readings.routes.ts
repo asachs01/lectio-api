@@ -65,6 +65,49 @@ function getController(): ReadingsController {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+
+/**
+ * @swagger
+ * /api/v1/readings/search:
+ *   get:
+ *     operationId: searchReadings
+ *     summary: Search readings
+ *     description: Search scripture references, reading text, notes, season names, and feast names. This path is registered before any parameterized reading route so "search" is never treated as an id.
+ *     tags: [Readings]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         description: Search string (at least 2 characters)
+ *         schema:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 200
+ *       - in: query
+ *         name: tradition
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Matching readings
+ *       400:
+ *         description: Missing or invalid query
+ */
+router.get('/search', asyncHandler((req, res) => getController().search(req, res)));
+
 router.get('/', asyncHandler((req, res) => getController().getByDate(req, res)));
 
 /**
