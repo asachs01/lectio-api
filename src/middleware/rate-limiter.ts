@@ -376,9 +376,8 @@ export const rateLimitStrategies = {
 
   // Geo-based rate limiting
   geographic: (): RequestHandler => {
-    return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    return async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
       // Implement geo-based rate limiting
-      req.headers['cf-ipcountry'] || 'unknown';
       
       // Apply different limits based on geography
       next();
