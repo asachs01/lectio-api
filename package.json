@@ -96,7 +96,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.10.4",
+    "@types/node": "^20.19.43",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "@types/swagger-jsdoc": "^6.0.4",
